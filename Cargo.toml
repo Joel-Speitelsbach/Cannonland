@@ -1,0 +1,6 @@
+[package]
+name = "rost"
+version = "0.1.0"
+authors = ["Joel Speitelsbach <joel.speitelsbach@gmail.com>"]
+
+[dependencies]
