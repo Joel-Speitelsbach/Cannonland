@@ -3,6 +3,7 @@ extern crate sdl2;
 use std::env;
 
 mod window;
+mod data;
 
 use std::path::Path;
 

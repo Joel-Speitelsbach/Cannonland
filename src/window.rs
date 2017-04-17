@@ -4,6 +4,9 @@ use sdl2;
 use sdl2::image::{LoadTexture, INIT_PNG, INIT_JPG};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
+use sdl2::gfx::primitives::DrawRenderer;
+
+use data::cell::Cell;
 
 pub fn run(png: &Path) {
 
@@ -19,6 +22,10 @@ pub fn run(png: &Path) {
     let texture = renderer.load_texture(png).expect("Loading image failed");
 
     renderer.copy(&texture, None, None).expect("Render failed");
+
+    let cell = Cell::new(100 as f32);
+    renderer.circle(100, 100, cell.radius as i16, (255, 255, 255, 255)).unwrap();
+
     renderer.present();
 
     'mainloop: loop {
