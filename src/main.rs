@@ -1,48 +1,24 @@
 extern crate sdl2;
 
+#[macro_use]
+extern crate serde_derive;
+
 use std::env;
 
-mod window;
+// mod window;
 mod joel;
 mod particle_test;
-// mod data;
-
-use std::path::Path;
-
-// #[cfg(test)]
-// mod tests {
-    // use std::env;
-    // use std::path::Path;
-    // use ::window;
-    // #[test]
-    // fn zoom() {
-
-        // let args: Vec<_> = env::args().collect();
-
-        // if args.len() < 2 {
-            // println!("Usage: cargo run /path/to/image.(png|jpg)")
-        // } else {
-            // window::run(Path::new(&args[1]));
-        // }
-    // }
-// }
-
-// #[test]
-// fn tool() {}
 
 fn main() {
-
     let args: Vec<_> = env::args().collect();
 
     if args.len() < 2 {
         panic!("Usage: cargo run <module name> <args>")
     }
 
-    if &args[1] == "joel" {
-        joel::run();
-    } else if &args[1] == "particle_test" {
-        particle_test::run();
-    } else {
-        window::run(Path::new(&args[1]));
+    match args[1].as_str() {
+        "joel" => joel::run(),
+        "particle_test" => particle_test::run(),
+        x => println!("module name {} does not exist", x)
     }
 }
