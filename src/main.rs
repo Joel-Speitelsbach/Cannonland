@@ -1,7 +1,7 @@
 extern crate sdl2;
 
-#[macro_use]
-extern crate serde_derive;
+//#[macro_use]
+//extern crate serde_derive;
 
 use std::env;
 
