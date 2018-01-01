@@ -2,7 +2,7 @@ use std::{thread, time};
 use std::mem;
 
 use grid::color::Color;
-use grid::grid::Grid;
+use grid::Grid;
 
 pub fn run() {
     println!("this is a particle test");

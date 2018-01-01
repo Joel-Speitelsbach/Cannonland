@@ -5,9 +5,9 @@ extern crate sdl2;
 
 use std::env;
 
-// mod window;
 mod joel;
 mod grid;
+mod window;
 
 fn main() {
     let args: Vec<_> = env::args().collect();
@@ -19,6 +19,7 @@ fn main() {
     match args[1].as_str() {
         "joel" => joel::run(),
         "particle_test" => grid::particle_test::run(),
+        "window" => window::run(),
         x => println!("module name {} does not exist", x)
     }
 }
