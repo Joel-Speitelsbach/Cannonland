@@ -7,6 +7,9 @@ https://doc.rust-lang.org/book/
 - Rust Standard Library Documentation:
 https://doc.rust-lang.org/std/
 
+- Rust Library Documentations
+https://docs.rs/
+
 - Rust Sdl2 Documentation:
 https://rust-sdl2.github.io/rust-sdl2/
 
