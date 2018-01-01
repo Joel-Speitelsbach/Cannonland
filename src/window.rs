@@ -65,7 +65,6 @@ impl Game {
 
         println!(", calc and present needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
 
-
         self.fps_manager.delay();
     }
 
