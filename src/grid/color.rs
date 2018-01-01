@@ -61,11 +61,6 @@ impl Color {
         }
     }
 
-    #[inline]
-    fn create_color(red: u8, green: u8, blue: u8, alpha: u8) -> u32 {
-        return ((red as u32) << 24) + ((green as u32) << 16) + ((blue as u32) << 8) + (alpha as u32);
-    }
-
     pub fn can_fall(&self) -> bool {
         match self {
             &Color::EMPTY => false,

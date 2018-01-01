@@ -1,6 +1,6 @@
 pub mod particle_test;
-pub mod particle;
-pub mod color;
+mod particle;
+mod color;
 
 use grid::color::Color;
 use grid::particle::Particle;

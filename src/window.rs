@@ -8,7 +8,6 @@ use sdl2::video::Window;
 use sdl2::pixels;
 
 use grid;
-use grid::color::Color;
 
 pub fn run() {
 
