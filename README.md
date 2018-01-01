@@ -8,7 +8,7 @@ https://doc.rust-lang.org/book/
 https://doc.rust-lang.org/std/
 
 - Rust Sdl2 Documentation:
-http://angrylawyer.github.io/rust-sdl2/sdl2/
+https://rust-sdl2.github.io/rust-sdl2/
 
 - Rust Package Archive (when looking for additional packages):
 https://crates.io/
