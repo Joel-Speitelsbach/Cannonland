@@ -15,6 +15,15 @@ pub fn create_grid() -> Grid {
     grid.set_rect(Color::ROCK, 350, 140, 400, 240);
     grid.set_rect(Color::BETON, 350, 400, 600, 450);
 
+    grid.set_rect(Color::PlayerBlue, 50, 40, 51, 41);
+    grid.set_rect(Color::PlayerRed, 150, 40, 151, 41);
+    grid.set_rect(Color::PlayerGreen, 250, 40, 251, 41);
+    grid.set_rect(Color::PlayerYellow, 350, 40, 351, 41);
+    grid.set_rect(Color::PlayerTeal, 450, 40, 451, 41);
+    grid.set_rect(Color::PlayerPurple, 550, 40, 551, 41);
+    grid.set_rect(Color::PlayerGrey, 650, 40, 651, 41);
+    grid.set_rect(Color::PlayerOrange, 750, 40, 751, 41);
+
     return grid;
 }
 

@@ -81,22 +81,15 @@ impl Game {
         self.canvas.present();
     }
 
-    fn draw_particle(&mut self, x: usize, y:usize) -> () {
-        match self.grid.grid[y][x].color {
-            Color::EMPTY => return,
-            Color::BLUR => return,
-            Color::DIRT => self.draw_color(x, y, pixels::Color::RGBA(128,64,0,255)),
-            Color::ROCK => self.draw_color(x, y, pixels::Color::RGBA(128,128,128,255)),
-            Color::BETON => self.draw_color(x, y, pixels::Color::RGBA(194,194,194,255)),
-            Color::SNOW => self.draw_color(x, y, pixels::Color::RGBA(255,255,255,255)),
-            Color::WATER => self.draw_color(x, y, pixels::Color::RGBA(0,0,200,255))
-        }
-    }
+    fn draw_particle(&mut self, x: usize, y: usize) -> () {
+        let rgba: (u8,u8,u8,u8) = self.grid.grid[y][x].color.get_rgba();
 
-    fn draw_color(&mut self, x: usize, y: usize, rgba: pixels::Color) -> () {
-        let x_scaled = x as i16 * self.particle_size;
-        let y_scaled = y as i16 * self.particle_size;
-        self.canvas.box_(x_scaled, y_scaled, x_scaled+self.particle_size, y_scaled+self.particle_size, rgba).unwrap();
+        if rgba.3 != 0 {
+            let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
+            let x_scaled = x as i16 * self.particle_size;
+            let y_scaled = y as i16 * self.particle_size;
+            self.canvas.box_(x_scaled, y_scaled, x_scaled+self.particle_size, y_scaled+self.particle_size, color).unwrap();
+        }
     }
 
 }

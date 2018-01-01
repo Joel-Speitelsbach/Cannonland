@@ -16,6 +16,12 @@ fn main() {
         panic!("Usage: cargo run <module name> <args>")
     }
 
+    let red: u8 = 255;
+    let green: u8 = 0;
+
+    let color: u32 = (red as u32) << 24;
+    println!("{}", color);
+
     match args[1].as_str() {
         "joel" => joel::run(),
         "particle_test" => grid::particle_test::run(),
