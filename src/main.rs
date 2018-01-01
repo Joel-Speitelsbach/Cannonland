@@ -4,7 +4,7 @@ use std::env;
 
 mod window;
 mod joel;
-mod particle_test;
+mod grid;
 // mod data;
 
 use std::path::Path;
@@ -41,7 +41,7 @@ fn main() {
     if &args[1] == "joel" {
         joel::run();
     } else if &args[1] == "particle_test" {
-        particle_test::run();
+        grid::particle_test::run();
     } else {
         window::run(Path::new(&args[1]));
     }
