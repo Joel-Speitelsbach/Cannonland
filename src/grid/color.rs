@@ -6,6 +6,7 @@ pub enum Color {
     BLUR,
     DIRT,
     ROCK,
+    BETON,
     SNOW,
     WATER
 }
@@ -18,6 +19,7 @@ impl Color {
             &Color::BLUR => '\'',
             &Color::DIRT => 'D',
             &Color::ROCK => '#',
+            &Color::BETON => 'B',
             &Color::SNOW => '*',
             &Color::WATER => '~'
         }
@@ -29,6 +31,7 @@ impl Color {
             &Color::BLUR => false,
             &Color::DIRT => true,
             &Color::ROCK => true,
+            &Color::BETON => false,
             &Color::SNOW => true,
             &Color::WATER => true
         }
@@ -40,6 +43,7 @@ impl Color {
             &Color::BLUR => false,
             &Color::DIRT => false,
             &Color::ROCK => false,
+            &Color::BETON => false,
             &Color::SNOW => false,
             &Color::WATER => false
         }
