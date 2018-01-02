@@ -1,9 +1,16 @@
 pub mod particle_test;
-pub mod particle;
-pub mod color;
+mod particle;
+mod color;
+
+use std::collections::HashMap;
 
 use grid::color::Color;
 use grid::particle::Particle;
+
+pub struct Player {
+    pub x_pos: i32,
+    pub y_pos: i32
+}
 
 pub fn create_grid() -> Grid {
     let mut grid = Grid::new(800, 500);
@@ -15,13 +22,23 @@ pub fn create_grid() -> Grid {
     grid.set_rect(Color::ROCK, 350, 140, 400, 240);
     grid.set_rect(Color::BETON, 350, 400, 600, 450);
 
+    grid.set_rect(Color::PlayerBlue, 50, 40, 51, 41);
+    grid.set_rect(Color::PlayerRed, 150, 40, 151, 41);
+    grid.set_rect(Color::PlayerGreen, 250, 40, 251, 41);
+    grid.set_rect(Color::PlayerYellow, 350, 40, 351, 41);
+    grid.set_rect(Color::PlayerTeal, 450, 40, 451, 41);
+    grid.set_rect(Color::PlayerPurple, 550, 40, 551, 41);
+    grid.set_rect(Color::PlayerGrey, 650, 40, 651, 41);
+    grid.set_rect(Color::PlayerOrange, 750, 40, 751, 41);
+
     return grid;
 }
 
 pub struct Grid {
     pub width: usize,
     pub height: usize,
-    pub grid: Vec<Vec<Particle>>
+    pub grid: Vec<Vec<Particle>>,
+    pub players: HashMap<Color, Player>
 }
 
 impl Grid {
@@ -36,7 +53,7 @@ impl Grid {
             }
         }
 
-        return Grid{width: width, height: height, grid: grid_vec};
+        return Grid{width: width, height: height, grid: grid_vec, players: HashMap::new()};
     }
 
     pub fn set_rect(&mut self, color: Color, x_start: usize, y_start: usize, x_end: usize, y_end: usize) -> () {
@@ -51,6 +68,7 @@ impl Grid {
         self.fall_down();
         self.fall_side(1);
         self.fall_side(-1);
+        self.update_players();
         self.clear_blur();
     }
 
@@ -93,6 +111,19 @@ impl Grid {
                     self.grid[y][x].color = Color::BLUR;
                     self.grid[y+1][(x32+sign) as usize].color = Color::BLUR;
                     self.grid[y+2][(x32+sign) as usize].color = Color::BLUR;
+                }
+            }
+        }
+    }
+
+    fn update_players(&mut self) -> () {
+        for y in 0..self.height {
+            for x in 0..self.width {
+                if self.grid[y][x].is_player() {
+                    let player_color = self.grid[y][x].color;
+                    let player = self.players.entry(player_color).or_insert(Player{x_pos: x as i32, y_pos: y as i32});
+                    player.x_pos = x as i32;
+                    player.y_pos = y as i32;
                 }
             }
         }

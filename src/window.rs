@@ -8,7 +8,6 @@ use sdl2::video::Window;
 use sdl2::pixels;
 
 use grid;
-use grid::color::Color;
 
 pub fn run() {
 
@@ -60,44 +59,55 @@ impl Game {
         print!("calc needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
 
         let present_time = SystemTime::now();
-        self.present_grid();
+        self.present();
         print!(", present needed {} msecs", present_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
 
         println!(", calc and present needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
 
-
         self.fps_manager.delay();
     }
 
-    fn present_grid(&mut self) {
+    fn present(&mut self) -> () {
+        self.draw_background();
+
+        self.draw_particles();
+        self.draw_players();
+
+        self.canvas.present();
+    }
+
+    fn draw_background(&mut self) -> () {
         self.canvas.set_draw_color(pixels::Color::RGBA(96,128,200,255));
         self.canvas.clear();
+    }
 
+    fn draw_particles(&mut self) -> () {
         for y in 0..self.grid.height {
             for x in 0..self.grid.width {
                 self.draw_particle(x, y);
             }
         }
-
-        self.canvas.present();
     }
 
-    fn draw_particle(&mut self, x: usize, y:usize) -> () {
-        match self.grid.grid[y][x].color {
-            Color::EMPTY => return,
-            Color::BLUR => return,
-            Color::DIRT => self.draw_color(x, y, pixels::Color::RGBA(128,64,0,255)),
-            Color::ROCK => self.draw_color(x, y, pixels::Color::RGBA(128,128,128,255)),
-            Color::BETON => self.draw_color(x, y, pixels::Color::RGBA(194,194,194,255)),
-            Color::SNOW => self.draw_color(x, y, pixels::Color::RGBA(255,255,255,255)),
-            Color::WATER => self.draw_color(x, y, pixels::Color::RGBA(0,0,200,255))
+    fn draw_particle(&mut self, x: usize, y: usize) -> () {
+        let rgba: (u8,u8,u8,u8) = self.grid.grid[y][x].get_rgba();
+
+        if rgba.3 != 0 {
+            let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
+            let x_scaled = x as i16 * self.particle_size;
+            let y_scaled = y as i16 * self.particle_size;
+            self.canvas.box_(x_scaled, y_scaled, x_scaled+self.particle_size, y_scaled+self.particle_size, color).unwrap();
         }
     }
 
-    fn draw_color(&mut self, x: usize, y: usize, rgba: pixels::Color) -> () {
-        let x_scaled = x as i16 * self.particle_size;
-        let y_scaled = y as i16 * self.particle_size;
-        self.canvas.box_(x_scaled, y_scaled, x_scaled+self.particle_size, y_scaled+self.particle_size, rgba).unwrap();
+    fn draw_players(&mut self) -> () {
+        for player in &self.grid.players {
+            let x_scaled = player.1.x_pos as i16 * self.particle_size;
+            let y_scaled = player.1.y_pos as i16 * self.particle_size;
+            let rgba: (u8,u8,u8,u8) = player.0.get_rgba();
+
+            self.canvas.filled_pie(x_scaled, y_scaled, 20, 180, 360, pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3)).unwrap();
+        }
     }
 
 }
