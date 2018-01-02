@@ -1,6 +1,7 @@
 
 #[derive(Copy, Clone)]
 #[derive(PartialEq, Eq)]
+#[derive(Hash)]
 pub enum Color {
     EMPTY,
     BLUR,
@@ -98,6 +99,26 @@ impl Color {
             &Color::PlayerPurple => false,
             &Color::PlayerGrey => false,
             &Color::PlayerOrange => false
+        }
+    }
+
+    pub fn is_player(&self) -> bool {
+        match self {
+            &Color::EMPTY => false,
+            &Color::BLUR => false,
+            &Color::DIRT => false,
+            &Color::ROCK => false,
+            &Color::BETON => false,
+            &Color::SNOW => false,
+            &Color::WATER => false,
+            &Color::PlayerBlue => true,
+            &Color::PlayerRed => true,
+            &Color::PlayerGreen => true,
+            &Color::PlayerYellow => true,
+            &Color::PlayerTeal => true,
+            &Color::PlayerPurple => true,
+            &Color::PlayerGrey => true,
+            &Color::PlayerOrange => true
         }
     }
 

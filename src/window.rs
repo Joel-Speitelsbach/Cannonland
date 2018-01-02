@@ -67,27 +67,46 @@ impl Game {
         self.fps_manager.delay();
     }
 
-    fn present_grid(&mut self) {
+    fn present_grid(&mut self) -> () {
+        self.draw_background();
+
+        self.draw_particles();
+        self.draw_players();
+
+        self.canvas.present();
+    }
+
+    fn draw_background(&mut self) -> () {
         self.canvas.set_draw_color(pixels::Color::RGBA(96,128,200,255));
         self.canvas.clear();
+    }
 
+    fn draw_particles(&mut self) -> () {
         for y in 0..self.grid.height {
             for x in 0..self.grid.width {
                 self.draw_particle(x, y);
             }
         }
-
-        self.canvas.present();
     }
 
     fn draw_particle(&mut self, x: usize, y: usize) -> () {
-        let rgba: (u8,u8,u8,u8) = self.grid.grid[y][x].color.get_rgba();
+        let rgba: (u8,u8,u8,u8) = self.grid.grid[y][x].get_rgba();
 
         if rgba.3 != 0 {
             let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
             let x_scaled = x as i16 * self.particle_size;
             let y_scaled = y as i16 * self.particle_size;
             self.canvas.box_(x_scaled, y_scaled, x_scaled+self.particle_size, y_scaled+self.particle_size, color).unwrap();
+        }
+    }
+
+    fn draw_players(&mut self) -> () {
+        for player in &self.grid.players {
+            let x_scaled = player.1.x_pos as i16 * self.particle_size;
+            let y_scaled = player.1.y_pos as i16 * self.particle_size;
+            let rgba: (u8,u8,u8,u8) = player.0.get_rgba();
+
+            self.canvas.filled_pie(x_scaled, y_scaled, 20, 180, 360, pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3));
         }
     }
 
