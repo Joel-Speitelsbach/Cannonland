@@ -121,7 +121,7 @@ impl Grid {
             for x in 0..self.width {
                 if self.grid[y][x].is_player() {
                     let player_color = self.grid[y][x].color;
-                    let mut player = self.players.entry(player_color).or_insert(Player{x_pos: x as i32, y_pos: y as i32});
+                    let player = self.players.entry(player_color).or_insert(Player{x_pos: x as i32, y_pos: y as i32});
                     player.x_pos = x as i32;
                     player.y_pos = y as i32;
                 }

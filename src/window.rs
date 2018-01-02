@@ -59,7 +59,7 @@ impl Game {
         print!("calc needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
 
         let present_time = SystemTime::now();
-        self.present_grid();
+        self.present();
         print!(", present needed {} msecs", present_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
 
         println!(", calc and present needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
@@ -67,7 +67,7 @@ impl Game {
         self.fps_manager.delay();
     }
 
-    fn present_grid(&mut self) -> () {
+    fn present(&mut self) -> () {
         self.draw_background();
 
         self.draw_particles();
@@ -106,7 +106,7 @@ impl Game {
             let y_scaled = player.1.y_pos as i16 * self.particle_size;
             let rgba: (u8,u8,u8,u8) = player.0.get_rgba();
 
-            self.canvas.filled_pie(x_scaled, y_scaled, 20, 180, 360, pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3));
+            self.canvas.filled_pie(x_scaled, y_scaled, 20, 180, 360, pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3)).unwrap();
         }
     }
 
