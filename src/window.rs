@@ -102,11 +102,17 @@ impl Game {
 
     fn draw_players(&mut self) -> () {
         for player in &self.grid.players {
-            let x_scaled = player.1.x_pos as i16 * self.particle_size;
-            let y_scaled = player.1.y_pos as i16 * self.particle_size;
+            let cannon_pos: (i16,i16,i16,i16) = player.1.get_cannon_pos_x1y1x2y2();
+            let x_scaled = player.1.x_pos * self.particle_size;
+            let y_scaled = player.1.y_pos * self.particle_size;
             let rgba: (u8,u8,u8,u8) = player.0.get_rgba();
+            let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
 
-            self.canvas.filled_pie(x_scaled, y_scaled, 20, 180, 360, pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3)).unwrap();
+            self.canvas.thick_line(
+                cannon_pos.0 * self.particle_size, cannon_pos.1 * self.particle_size,
+                cannon_pos.2 * self.particle_size, cannon_pos.3 * self.particle_size,
+                2, color).unwrap();
+            self.canvas.filled_pie(x_scaled, y_scaled + 2, player.1.radius * self.particle_size, 180, 360, color).unwrap();
         }
     }
 
