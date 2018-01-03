@@ -18,7 +18,7 @@ pub fn run() {
       .build()
       .unwrap();
 
-    let mut game = Game::new(window.into_canvas().build().unwrap());
+    let mut presenter = Presenter::new(window.into_canvas().build().unwrap());
 
     'mainloop: loop {
         for event in sdl_context.event_pump().unwrap().poll_iter() {
@@ -29,22 +29,22 @@ pub fn run() {
                 _ => {}
             }
         }
-        game.stride();
+        presenter.stride();
     }
 }
 
-struct Game {
+struct Presenter {
     canvas: sdl2::render::Canvas<Window>,
     fps_manager: sdl2::gfx::framerate::FPSManager,
     particle_size: i16,
     grid: grid::Grid
 }
 
-impl Game {
-    fn new(canvas: sdl2::render::Canvas<Window>) -> Game {
+impl Presenter {
+    fn new(canvas: sdl2::render::Canvas<Window>) -> Presenter {
         let mut fps_manager = sdl2::gfx::framerate::FPSManager::new();
         fps_manager.set_framerate(60).unwrap();
-        Game {
+        Presenter {
             canvas: canvas,
             fps_manager: fps_manager,
             particle_size: 2,
