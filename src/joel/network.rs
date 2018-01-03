@@ -1,52 +1,69 @@
-use std;
+
+use std::net::{TcpListener, TcpStream};
+use std::io::Error;
 
 extern crate serde;
 use self::serde::{Serialize, Deserialize};
+extern crate bincode;
+use self::bincode::{Infinite, Result as Result_};
 
-type OtherSide = std::net::TcpStream;
-type Server = std::net::TcpListener;
+pub type OtherSide = TcpStream;
+pub type Server = TcpListener;
 
-fn send<D>(other: OtherSide, data: D) 
-    where D: Serialize {
-    // bincode::serialize(&msg, bincode::Infinite).unwrap();
-}
-
-fn recieve<'de, D>(other: OtherSide) -> D
-    where D: Deserialize<'de> {
-    let mut init_bytes: [u8; 4] = [0; 4];
-    other.read_exact(&mut init_bytes);
-    let size = read_int(&init_bytes);
-    let mut data_bytes: [u8] = [0; size];
-    other.read_exact(&mut init_bytes);
-    bincode::deserialize(&encoded[..]).unwrap();
-}
-
-// fn pollForClients(server: Server) -> Clients
-    // where Clients: Iterator {}
-
-trait Network {
-    fn start_server() -> std::net::TcpListener;
-    fn connect_to_server(addr: &str) -> std::net::TcpStream;
-}
-
-////////// misc /////////////////
-
-fn read_int(bytes: &[u8; 4]) -> u32 {
-    let mut sum = 0;
-    for byte in bytes.iter() {
-        let n = *byte as u32;
-        sum = (sum << 8) & n;
+pub struct Simple;
+impl Simple {
+    pub fn send<D>(mut other: &OtherSide, data: &D) -> Result_<()> 
+        where D: Serialize {
+        bincode::serialize_into(&mut other, &data, Infinite) //todo
     }
-    sum
+
+    pub fn recieve<D>(mut other: &OtherSide) -> Result_<D>
+        where for<'de> D: Deserialize<'de> {
+        bincode::deserialize_from(&mut other, bincode::Infinite)
+    }
+
+    pub fn start_server() -> Result<Server, Error> {
+        match TcpListener::bind("127.0.0.1:8080") {
+            Ok(x) => {
+                if let Err(_) = x.set_nonblocking(true) {
+                    panic!("could not set nonblocking mode");
+                }
+                Ok(x)
+            },
+            Err(err) => Err(err),
+        }
+    }
+    pub fn poll_for_client(server: &Server) -> Option<OtherSide> {
+        match server.accept() {
+            Ok((stream,_)) => {
+                if let Err(_) = stream.set_nonblocking(true) {
+                    panic!("could not set nonblocking mode");
+                }
+                stream.set_nodelay(true).unwrap();
+                Some(stream)
+            },
+            Err(_)         => None,
+        }
+    }
+    pub fn connect_to_server(addr: &str) -> Result<OtherSide, Error> {
+        let connect = TcpStream::connect(addr);
+        if let Ok(stream) = connect {
+            if let Err(_) = stream.set_nonblocking(true) {
+                panic!("could not set nonblocking mode");
+            }
+            stream.set_nodelay(true).unwrap();
+            return Ok(stream);
+        }
+        connect
+    }
 }
 
-fn to_bytes(n: u32) -> [u8; 4] {
-    let mut bytes = [0; 4];
-    // let mask = 0xff 00 00 00;
-    let mut n = n;
-    for i in 0..4 {
-        bytes[i] = (n >> 24) as u8;
-        n = n << 8;
-    }
-    bytes
-}
+// pub trait Network {
+    // fn start_server() -> Server;
+    // fn connect_to_server(addr: &str) -> OtherSide;
+    // fn send<D>(&OtherSide, data: D) 
+        // where D: Serialize;
+    // fn recieve<D>(&OtherSide) -> D
+        // where for<'de> D: Deserialize<'de>;
+    // fn poll_for_clients(server: Server) -> OtherSide;
+// }

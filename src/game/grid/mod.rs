@@ -3,37 +3,10 @@ mod particle;
 mod color;
 
 use std::collections::HashMap;
-use std::f32;
 
 use self::color::Color;
 use self::particle::Particle;
-
-pub struct Player {
-    pub x_pos: i16,
-    pub y_pos: i16,
-    pub radius: i16,
-    angle_radians: f32,
-    cannon_length: i16,
-}
-
-impl Player {
-
-    pub fn new(x_pos: i16, y_pos: i16) -> Player {
-        return Player{x_pos: x_pos, y_pos: y_pos, radius: 10, angle_radians: f32::consts::PI*1.5, cannon_length: 20};
-    }
-
-    pub fn get_shot_pos_xy(&self) -> (i16, i16) {
-        let sin_cos = self.angle_radians.sin_cos();
-        return (
-            self.x_pos + (self.cannon_length as f32 * sin_cos.1) as i16,
-            self.y_pos + (self.cannon_length as f32 * sin_cos.0) as i16);
-    }
-
-    pub fn get_cannon_pos_x1y1x2y2(&self) -> (i16, i16, i16, i16) {
-        let shot_pos = self.get_shot_pos_xy();
-        return (self.x_pos, self.y_pos, shot_pos.0, shot_pos.1);
-    }
-}
+use super::Bunker;
 
 pub fn create_grid() -> Grid {
     let mut grid = Grid::new(800, 500);
@@ -61,7 +34,7 @@ pub struct Grid {
     pub width: usize,
     pub height: usize,
     pub grid: Vec<Vec<Particle>>,
-    pub players: HashMap<Color, Player>
+    pub players: HashMap<Color, Bunker>
 }
 
 impl Grid {
@@ -144,7 +117,7 @@ impl Grid {
             for x in 0..self.width {
                 if self.grid[y][x].is_player() {
                     let player_color = self.grid[y][x].color;
-                    let player = self.players.entry(player_color).or_insert(Player::new(x as i16, y as i16));
+                    let player = self.players.entry(player_color).or_insert(Bunker::new(x as i16, y as i16));
                     player.x_pos = x as i16;
                     player.y_pos = y as i16;
                 }
