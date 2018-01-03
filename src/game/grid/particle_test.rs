@@ -1,8 +1,8 @@
 use std::{thread, time};
 use std::mem;
 
-use grid::color::Color;
-use grid::Grid;
+use super::color::Color;
+use super::Grid;
 
 pub fn run() {
     println!("this is a particle test");

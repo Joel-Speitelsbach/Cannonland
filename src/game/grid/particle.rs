@@ -1,4 +1,4 @@
-use grid::color::Color;
+use super::color::Color;
 
 #[derive(Copy, Clone)]
 pub struct Particle {

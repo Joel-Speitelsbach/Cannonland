@@ -6,7 +6,6 @@ extern crate serde_derive;
 use std::env;
 
 mod joel;
-mod grid;
 mod window;
 mod game;
 
@@ -19,7 +18,7 @@ fn main() {
 
     match args[1].as_str() {
         "joel" => joel::run(),
-        "particle_test" => grid::particle_test::run(),
+        "particle_test" => game::grid::particle_test::run(),
         "window" => window::run(),
         x => println!("module name {} does not exist", x)
     }

@@ -1,4 +1,4 @@
-use grid;
+pub mod grid;
 
 pub struct Game {
     pub grid: grid::Grid

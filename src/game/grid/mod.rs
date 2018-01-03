@@ -5,8 +5,8 @@ mod color;
 use std::collections::HashMap;
 use std::f32;
 
-use grid::color::Color;
-use grid::particle::Particle;
+use self::color::Color;
+use self::particle::Particle;
 
 pub struct Player {
     pub x_pos: i16,

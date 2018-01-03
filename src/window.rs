@@ -7,7 +7,7 @@ use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::video::Window;
 use sdl2::pixels;
 
-use grid;
+use game::grid;
 use game;
 
 pub fn run() {
