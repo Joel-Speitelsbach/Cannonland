@@ -3,7 +3,7 @@ extern crate sdl2;
 #[macro_use]
 extern crate serde_derive;
 
-//mod joel;
+mod joel;
 mod window;
 mod game;
 
@@ -16,7 +16,7 @@ fn main() {
 
     match args[1].as_str() {
         "particle_test" => game::grid::particle_test::run(),
-//        "joel" => joel::run(&args[2..]),
+       "joel" => joel::run(&args[2..]),
         "window" => window::run(),
         x => println!("module name {} does not exist", x)
     }
