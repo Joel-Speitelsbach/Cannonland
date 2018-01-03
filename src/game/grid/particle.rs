@@ -29,8 +29,8 @@ impl Particle {
         return self.color.can_move_into();
     }
 
-    pub fn is_player(&self) -> bool {
-        return self.color.is_player();
+    pub fn is_bunker(&self) -> bool {
+        return self.color.is_bunker();
     }
 
 }

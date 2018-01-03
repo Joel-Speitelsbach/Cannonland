@@ -18,14 +18,14 @@ pub fn create_grid() -> Grid {
     grid.set_rect(Color::ROCK, 350, 140, 400, 240);
     grid.set_rect(Color::BETON, 350, 400, 600, 450);
 
-    grid.set_rect(Color::PlayerBlue, 50, 40, 51, 41);
-    grid.set_rect(Color::PlayerRed, 150, 40, 151, 41);
-    grid.set_rect(Color::PlayerGreen, 250, 40, 251, 41);
-    grid.set_rect(Color::PlayerYellow, 350, 40, 351, 41);
-    grid.set_rect(Color::PlayerTeal, 450, 40, 451, 41);
-    grid.set_rect(Color::PlayerPurple, 550, 40, 551, 41);
-    grid.set_rect(Color::PlayerGrey, 650, 40, 651, 41);
-    grid.set_rect(Color::PlayerOrange, 750, 40, 751, 41);
+    grid.set_rect(Color::BunkerBlue, 50, 40, 51, 41);
+    grid.set_rect(Color::BunkerRed, 150, 40, 151, 41);
+    grid.set_rect(Color::BunkerGreen, 250, 40, 251, 41);
+    grid.set_rect(Color::BunkerYellow, 350, 40, 351, 41);
+    grid.set_rect(Color::BunkerTeal, 450, 40, 451, 41);
+    grid.set_rect(Color::BunkerPurple, 550, 40, 551, 41);
+    grid.set_rect(Color::BunkerGrey, 650, 40, 651, 41);
+    grid.set_rect(Color::BunkerOrange, 750, 40, 751, 41);
 
     return grid;
 }
@@ -34,7 +34,7 @@ pub struct Grid {
     pub width: usize,
     pub height: usize,
     pub grid: Vec<Vec<Particle>>,
-    pub players: HashMap<Color, Bunker>
+    pub bunkers: HashMap<Color, Bunker>
 }
 
 impl Grid {
@@ -49,7 +49,7 @@ impl Grid {
             }
         }
 
-        return Grid{width: width, height: height, grid: grid_vec, players: HashMap::new()};
+        return Grid{width: width, height: height, grid: grid_vec, bunkers: HashMap::new()};
     }
 
     pub fn set_rect(&mut self, color: Color, x_start: usize, y_start: usize, x_end: usize, y_end: usize) -> () {
@@ -64,7 +64,7 @@ impl Grid {
         self.fall_down();
         self.fall_side(1);
         self.fall_side(-1);
-        self.update_players();
+        self.update_bunkers();
         self.clear_blur();
     }
 
@@ -112,14 +112,14 @@ impl Grid {
         }
     }
 
-    fn update_players(&mut self) -> () {
+    fn update_bunkers(&mut self) -> () {
         for y in 0..self.height {
             for x in 0..self.width {
-                if self.grid[y][x].is_player() {
-                    let player_color = self.grid[y][x].color;
-                    let player = self.players.entry(player_color).or_insert(Bunker::new(x as i16, y as i16));
-                    player.x_pos = x as i16;
-                    player.y_pos = y as i16;
+                if self.grid[y][x].is_bunker() {
+                    let bunker_color = self.grid[y][x].color;
+                    let bunker = self.bunkers.entry(bunker_color).or_insert(Bunker::new(x as i16, y as i16));
+                    bunker.x_pos = x as i16;
+                    bunker.y_pos = y as i16;
                 }
             }
         }
