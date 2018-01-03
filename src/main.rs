@@ -8,6 +8,7 @@ use std::env;
 mod joel;
 mod grid;
 mod window;
+mod game;
 
 fn main() {
     let args: Vec<_> = env::args().collect();

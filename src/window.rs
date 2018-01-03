@@ -8,6 +8,7 @@ use sdl2::video::Window;
 use sdl2::pixels;
 
 use grid;
+use game;
 
 pub fn run() {
 
@@ -34,6 +35,7 @@ pub fn run() {
 }
 
 struct Presenter {
+    game: game::Game,
     grid_presenter: GridPresenter,
     fps_manager: sdl2::gfx::framerate::FPSManager
 }
@@ -44,6 +46,7 @@ impl Presenter {
         let mut fps_manager = sdl2::gfx::framerate::FPSManager::new();
         fps_manager.set_framerate(60).unwrap();
         return Presenter{
+            game: game::Game::new(),
             grid_presenter: GridPresenter::new(canvas),
             fps_manager: fps_manager
         };
