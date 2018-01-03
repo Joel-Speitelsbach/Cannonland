@@ -34,37 +34,51 @@ pub fn run() {
 }
 
 struct Presenter {
-    canvas: sdl2::render::Canvas<Window>,
-    fps_manager: sdl2::gfx::framerate::FPSManager,
-    particle_size: i16,
-    grid: grid::Grid
+    grid_presenter: GridPresenter,
+    fps_manager: sdl2::gfx::framerate::FPSManager
 }
 
 impl Presenter {
-    fn new(canvas: sdl2::render::Canvas<Window>) -> Presenter {
+
+    pub fn new(canvas: sdl2::render::Canvas<Window>) -> Presenter {
         let mut fps_manager = sdl2::gfx::framerate::FPSManager::new();
         fps_manager.set_framerate(60).unwrap();
-        Presenter {
-            canvas: canvas,
-            fps_manager: fps_manager,
-            particle_size: 2,
-            grid: grid::create_grid()
-        }
+        return Presenter{
+            grid_presenter: GridPresenter::new(canvas),
+            fps_manager: fps_manager
+        };
     }
 
     fn stride(&mut self) -> () {
 
         let calc_time = SystemTime::now();
-        self.grid.stride();
+        self.grid_presenter.grid.stride();
         print!("calc needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
 
         let present_time = SystemTime::now();
-        self.present();
+        self.grid_presenter.present();
         print!(", present needed {} msecs", present_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
 
         println!(", calc and present needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
 
         self.fps_manager.delay();
+    }
+
+}
+
+struct GridPresenter {
+    canvas: sdl2::render::Canvas<Window>,
+    particle_size: i16,
+    grid: grid::Grid
+}
+
+impl GridPresenter {
+    fn new(canvas: sdl2::render::Canvas<Window>) -> GridPresenter {
+        GridPresenter {
+            canvas: canvas,
+            particle_size: 2,
+            grid: grid::create_grid()
+        }
     }
 
     fn present(&mut self) -> () {
