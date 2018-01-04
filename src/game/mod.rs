@@ -1,6 +1,7 @@
 pub mod grid;
 
 use std::f32;
+use message::PlayerAction;
 
 pub struct Game {
     pub grid: grid::Grid,
@@ -33,6 +34,8 @@ impl Game {
 
         self.collide();
     }
+    
+    pub fn alter(&mut self, action: &PlayerAction) {/*TODO*/}
 
     fn stride_shots(&mut self) {
         for shot in &mut self.shots {
