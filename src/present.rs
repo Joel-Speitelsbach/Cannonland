@@ -7,27 +7,27 @@ use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::video::Window;
 use sdl2::pixels;
 
-use game::grid;
 use game;
+use game::grid::{self,Grid};
 
 const GRID_WIDTH :i32 = 800;
 const GRID_HEIGHT:i32 = 500;
 
 pub fn run() {
-
-    let game = game::Game::new();
-
+    let mut game = game::Game::new();
+    
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
-    let window = video_subsystem.window("Cannonland", 
+    let mut window = video_subsystem.window("Cannonland", 
         game.grid.width as u32,
         game.grid.height as u32)
       .position_centered().resizable()
       .build()
       .unwrap();
     
-    let canvas = window.into_canvas().build().unwrap();
-    let mut presenter = Presenter::new(canvas,game);
+    let mut canvas = window.into_canvas().build().unwrap();
+    let mut presenter_state = PresenterState::new();
+    let mut presenter = Presenter::new(&mut presenter_state, &mut canvas, &mut game);
     
     'mainloop: loop {
         for event in sdl_context.event_pump().unwrap().poll_iter() {
@@ -37,8 +37,7 @@ pub fn run() {
                     break 'mainloop,
                 Event::Window{win_event: WindowEvent::Resized
                         (width,height),..} =>
-                    rescale_canvas(
-                        &mut presenter.grid_presenter.canvas,width,height),
+                    presenter.rescale_canvas(width,height,),
                 _ => {}
             }
         }
@@ -46,69 +45,71 @@ pub fn run() {
     }
 }
 
-fn rescale_canvas(canvas: &mut sdl2::render::Canvas<Window>, x: i32, y: i32) {
-    // let (x,y) = canvas.output_size().unwrap();
-    // let x = x as i32;
-    // let y = y as i32;
-    // let (x,y) = 
-        // if x*GRID_HEIGHT < y*GRID_WIDTH
-              // {((y*GRID_WIDTH)/GRID_HEIGHT,y                         )
-        // }else {(x                         ,(x*GRID_HEIGHT)/GRID_WIDTH)};
-    // canvas.window_mut().set_size(x as u32,y as u32).unwrap();
-    canvas.set_scale(x as f32 / GRID_WIDTH  as f32, 
-                     y as f32 / GRID_HEIGHT as f32).unwrap();
+struct PresenterState {
+    fps_manager: sdl2::gfx::framerate::FPSManager,
 }
-
-struct Presenter {
-    game: game::Game,
-    grid_presenter: GridPresenter,
-    fps_manager: sdl2::gfx::framerate::FPSManager
-}
-
-impl Presenter {
-
-    pub fn new(canvas: sdl2::render::Canvas<Window>,
-        game: game::Game) -> Presenter {
+impl PresenterState {
+    pub fn new() -> PresenterState {
         let mut fps_manager = sdl2::gfx::framerate::FPSManager::new();
         fps_manager.set_framerate(60).unwrap();
+        PresenterState {
+            fps_manager: fps_manager,
+        }
+    }
+}
+
+struct Presenter<'st,'g> {
+    state: &'st mut PresenterState,
+    game: &'g mut game::Game,
+    canvas: &'g mut sdl2::render::Canvas<Window>,
+}
+impl<'st,'g> Presenter<'st,'g> {
+    pub fn new(
+        presenter_state: &'st mut PresenterState,
+        canvas: &'g mut sdl2::render::Canvas<Window>,
+        game: &'g mut game::Game,
+        )-> Presenter<'st,'g> 
+    {
         return Presenter{
+            state: presenter_state,
             game: game,
-            grid_presenter: GridPresenter::new(canvas),
-            fps_manager: fps_manager
+            canvas: canvas,
         };
     }
 
     fn stride(&mut self) -> () {
 
         let calc_time = SystemTime::now();
-        self.grid_presenter.grid.stride();
+        self.grid().stride();
         print!("calc needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
 
         let present_time = SystemTime::now();
-        self.grid_presenter.present();
+        self.present_grid();
         print!(", present needed {} msecs", present_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
 
         println!(", calc and present needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
 
-        self.fps_manager.delay();
+        self.state.fps_manager.delay();
     }
 
-}
-
-struct GridPresenter {
-    canvas: sdl2::render::Canvas<Window>,
-    grid: grid::Grid,
-}
-
-impl GridPresenter {
-    fn new(canvas: sdl2::render::Canvas<Window>) -> GridPresenter {
-        GridPresenter {
-            canvas: canvas,
-            grid: grid::create_grid(),
-        }
+    fn rescale_canvas(&mut self, x: i32, y: i32) {
+        // let (x,y) = canvas.output_size().unwrap();
+        // let x = x as i32;
+        // let y = y as i32;
+        // let (x,y) = 
+            // if x*GRID_HEIGHT < y*GRID_WIDTH
+                  // {((y*GRID_WIDTH)/GRID_HEIGHT,y                         )
+            // }else {(x                         ,(x*GRID_HEIGHT)/GRID_WIDTH)};
+        // canvas.window_mut().set_size(x as u32,y as u32).unwrap();
+        self.canvas.set_scale
+            (x as f32 / GRID_WIDTH  as f32, 
+             y as f32 / GRID_HEIGHT as f32).unwrap();
     }
+}
 
-    fn present(&mut self) -> () {
+// draw grid
+impl<'st,'g> Presenter<'st,'g> {
+    fn present_grid(&mut self) -> () {
         self.draw_background();
 
         self.draw_particles();
@@ -116,6 +117,8 @@ impl GridPresenter {
 
         self.canvas.present();
     }
+    
+    fn grid(&mut self) -> &mut grid::Grid {&mut self.game.grid}
 
     fn draw_background(&mut self) -> () {
         self.canvas.set_draw_color(pixels::Color::RGBA(96,128,200,255));
@@ -123,15 +126,15 @@ impl GridPresenter {
     }
 
     fn draw_particles(&mut self) -> () {
-        for y in 0..self.grid.height {
-            for x in 0..self.grid.width {
+        for y in 0..self.grid().height {
+            for x in 0..self.grid().width {
                 self.draw_particle(x, y);
             }
         }
     }
 
     fn draw_particle(&mut self, x: usize, y: usize) -> () {
-        let rgba: (u8,u8,u8,u8) = self.grid.grid[y][x].get_rgba();
+        let rgba: (u8,u8,u8,u8) = self.grid().grid[y][x].get_rgba();
 
         if rgba.3 != 0 {
             let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
@@ -142,7 +145,7 @@ impl GridPresenter {
     }
 
     fn draw_bunkers(&mut self) -> () {
-        for bunker in &self.grid.bunkers {
+        for bunker in &self.game.grid.bunkers {
             let cannon_pos: (i16,i16,i16,i16) = bunker.1.get_cannon_pos_x1y1x2y2();
             let x = bunker.1.x_pos;
             let y = bunker.1.y_pos;
