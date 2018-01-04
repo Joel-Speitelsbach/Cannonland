@@ -144,6 +144,11 @@ impl<'st,'g> Presenter<'st,'g> {
         }
     }
 
+}
+
+// draw bunkers
+impl<'st,'g> Presenter<'st,'g> {
+
     fn draw_bunkers(&mut self) -> () {
         for bunker in &self.game.grid.bunkers {
             let cannon_pos: (i16,i16,i16,i16) = bunker.1.get_cannon_pos_x1y1x2y2();
@@ -161,3 +166,14 @@ impl<'st,'g> Presenter<'st,'g> {
     }
 
 }
+
+// draw shots
+/*impl<'st,'g> Presenter<'st,'g> {
+
+    fn draw_shots(&mut self) -> () {
+        for shot in &self.game.get_shots() {
+            self.canvas.filled_pie(shot.x_pos as i16, shot.y_pos as i16, 10, 0, 360, pixels::Color::RGBA(128,128,128,255)).unwrap();
+        }
+    }
+
+}*/
