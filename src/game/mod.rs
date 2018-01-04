@@ -21,6 +21,7 @@ impl Game {
     }
 
     pub fn shoot(&mut self, bunker: &Bunker) {
+        let bunker = self.grid.bunkers.get(&grid::color::Color::BunkerYellow).unwrap();  // TODO delete this line
         let shoot_pos = bunker.get_shoot_pos_xy();
         let shot = shot::Shot::new(shoot_pos.0 as f32, shoot_pos.1 as f32, bunker.angle_radians, bunker.charge_percent);
         self.shots.push(shot);

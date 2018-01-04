@@ -19,16 +19,16 @@ pub fn run() {
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
-    let window = video_subsystem.window("Cannonland", 
+    let window = video_subsystem.window("Cannonland",
         game.grid.width as u32,
         game.grid.height as u32)
       .position_centered().resizable()
       .build()
       .unwrap();
-    
+
     let canvas = window.into_canvas().build().unwrap();
     let mut presenter = Presenter::new(canvas,game);
-    
+
     'mainloop: loop {
         for event in sdl_context.event_pump().unwrap().poll_iter() {
             match event {
@@ -50,12 +50,12 @@ fn rescale_canvas(canvas: &mut sdl2::render::Canvas<Window>, x: i32, y: i32) {
     // let (x,y) = canvas.output_size().unwrap();
     // let x = x as i32;
     // let y = y as i32;
-    // let (x,y) = 
+    // let (x,y) =
         // if x*GRID_HEIGHT < y*GRID_WIDTH
               // {((y*GRID_WIDTH)/GRID_HEIGHT,y                         )
         // }else {(x                         ,(x*GRID_HEIGHT)/GRID_WIDTH)};
     // canvas.window_mut().set_size(x as u32,y as u32).unwrap();
-    canvas.set_scale(x as f32 / GRID_WIDTH  as f32, 
+    canvas.set_scale(x as f32 / GRID_WIDTH  as f32,
                      y as f32 / GRID_HEIGHT as f32).unwrap();
 }
 
@@ -81,11 +81,11 @@ impl Presenter {
     fn stride(&mut self) -> () {
 
         let calc_time = SystemTime::now();
-        self.grid_presenter.grid.stride();
+        self.game.stride();
         print!("calc needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
 
         let present_time = SystemTime::now();
-        self.grid_presenter.present();
+        self.grid_presenter.present(&self.game.grid);
         print!(", present needed {} msecs", present_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
 
         println!(", calc and present needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
@@ -96,23 +96,21 @@ impl Presenter {
 }
 
 struct GridPresenter {
-    canvas: sdl2::render::Canvas<Window>,
-    grid: grid::Grid,
+    canvas: sdl2::render::Canvas<Window>
 }
 
 impl GridPresenter {
     fn new(canvas: sdl2::render::Canvas<Window>) -> GridPresenter {
         GridPresenter {
-            canvas: canvas,
-            grid: grid::create_grid(),
+            canvas: canvas
         }
     }
 
-    fn present(&mut self) -> () {
+    fn present(&mut self, grid: &grid::Grid) -> () {
         self.draw_background();
 
-        self.draw_particles();
-        self.draw_bunkers();
+        self.draw_particles(&grid);
+        self.draw_bunkers(&grid);
 
         self.canvas.present();
     }
@@ -122,16 +120,16 @@ impl GridPresenter {
         self.canvas.clear();
     }
 
-    fn draw_particles(&mut self) -> () {
-        for y in 0..self.grid.height {
-            for x in 0..self.grid.width {
-                self.draw_particle(x, y);
+    fn draw_particles(&mut self, grid: &grid::Grid) -> () {
+        for y in 0..grid.height {
+            for x in 0..grid.width {
+                self.draw_particle(x, y, &grid);
             }
         }
     }
 
-    fn draw_particle(&mut self, x: usize, y: usize) -> () {
-        let rgba: (u8,u8,u8,u8) = self.grid.grid[y][x].get_rgba();
+    fn draw_particle(&mut self, x: usize, y: usize, grid: &grid::Grid) -> () {
+        let rgba: (u8,u8,u8,u8) = grid.grid[y][x].get_rgba();
 
         if rgba.3 != 0 {
             let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
@@ -141,19 +139,19 @@ impl GridPresenter {
         }
     }
 
-    fn draw_bunkers(&mut self) -> () {
-        for bunker in &self.grid.bunkers {
+    fn draw_bunkers(&mut self, grid: &grid::Grid) -> () {
+        for bunker in &grid.bunkers {
             let cannon_pos: (i16,i16,i16,i16) = bunker.1.get_cannon_pos_x1y1x2y2();
             let x = bunker.1.x_pos;
             let y = bunker.1.y_pos;
             let rgba: (u8,u8,u8,u8) = bunker.0.get_rgba();
             let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
 
-            self.canvas.thick_line(
+            self.canvas.line(
                 cannon_pos.0, cannon_pos.1,
                 cannon_pos.2, cannon_pos.3,
-                2, color).unwrap();
-            self.canvas.filled_pie(x, y + 2, bunker.1.radius, 180, 360, color).unwrap();
+                color).unwrap();
+            self.canvas.filled_pie(x, y, bunker.1.radius, 180, 360, color).unwrap();
         }
     }
 

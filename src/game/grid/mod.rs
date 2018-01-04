@@ -1,6 +1,6 @@
 pub mod particle_test;
 mod particle;
-mod color;
+pub mod color;  // make private
 
 use std::collections::HashMap;
 
