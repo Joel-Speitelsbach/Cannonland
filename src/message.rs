@@ -3,11 +3,18 @@
 use std::vec::Vec;
 use std::time::Duration;
 
-pub type PlayerID = i32;
+pub type PlayerID = u32; //can be changed
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum PlayerAction {
+    ChangeAngle,
+    ChangeLoad,
+    Fire,
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ClientMessage {
-    pub actions: Vec<String>,
+    pub actions: Vec<PlayerAction>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
