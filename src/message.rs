@@ -1,10 +1,10 @@
 // module info: data types for sending messages between server and client
 
 use std::vec::Vec;
-use std::time::Duration;
 
 pub type PlayerID = u32; //can be changed
 
+// 'game' can use this to alter its state
 #[derive(Serialize, Deserialize, Debug)]
 pub enum PlayerAction {
     ChangeAngle,

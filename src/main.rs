@@ -5,6 +5,7 @@ extern crate serde_derive;
 
 mod present;
 mod game;
+mod message;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
