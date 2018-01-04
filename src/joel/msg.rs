@@ -1,4 +1,5 @@
 // module info: data types for sending messages between server and client
+#![allow(dead_code,unused_variables,unused_imports)]
 
 use std::vec::Vec;
 use std::time::Duration;

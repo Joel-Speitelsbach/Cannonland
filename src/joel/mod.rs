@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 
 #[macro_use]
 extern crate serde_derive;
@@ -8,7 +9,6 @@ mod network;
 mod client;
 mod server;
 mod msg;
-mod exe;
 
 use std::vec::Vec;
 

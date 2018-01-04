@@ -1,4 +1,5 @@
 // module info: server specific code / data
+#![allow(dead_code,unused_variables,unused_imports)]
 
 use std::thread::sleep;
 use std::time::Duration;

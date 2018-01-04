@@ -1,4 +1,5 @@
 // client specific code / data
+#![allow(dead_code,unused_variables,unused_imports)]
 
 use std::thread::sleep;
 use std::time::Duration;
@@ -18,12 +19,12 @@ pub fn run(opts: &[String]) {
         },
     };
     // recieve init message
-    other.set_nonblocking(false);
-    let initMsg: ServerMessageInit = network::Simple::recieve(&other)
+    other.set_nonblocking(false).unwrap();
+    let init_msg: ServerMessageInit = network::Simple::recieve(&other)
         .expect("failed to recieve init msg");
-    other.set_nonblocking(true);
-    println!("initMsg: {:?}", initMsg);
-    let ServerMessageInit {player_id: my_player_id,..} = initMsg;
+    other.set_nonblocking(true).unwrap();
+    println!("init_msg: {:?}", init_msg);
+    let ServerMessageInit {player_id: my_player_id,..} = init_msg;
     // init client state
     let mut counter = 0;
     // main loop
