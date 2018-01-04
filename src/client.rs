@@ -13,7 +13,7 @@ use std::thread::sleep;
 use std::time::Duration;
 
 use super::network;
-use super::msg::{ServerMessage,ClientMessage,PlayerID,ServerMessageInit,delay};
+use super::message::{ServerMessage,ClientMessage,PlayerID,ServerMessageInit,delay};
 
 pub fn run(opts: &[String]) {
     println!("opts: {:?}", opts);
