@@ -2,7 +2,7 @@
 
 use std::vec::Vec;
 
-pub type PlayerID = u32; //can be changed
+pub type PlayerID = u32; //can be changed and maybe this belongs into 'game'
 
 // 'game' can use this to alter its state
 #[derive(Serialize, Deserialize, Debug)]

@@ -1,7 +1,7 @@
 use std::time::SystemTime;
 
 use sdl2;
-use sdl2::event::Event;
+use sdl2::event::{Event,WindowEvent};
 use sdl2::keyboard::Keycode;
 use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::video::Window;
@@ -10,28 +10,53 @@ use sdl2::pixels;
 use game::grid;
 use game;
 
+const GRID_WIDTH :i32 = 800;
+const GRID_HEIGHT:i32 = 500;
+
 pub fn run() {
+
+    let game = game::Game::new();
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
-    let window = video_subsystem.window("Rost", 1600, 1000)
-      .position_centered()
+    let window = video_subsystem.window("Cannonland", 
+        game.grid.width as u32,
+        game.grid.height as u32)
+      .position_centered().resizable()
       .build()
       .unwrap();
-
-    let mut presenter = Presenter::new(window.into_canvas().build().unwrap());
-
+    
+    let canvas = window.into_canvas().build().unwrap();
+    let mut presenter = Presenter::new(canvas,game);
+    
     'mainloop: loop {
         for event in sdl_context.event_pump().unwrap().poll_iter() {
             match event {
                 Event::Quit{..} |
                 Event::KeyDown {keycode: Option::Some(Keycode::Escape), ..} =>
                     break 'mainloop,
+                Event::Window{win_event: WindowEvent::Resized
+                        (width,height),..} =>
+                    rescale_canvas(
+                        &mut presenter.grid_presenter.canvas,width,height),
                 _ => {}
             }
         }
         presenter.stride();
     }
+}
+
+fn rescale_canvas(canvas: &mut sdl2::render::Canvas<Window>, x: i32, y: i32) {
+    // let (x,y) = canvas.output_size().unwrap();
+    // let x = x as i32;
+    // let y = y as i32;
+    // let (x,y) = 
+        // if x*GRID_HEIGHT < y*GRID_WIDTH
+              // {((y*GRID_WIDTH)/GRID_HEIGHT,y                         )
+        // }else {(x                         ,(x*GRID_HEIGHT)/GRID_WIDTH)};
+    // canvas.window_mut().set_size(x as u32,y as u32).unwrap();
+    canvas.set_scale(x as f32 / GRID_WIDTH  as f32, 
+                     y as f32 / GRID_HEIGHT as f32).unwrap();
 }
 
 struct Presenter {
@@ -42,11 +67,12 @@ struct Presenter {
 
 impl Presenter {
 
-    pub fn new(canvas: sdl2::render::Canvas<Window>) -> Presenter {
+    pub fn new(canvas: sdl2::render::Canvas<Window>,
+        game: game::Game) -> Presenter {
         let mut fps_manager = sdl2::gfx::framerate::FPSManager::new();
         fps_manager.set_framerate(60).unwrap();
         return Presenter{
-            game: game::Game::new(),
+            game: game,
             grid_presenter: GridPresenter::new(canvas),
             fps_manager: fps_manager
         };
@@ -71,16 +97,14 @@ impl Presenter {
 
 struct GridPresenter {
     canvas: sdl2::render::Canvas<Window>,
-    particle_size: i16,
-    grid: grid::Grid
+    grid: grid::Grid,
 }
 
 impl GridPresenter {
     fn new(canvas: sdl2::render::Canvas<Window>) -> GridPresenter {
         GridPresenter {
             canvas: canvas,
-            particle_size: 2,
-            grid: grid::create_grid()
+            grid: grid::create_grid(),
         }
     }
 
@@ -111,25 +135,25 @@ impl GridPresenter {
 
         if rgba.3 != 0 {
             let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
-            let x_scaled = x as i16 * self.particle_size;
-            let y_scaled = y as i16 * self.particle_size;
-            self.canvas.box_(x_scaled, y_scaled, x_scaled+self.particle_size, y_scaled+self.particle_size, color).unwrap();
+            let x = x as i16;
+            let y = y as i16;
+            self.canvas.pixel(x, y, color).unwrap();
         }
     }
 
     fn draw_bunkers(&mut self) -> () {
         for bunker in &self.grid.bunkers {
             let cannon_pos: (i16,i16,i16,i16) = bunker.1.get_cannon_pos_x1y1x2y2();
-            let x_scaled = bunker.1.x_pos * self.particle_size;
-            let y_scaled = bunker.1.y_pos * self.particle_size;
+            let x = bunker.1.x_pos;
+            let y = bunker.1.y_pos;
             let rgba: (u8,u8,u8,u8) = bunker.0.get_rgba();
             let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
 
             self.canvas.thick_line(
-                cannon_pos.0 * self.particle_size, cannon_pos.1 * self.particle_size,
-                cannon_pos.2 * self.particle_size, cannon_pos.3 * self.particle_size,
+                cannon_pos.0, cannon_pos.1,
+                cannon_pos.2, cannon_pos.3,
                 2, color).unwrap();
-            self.canvas.filled_pie(x_scaled, y_scaled + 2, bunker.1.radius * self.particle_size, 180, 360, color).unwrap();
+            self.canvas.filled_pie(x, y + 2, bunker.1.radius, 180, 360, color).unwrap();
         }
     }
 

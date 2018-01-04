@@ -1,13 +1,17 @@
-
+/*////////// Grundgerüst ///////////////
 fn run (args &[String]) {
     loop {
         for serverMessage in serverMessages {
-            game.stride(serverMessage);
+            for actions in serverMessage {
+                game.alter(action);
+            }
+            game.stride();
         }
         
         presenter.present(game);
     }
 }
+//////////////////////////////////// */
 
 use std::thread::sleep;
 use std::time::Duration;
