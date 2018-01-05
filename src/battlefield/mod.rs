@@ -5,18 +5,18 @@ mod bunker;
 use std::f32;
 use message::PlayerAction;
 
-pub struct Game {
+pub struct Battlefield {
     pub grid: grid::Grid,
     shots: Vec<shot::Shot>,
     bunkers: Vec<bunker::Bunker>
 }
 
-impl Game {
+impl Battlefield {
 
-    pub fn new() -> Game {
+    pub fn new() -> Battlefield {
         let bunkers = Vec::with_capacity(8);
         // TODO add bunkers and pass to grid
-        return Game{grid: grid::create_grid(), shots: Vec::new(), bunkers};
+        return Battlefield{grid: grid::create_grid(), shots: Vec::new(), bunkers};
     }
 
     pub fn get_shots(&self) -> &Vec<shot::Shot> {
