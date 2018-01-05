@@ -33,4 +33,10 @@ impl Particle {
         return self.color.is_bunker();
     }
 
+    pub fn empty_if_not_bunker(&mut self) -> () {
+        if !self.color.is_bunker() {
+            self.color = Color::EMPTY;
+        }
+    }
+
 }

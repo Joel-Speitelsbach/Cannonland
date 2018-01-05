@@ -62,6 +62,7 @@ struct Presenter<'st,'g> {
     state: &'st mut PresenterState,
     game: &'g mut game::Game,
     canvas: &'g mut sdl2::render::Canvas<Window>,
+    shootTest: i32
 }
 impl<'st,'g> Presenter<'st,'g> {
     pub fn new(
@@ -74,6 +75,7 @@ impl<'st,'g> Presenter<'st,'g> {
             state: presenter_state,
             game: game,
             canvas: canvas,
+            shootTest: 0
         };
     }
 
@@ -83,8 +85,16 @@ impl<'st,'g> Presenter<'st,'g> {
         self.game.stride();
         print!("calc needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
 
+        if self.shootTest%100 == 0 {
+            self.game.shoot();
+        }
+        self.shootTest += 1;
+
         let present_time = SystemTime::now();
-        self.present_grid();
+        self.draw_grid();
+        self.draw_bunkers();
+        self.draw_shots();
+        self.canvas.present();
         print!(", present needed {} msecs", present_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
 
         println!(", calc and present needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
@@ -109,13 +119,9 @@ impl<'st,'g> Presenter<'st,'g> {
 
 // draw grid
 impl<'st,'g> Presenter<'st,'g> {
-    fn present_grid(&mut self) -> () {
+    fn draw_grid(&mut self) -> () {
         self.draw_background();
-
         self.draw_particles();
-        self.draw_bunkers();
-
-        self.canvas.present();
     }
 
     fn grid(&mut self) -> &mut grid::Grid {&mut self.game.grid}
@@ -157,7 +163,7 @@ impl<'st,'g> Presenter<'st,'g> {
             let rgba: (u8,u8,u8,u8) = bunker.0.get_rgba();
             let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
 
-            self.canvas.line(
+            self.canvas.aa_line(
                 cannon_pos.0, cannon_pos.1,
                 cannon_pos.2, cannon_pos.3,
                 color).unwrap();
@@ -168,12 +174,12 @@ impl<'st,'g> Presenter<'st,'g> {
 }
 
 // draw shots
-/*impl<'st,'g> Presenter<'st,'g> {
+impl<'st,'g> Presenter<'st,'g> {
 
     fn draw_shots(&mut self) -> () {
-        for shot in &self.game.get_shots() {
-            self.canvas.filled_pie(shot.x_pos as i16, shot.y_pos as i16, 10, 0, 360, pixels::Color::RGBA(128,128,128,255)).unwrap();
+        for shot in self.game.get_shots() {
+            self.canvas.filled_circle(shot.x_pos as i16, shot.y_pos as i16, 4, pixels::Color::RGBA(96,96,96,255)).unwrap();
         }
     }
 
-}*/
+}
