@@ -3,6 +3,7 @@ use sdl2;
 use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::video::Window;
 use sdl2::pixels;
+use sdl2::event::{Event,WindowEvent};
 
 use battlefield;
 use battlefield::grid;
@@ -50,8 +51,17 @@ impl<'st,'g> Presenter<'st,'g> {
         self.draw_shots();
         self.state.canvas.present();
     }
+    
+    pub fn respond_to(&mut self, event: &Event) {
+        match *event {
+            Event::Window{win_event: WindowEvent::Resized
+                    (width,height),..} =>
+                self.rescale_canvas(width,height,),
+            _ => (),
+        }
+    }
 
-    pub fn rescale_canvas(&mut self, x: i32, y: i32) {
+    fn rescale_canvas(&mut self, x: i32, y: i32) {
         self.state.canvas.set_scale
             (x as f32 / GRID_WIDTH  as f32,
              y as f32 / GRID_HEIGHT as f32).unwrap();
