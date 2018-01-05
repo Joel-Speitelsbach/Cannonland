@@ -8,6 +8,7 @@ fn run (args &[String]) {
             game.stride();
         }
         
+        let presenter = Presenter::new(...);
         presenter.present(game);
     }
 }
