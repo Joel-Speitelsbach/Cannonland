@@ -7,7 +7,7 @@ use std::cmp;
 
 use self::color::Color;
 use self::particle::Particle;
-use super::Bunker;
+use super::bunker::Bunker;
 
 pub fn create_grid() -> Grid {
     let mut grid = Grid::new(800, 500);
@@ -66,8 +66,7 @@ impl Grid {
     }
 
     fn is_inside_grid(&self, x_pos: usize, y_pos: usize) -> bool {
-        return x_pos >= 0 && x_pos < self.width
-            && y_pos >= 0 && y_pos < self.height;
+        return x_pos < self.width && y_pos < self.height;
     }
 
     pub fn delete_radius_leave_out_bunkers(&mut self, x_pos: usize, y_pos: usize, radius: usize) -> () {

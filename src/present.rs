@@ -62,7 +62,7 @@ struct Presenter<'st,'g> {
     state: &'st mut PresenterState,
     game: &'g mut game::Game,
     canvas: &'g mut sdl2::render::Canvas<Window>,
-    shootTest: i32
+    counter: i64
 }
 impl<'st,'g> Presenter<'st,'g> {
     pub fn new(
@@ -75,7 +75,7 @@ impl<'st,'g> Presenter<'st,'g> {
             state: presenter_state,
             game: game,
             canvas: canvas,
-            shootTest: 0
+            counter: 0
         };
     }
 
@@ -83,23 +83,26 @@ impl<'st,'g> Presenter<'st,'g> {
 
         let calc_time = SystemTime::now();
         self.game.stride();
-        print!("calc needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
+        if self.counter%60 == 0 {
+            print!("calc needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
+        }
 
-        if self.shootTest%100 == 0 {
+        if self.counter%100 == 0 {
             self.game.shoot();
         }
-        self.shootTest += 1;
 
         let present_time = SystemTime::now();
         self.draw_grid();
         self.draw_bunkers();
         self.draw_shots();
         self.canvas.present();
-        print!(", present needed {} msecs", present_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
-
-        println!(", calc and present needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
+        if self.counter%60 == 0 {
+            print!(", present needed {} msecs", present_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
+            println!(", calc and present needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
+        }
 
         self.state.fps_manager.delay();
+        self.counter += 1;
     }
 
     fn rescale_canvas(&mut self, x: i32, y: i32) {
