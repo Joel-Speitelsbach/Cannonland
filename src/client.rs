@@ -1,15 +1,21 @@
 /*////////// Grundgerüst ///////////////
 fn run (args &[String]) {
+    let battlefield = Bf.new();
     loop {
         for serverMessage in serverMessages {
             for actions in serverMessage {
-                game.alter(action);
+                battlefield.alter(action);
             }
-            game.stride();
+            battlefield.stride();
         }
-        
-        let presenter = Presenter::new(...);
-        presenter.present(game);
+        let presenter = Presenter::new(&mut battlefield);
+        presenter.present();
+        for event in poll_events() {
+            controller.useEvent(&event);
+            presenter.useEvent(&event);
+        }
+        let actions = controller.takeActions();
+        sendMessageToServer(actions);
     }
 }
 //////////////////////////////////// */
