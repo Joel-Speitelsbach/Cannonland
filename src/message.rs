@@ -4,12 +4,23 @@ use std::vec::Vec;
 
 pub type PlayerID = u32; //can be changed and maybe this belongs into 'game'
 
-// 'game' can use this to alter its state
+// enum ChangeWeapon {
+    // Next,Prev,
+// }
+
+// 'game' uses this to alter its state
 #[derive(Serialize, Deserialize, Debug)]
 pub enum PlayerAction {
-    ChangeAngle,
-    ChangeLoad,
+    TurnCannon { diff_angle: f32 }, /*radian, clockwise*/ 
+    IncreaseLoad { inc: f32 }, /* 'load' ranges from 0. to 1. */
+    CangeWeapon (ChangeWeapon),
     Fire,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum ChangeWeapon {
+    Next, 
+    Prev,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
