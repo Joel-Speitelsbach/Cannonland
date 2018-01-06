@@ -2,7 +2,6 @@ pub mod particle_test;
 mod particle;
 pub mod color;  // make private
 
-use std::collections::HashMap;
 use std::cmp;
 
 use self::color::Color;
@@ -34,8 +33,7 @@ pub fn create_grid() -> Grid {
 pub struct Grid {
     pub width: usize,
     pub height: usize,
-    pub grid: Vec<Vec<Particle>>,
-    pub bunkers: HashMap<Color, Bunker>
+    pub grid: Vec<Vec<Particle>>
 }
 
 impl Grid {
@@ -50,7 +48,7 @@ impl Grid {
             }
         }
 
-        return Grid{width: width, height: height, grid: grid_vec, bunkers: HashMap::new()};
+        return Grid{width: width, height: height, grid: grid_vec};
     }
 
     pub fn set_rect(&mut self, color: Color, x_start: usize, y_start: usize, x_end: usize, y_end: usize) -> () {
@@ -89,7 +87,6 @@ impl Grid {
         self.fall_down();
         self.fall_side(1);
         self.fall_side(-1);
-        self.update_bunkers();
         self.clear_blur();
     }
 
@@ -137,19 +134,6 @@ impl Grid {
         }
     }
 
-    fn update_bunkers(&mut self) -> () {
-        for y in 0..self.height {
-            for x in 0..self.width {
-                if self.grid[y][x].is_bunker() {
-                    let bunker_color = self.grid[y][x].color;
-                    let bunker = self.bunkers.entry(bunker_color).or_insert(Bunker::new(x as i16, y as i16));
-                    bunker.x_pos = x as i16;
-                    bunker.y_pos = y as i16;
-                }
-            }
-        }
-    }
-
     fn clear_blur(&mut self) -> () {
         for y in 0..self.height {
             for x in 0..self.width {
@@ -158,6 +142,31 @@ impl Grid {
                 }
             }
         }
+    }
+
+    pub fn update_bunkers(&mut self, bunkers: &mut Vec<Bunker>) -> () {
+        for y in 0..self.height {
+            for x in 0..self.width {
+                if self.grid[y][x].is_bunker() {
+                    self.update_bunker_at(x, y, bunkers);
+                }
+            }
+        }
+    }
+
+    fn update_bunker_at(&mut self, x_pos: usize, y_pos: usize, bunkers: &mut Vec<Bunker>) -> () {
+        let color = self.grid[y_pos][x_pos].color;
+        let x_pos_i16 = x_pos as i16;
+        let y_pos_i16 = y_pos as i16;
+
+        for bunker in bunkers {
+            if bunker.color == color {
+                bunker.x_pos = x_pos_i16;
+                bunker.y_pos = y_pos_i16;
+                return;
+            }
+        }
+        self.grid[y_pos][x_pos].color = Color::EMPTY;
     }
 
 }

@@ -8,34 +8,31 @@ use self::grid::color::Color;
 
 pub struct Battlefield {
     pub grid: grid::Grid,
-    shots: Vec<shot::Shot>,
-    bunkers: Vec<bunker::Bunker>,
+    pub bunkers: Vec<bunker::Bunker>,
+    pub shots: Vec<shot::Shot>
 }
 
 impl Battlefield {
 
     pub fn new() -> Battlefield {
-        let bunkers = Vec::with_capacity(8);
-        // TODO add bunkers and pass to grid
-        return Battlefield{grid: grid::create_grid(), shots: Vec::new(), bunkers};
-    }
+        let mut bunkers = Vec::with_capacity(8);
+        bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerBlue));
+        bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerRed));
+        bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerGreen));
+        bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerYellow));
+        bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerTeal));
+        bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerPurple));
+        bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerGrey));
+        bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerOrange));
 
-    pub fn get_shots(&self) -> &Vec<shot::Shot> {
-        return &self.shots;
-    }
-
-    pub fn shoot(&mut self/*, bunker: &Bunker*/) {
-        let bunker = self.grid.bunkers.get(&grid::color::Color::BunkerYellow).unwrap();  // TODO delete this line
-
-        let shoot_pos = bunker.get_shoot_pos_xy();
-        let shot = shot::Shot::new(shoot_pos.0 as f32, shoot_pos.1 as f32, bunker.angle_radians, bunker.charge_percent);
-        self.shots.push(shot);
+        return Battlefield{ grid: grid::create_grid(), bunkers, shots: Vec::new() };
     }
 
     pub fn stride(&mut self) {
         self.collide();
 
         self.grid.stride();
+        self.grid.update_bunkers(&mut self.bunkers);
         self.stride_shots();
     }
 
@@ -46,6 +43,14 @@ impl Battlefield {
             },
             _ => (),
         }*/
+    }
+
+    pub fn shoot(&mut self, bunker_id: u8) {
+        let bunker = &self.bunkers[bunker_id as usize];
+
+        let shoot_pos = bunker.get_shoot_pos_xy();
+        let shot = shot::Shot::new(shoot_pos.0 as f32, shoot_pos.1 as f32, bunker.angle_radians, bunker.charge_percent);
+        self.shots.push(shot);
     }
 
     fn collide(&mut self) {

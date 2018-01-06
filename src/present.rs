@@ -51,7 +51,7 @@ impl<'st,'g> Presenter<'st,'g> {
         self.draw_shots();
         self.state.canvas.present();
     }
-    
+
     pub fn respond_to(&mut self, event: &Event) {
         match *event {
             Event::Window{win_event: WindowEvent::Resized
@@ -107,18 +107,16 @@ impl<'st,'g> Presenter<'st,'g> {
 impl<'st,'g> Presenter<'st,'g> {
 
     fn draw_bunkers(&mut self) -> () {
-        for bunker in &self.battlefield.grid.bunkers {
-            let cannon_pos: (i16,i16,i16,i16) = bunker.1.get_cannon_pos_x1y1x2y2();
-            let x = bunker.1.x_pos;
-            let y = bunker.1.y_pos;
-            let rgba: (u8,u8,u8,u8) = bunker.0.get_rgba();
+        for bunker in &self.battlefield.bunkers {
+            let cannon_pos: (i16,i16,i16,i16) = bunker.get_cannon_pos_x1y1x2y2();
+            let rgba: (u8,u8,u8,u8) = bunker.get_rgba();
             let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
 
             self.state.canvas.aa_line(
                 cannon_pos.0, cannon_pos.1,
                 cannon_pos.2, cannon_pos.3,
                 color).unwrap();
-            self.state.canvas.filled_pie(x, y, bunker.1.radius, 180, 360, color).unwrap();
+            self.state.canvas.filled_pie(bunker.x_pos, bunker.y_pos, bunker.radius, 180, 360, color).unwrap();
         }
     }
 
@@ -128,7 +126,7 @@ impl<'st,'g> Presenter<'st,'g> {
 impl<'st,'g> Presenter<'st,'g> {
 
     fn draw_shots(&mut self) -> () {
-        for shot in self.battlefield.get_shots() {
+        for shot in &self.battlefield.shots {
             self.state.canvas.filled_circle(shot.x_pos as i16, shot.y_pos as i16, 4, pixels::Color::RGBA(96,96,96,255)).unwrap();
         }
     }
