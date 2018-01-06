@@ -3,12 +3,13 @@ mod shot;
 mod bunker;
 
 use std::f32;
-use message::PlayerAction;
+use message::{PlayerAction,PlayerID};
+use self::grid::color::Color;
 
 pub struct Battlefield {
     pub grid: grid::Grid,
     shots: Vec<shot::Shot>,
-    bunkers: Vec<bunker::Bunker>
+    bunkers: Vec<bunker::Bunker>,
 }
 
 impl Battlefield {
@@ -38,7 +39,14 @@ impl Battlefield {
         self.stride_shots();
     }
 
-    pub fn alter(&mut self, action: &PlayerAction) {/*TODO*/}
+    pub fn alter(&mut self, player_id: PlayerID, action: &PlayerAction) {
+        /*match *action {
+            PlayerAction::TurnCannon { diff_angle: angle } => {
+                self.grid.bunkers[Color::BunkerBlue].
+            },
+            _ => (),
+        }*/
+    }
 
     fn collide(&mut self) {
         for i in (0..self.shots.len()).rev() {

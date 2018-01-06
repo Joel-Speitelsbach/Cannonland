@@ -12,7 +12,7 @@ pub fn run(opts: &[String]) {
     let mut battlefield = battlefield::Battlefield::new();
     
     let mut presenter_state = PresenterState::new(&sdl_context);
-    let mut controller = Controller::new();
+    let mut controller = Controller::new(&sdl_context);
 
     //init misc
     let mut fps_manager = sdl2::gfx::framerate::FPSManager::new();
