@@ -61,8 +61,8 @@ impl Controller {
             cannon_movement -= time_diff;
         }
         vec!(
-            PlayerAction::TurnCannon { 
-                diff_angle: cannon_movement as f32 / 1000.,
+            PlayerAction::TurnCannon {
+                diff_angle: cannon_movement as f32 / 100.,
             },
         )
     }

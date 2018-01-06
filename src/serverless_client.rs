@@ -24,6 +24,9 @@ pub fn run(opts: &[String]) {
         let calc_time = SystemTime::now();
         let actions = controller.take_actions();
         /* TODO here: apply 'actions' to battlefield */
+        for action in actions {
+            battlefield.execute_action(0, &action);
+        }
         battlefield.stride();
         if counter%60 == 0 {
             print!("calc needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));

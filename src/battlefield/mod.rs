@@ -36,13 +36,14 @@ impl Battlefield {
         self.stride_shots();
     }
 
-    pub fn alter(&mut self, player_id: PlayerID, action: &PlayerAction) {
-        /*match *action {
+    pub fn execute_action(&mut self, player_id: PlayerID, action: &PlayerAction) {
+        match *action {
             PlayerAction::TurnCannon { diff_angle: angle } => {
-                self.grid.bunkers[Color::BunkerBlue].
+                let mut bunker = &mut self.bunkers[player_id as usize];
+                bunker.angle_radians += angle;
             },
             _ => (),
-        }*/
+        }
     }
 
     pub fn shoot(&mut self, bunker_id: u8) {
