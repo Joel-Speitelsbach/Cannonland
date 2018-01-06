@@ -127,7 +127,7 @@ impl<'st,'g> Presenter<'st,'g> {
     }
 
     fn draw_building(canvas: &mut sdl2::render::Canvas<Window>, bunker: &battlefield::bunker::Bunker, color: pixels::Color) {
-        canvas.filled_pie(bunker.x_pos, bunker.y_pos, bunker.get_radius(), 180, 360, color).unwrap();
+        canvas.filled_pie(bunker.x_pos, bunker.y_pos, bunker.get_radius() as i16, 180, 360, color).unwrap();
     }
 
     fn draw_charge(canvas: &mut sdl2::render::Canvas<Window>, bunker: &battlefield::bunker::Bunker) {
@@ -139,8 +139,8 @@ impl<'st,'g> Presenter<'st,'g> {
         let x_current = x_zero + bunker.get_charge() as i16/divisor;
         let x_max = x_zero + bunker.get_max_charge() as i16/divisor;
 
-        canvas.box_(x_zero, y1, x_max, y2, pixels::Color::RGBA(128,128,128,128));
-        canvas.box_(x_zero, y1, x_current, y2, pixels::Color::RGBA(0,0,255,255));
+        canvas.box_(x_zero, y1, x_max, y2, pixels::Color::RGBA(128,128,128,128)).unwrap();
+        canvas.box_(x_zero, y1, x_current, y2, pixels::Color::RGBA(0,0,255,255)).unwrap();
     }
 
     fn draw_health(canvas: &mut sdl2::render::Canvas<Window>, bunker: &battlefield::bunker::Bunker) {
@@ -152,8 +152,8 @@ impl<'st,'g> Presenter<'st,'g> {
         let x_current = x_zero + bunker.get_health() as i16/divisor;
         let x_max = x_zero + bunker.get_max_health() as i16/divisor;
 
-        canvas.box_(x_zero, y1, x_max, y2, pixels::Color::RGBA(255,0,0,128));
-        canvas.box_(x_zero, y1, x_current, y2, pixels::Color::RGBA(0,255,0,255));
+        canvas.box_(x_zero, y1, x_max, y2, pixels::Color::RGBA(255,0,0,128)).unwrap();
+        canvas.box_(x_zero, y1, x_current, y2, pixels::Color::RGBA(0,255,0,255)).unwrap();
     }
 
 }

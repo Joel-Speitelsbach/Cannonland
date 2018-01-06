@@ -58,11 +58,36 @@ impl Battlefield {
         for i in (0..self.shots.len()).rev() {
             let x_pos = self.shots[i].x_pos as usize;
             let y_pos = self.shots[i].y_pos as usize;
-            if self.grid.collides_at_position(x_pos, y_pos) {
+
+            if Battlefield::collide_with_bunkers_true_for_hit(&mut self.bunkers, &self.shots[i])
+                || self.grid.collides_at_position(x_pos, y_pos) {
                 self.grid.delete_radius_leave_out_bunkers(x_pos, y_pos, self.shots[i].destruction_radius as usize);
                 self.shots.remove(i);
             }
         }
+    }
+
+    fn collide_with_bunkers_true_for_hit(bunkers: &mut Vec<bunker::Bunker>, shot: &shot::Shot) -> bool {
+        let mut hit = false;
+
+        for i in (0..bunkers.len()).rev() {
+            if Battlefield::collide_with_bunker_true_for_hit(&mut bunkers[i], shot) {
+                if bunkers[i].get_health() <= 0 {
+                    bunkers.remove(i);
+                }
+                hit = true;
+            }
+        }
+
+        return hit;
+    }
+
+    fn collide_with_bunker_true_for_hit(bunker: &mut bunker::Bunker, shot: &shot::Shot) -> bool {
+        if bunker.hit_at(shot.x_pos as i16, shot.y_pos as i16, shot.radius) {
+            bunker.harm(shot.harm);
+            return true;
+        }
+        return false;
     }
 
     fn stride_shots(&mut self) {
