@@ -7,7 +7,7 @@ pub struct Bunker {
     pub x_pos: i16,
     pub y_pos: i16,
     pub radius: i16,
-    pub angle_radians: f32,
+    angle_radians: f32,
     cannon_length: i16,
     pub charge_percent: u8
 }
@@ -32,6 +32,14 @@ impl Bunker {
 
     pub fn get_rgba(&self) -> (u8, u8, u8, u8) {
         return self.color.get_rgba();
+    }
+
+    pub fn get_angle_radians(&self) -> f32 {
+        return self.angle_radians;
+    }
+
+    pub fn change_angle_radians_trim_overflow(&mut self, angle_change: f32) {
+        self.angle_radians = f32::min(f32::max(self.angle_radians+angle_change, f32::consts::PI), f32::consts::PI*2.0);
     }
 
     pub fn get_shoot_pos_xy(&self) -> (i16, i16) {

@@ -37,10 +37,10 @@ impl Battlefield {
     }
 
     pub fn execute_action(&mut self, player_id: PlayerID, action: &PlayerAction) {
+        let mut bunker = &mut self.bunkers[player_id as usize];
         match *action {
             PlayerAction::TurnCannon { diff_angle: angle } => {
-                let mut bunker = &mut self.bunkers[player_id as usize];
-                bunker.angle_radians += angle;
+                bunker.change_angle_radians_trim_overflow(angle);
             },
             _ => (),
         }
@@ -50,7 +50,7 @@ impl Battlefield {
         let bunker = &self.bunkers[bunker_id as usize];
 
         let shoot_pos = bunker.get_shoot_pos_xy();
-        let shot = shot::Shot::new(shoot_pos.0 as f32, shoot_pos.1 as f32, bunker.angle_radians, bunker.charge_percent);
+        let shot = shot::Shot::new(shoot_pos.0 as f32, shoot_pos.1 as f32, bunker.get_angle_radians(), bunker.charge_percent);
         self.shots.push(shot);
     }
 
