@@ -160,7 +160,7 @@ impl Grid {
         let y_pos_i16 = y_pos as i16;
 
         for bunker in bunkers {
-            if bunker.color == color {
+            if bunker.get_color() == color {
                 bunker.x_pos = x_pos_i16;
                 bunker.y_pos = y_pos_i16;
                 return;

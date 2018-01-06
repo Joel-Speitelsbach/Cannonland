@@ -116,7 +116,7 @@ impl<'st,'g> Presenter<'st,'g> {
                 cannon_pos.0, cannon_pos.1,
                 cannon_pos.2, cannon_pos.3,
                 color).unwrap();
-            self.state.canvas.filled_pie(bunker.x_pos, bunker.y_pos, bunker.radius, 180, 360, color).unwrap();
+            self.state.canvas.filled_pie(bunker.x_pos, bunker.y_pos, bunker.get_radius(), 180, 360, color).unwrap();
         }
     }
 
