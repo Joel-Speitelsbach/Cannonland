@@ -7,8 +7,8 @@ use sdl2::keyboard::Keycode;
 use message::PlayerAction;
 
 pub struct Controller {
-    left_pressed: (bool, i32),
-    right_pressed: (bool, i32),
+    left_pressed: (bool, i32), // (whether key is currently pressed
+    right_pressed: (bool, i32), //   , timestamp)
     cannon_movement: i32,
     timer: TimerSubsystem,
 }
