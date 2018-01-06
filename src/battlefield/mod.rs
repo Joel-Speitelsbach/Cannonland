@@ -36,21 +36,31 @@ impl Battlefield {
         self.stride_shots();
     }
 
-    pub fn execute_action(&mut self, player_id: PlayerID, action: &PlayerAction) {
-        let mut bunker = &mut self.bunkers[player_id as usize];
+    pub fn execute_action(&mut self, bunker_id: PlayerID, action: &PlayerAction) {
         match *action {
             PlayerAction::TurnCannon { diff_angle: angle } => {
+                let bunker = &mut self.bunkers[bunker_id as usize];
                 bunker.change_angle_radians_trim_overflow(angle);
             },
+            PlayerAction::IncreaseLoad { inc: inc_load } => {
+                let bunker = &mut self.bunkers[bunker_id as usize];
+                bunker.increment_charge(
+                    (inc_load * 100.) as u8
+                );
+            },
+            PlayerAction::Fire => {
+                self.shoot(bunker_id as u8);
+            }
             _ => (),
         }
     }
 
     pub fn shoot(&mut self, bunker_id: u8) {
-        let bunker = &self.bunkers[bunker_id as usize];
+        let bunker = &mut self.bunkers[bunker_id as usize];
 
         let shoot_pos = bunker.get_shoot_pos_xy();
         let shot = shot::Shot::new(shoot_pos.0 as f32, shoot_pos.1 as f32, bunker.get_angle_radians(), bunker.get_charge());
+        bunker.reset_charge();
         self.shots.push(shot);
     }
 

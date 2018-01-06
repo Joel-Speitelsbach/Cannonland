@@ -84,19 +84,22 @@ impl Controller {
     }
     fn take_fire(&mut self) -> Vec<PlayerAction> {
         let mut actions = vec!();
-        let mut cannon_load = self.cannon_load;
-        self.cannon_load = 0;
         let time = self.timer.ticks() as i32;
         if let (true,old_time) = self.fire_pressed {
             let time_diff = time - old_time;
-            self.left_pressed = (true,time);
-            cannon_load += time_diff;
+            self.fire_pressed = (true,time);
+            self.cannon_load += time_diff;
         }
-        actions.push(PlayerAction::IncreaseLoad {
-            inc: cannon_load as f32 / 2000.,
-        });
+        let cannon_percent = self.cannon_load as f32 / 2000.;
+        if cannon_percent > 0.02 || self.fire {
+            actions.push(PlayerAction::IncreaseLoad {
+                inc: cannon_percent,
+            });
+            self.cannon_load = 0;
+        }
         if self.fire {
             actions.push(PlayerAction::Fire);
+            self.fire = false;
         }
         actions
     }

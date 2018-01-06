@@ -74,7 +74,7 @@ impl Bunker {
     }
 
     pub fn increment_charge(&mut self, charge_amount: u8) {
-        self.charge = cmp::max(self.charge+charge_amount, self.max_charge);
+        self.charge = cmp::min(self.charge+charge_amount, self.max_charge);
     }
 
     pub fn reset_charge(&mut self) {

@@ -24,9 +24,8 @@ pub fn run(opts: &[String]) {
         // iterate battlefield
         let calc_time = SystemTime::now();
         let actions = controller.take_actions();
-        /* TODO here: apply 'actions' to battlefield */
         for action in actions {
-            battlefield.execute_action(0, &action);
+            battlefield.execute_action(2, &action);
         }
         battlefield.stride();
         if counter%60 == 0 {
