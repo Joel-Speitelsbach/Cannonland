@@ -65,7 +65,6 @@ impl Controller {
             return vec!();
         }
         let angle = cannon_movement as f32 / 300.;
-        println!("diff angle: {}", &angle);
         vec!(
             PlayerAction::TurnCannon {
                 diff_angle: angle,
