@@ -7,8 +7,8 @@ use sdl2::keyboard::Keycode;
 use message::PlayerAction;
 
 pub struct Controller {
-    left_pressed: (bool, i32),
-    right_pressed: (bool, i32),
+    left_pressed: (bool, i32), // (whether key is currently pressed
+    right_pressed: (bool, i32), //   , timestamp)
     cannon_movement: i32,
     timer: TimerSubsystem,
 }
@@ -26,12 +26,12 @@ impl Controller {
     }
     pub fn use_event(&mut self, event: &Event) {
         match *event {
-            Event::KeyDown { timestamp: time, keycode: k,.. } => match k {
+            Event::KeyDown { repeat: false, timestamp: time, keycode: k,.. } => match k {
                 Some(Keycode::Right) => self.right_pressed = (true, time as i32),
                 Some(Keycode::Left) => self.left_pressed = (true, time as i32),
                 _ => (),
             },
-            Event::KeyUp { timestamp: time, keycode: k,..} => match k {
+            Event::KeyUp { repeat: false, timestamp: time, keycode: k,..} => match k {
                 Some(Keycode::Right) => if let (true,old_time) = self.right_pressed {
                     self.right_pressed = (false,0);
                     let time_diff = time as i32 - old_time;
@@ -50,6 +50,7 @@ impl Controller {
     pub fn take_actions(&mut self) -> Vec<PlayerAction> {
         let time = self.timer.ticks() as i32;
         let mut cannon_movement = self.cannon_movement;
+        self.cannon_movement = 0;
         if let (true,old_time) = self.right_pressed {
             let time_diff = time - old_time;
             self.right_pressed = (true,time);
@@ -60,9 +61,13 @@ impl Controller {
             self.left_pressed = (true,time);
             cannon_movement -= time_diff;
         }
+        if cannon_movement == 0 {
+            return vec!();
+        }
+        let angle = cannon_movement as f32 / 300.;
         vec!(
             PlayerAction::TurnCannon {
-                diff_angle: cannon_movement as f32 / 100.,
+                diff_angle: angle,
             },
         )
     }

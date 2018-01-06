@@ -16,6 +16,7 @@ pub fn run(opts: &[String]) {
 
     //init misc
     let mut fps_manager = sdl2::gfx::framerate::FPSManager::new();
+    fps_manager.set_framerate(60).unwrap();
     let mut counter: i64 = 0;
 
     'mainloop: loop {
