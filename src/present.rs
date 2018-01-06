@@ -108,16 +108,52 @@ impl<'st,'g> Presenter<'st,'g> {
 
     fn draw_bunkers(&mut self) -> () {
         for bunker in &self.battlefield.bunkers {
-            let cannon_pos: (i16,i16,i16,i16) = bunker.get_cannon_pos_x1y1x2y2();
             let rgba: (u8,u8,u8,u8) = bunker.get_rgba();
             let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
 
-            self.state.canvas.aa_line(
-                cannon_pos.0, cannon_pos.1,
-                cannon_pos.2, cannon_pos.3,
-                color).unwrap();
-            self.state.canvas.filled_pie(bunker.x_pos, bunker.y_pos, bunker.get_radius(), 180, 360, color).unwrap();
+            Presenter::draw_cannon(&mut self.state.canvas, &bunker, color);
+            Presenter::draw_building(&mut self.state.canvas, &bunker, color);
+            Presenter::draw_charge(&mut self.state.canvas, &bunker);
+            Presenter::draw_health(&mut self.state.canvas, &bunker);
         }
+    }
+
+    fn draw_cannon(canvas: &mut sdl2::render::Canvas<Window>, bunker: &battlefield::bunker::Bunker, color: pixels::Color) {
+        let cannon_pos: (i16,i16,i16,i16) = bunker.get_cannon_pos_x1y1x2y2();
+        canvas.aa_line(
+            cannon_pos.0, cannon_pos.1,
+            cannon_pos.2, cannon_pos.3,
+            color).unwrap();
+    }
+
+    fn draw_building(canvas: &mut sdl2::render::Canvas<Window>, bunker: &battlefield::bunker::Bunker, color: pixels::Color) {
+        canvas.filled_pie(bunker.x_pos, bunker.y_pos, bunker.get_radius(), 180, 360, color).unwrap();
+    }
+
+    fn draw_charge(canvas: &mut sdl2::render::Canvas<Window>, bunker: &battlefield::bunker::Bunker) {
+        let divisor = 4;
+
+        let y1 = bunker.y_pos + 1;
+        let y2 = y1 + 5;
+        let x_zero = bunker.x_pos - (bunker.get_max_charge() as i16/2/divisor);
+        let x_current = x_zero + bunker.get_charge() as i16/divisor;
+        let x_max = x_zero + bunker.get_max_charge() as i16/divisor;
+
+        canvas.box_(x_zero, y1, x_max, y2, pixels::Color::RGBA(128,128,128,128));
+        canvas.box_(x_zero, y1, x_current, y2, pixels::Color::RGBA(0,0,255,255));
+    }
+
+    fn draw_health(canvas: &mut sdl2::render::Canvas<Window>, bunker: &battlefield::bunker::Bunker) {
+        let divisor = 4;
+
+        let y1 = bunker.y_pos + 7;
+        let y2 = y1 + 5;
+        let x_zero = bunker.x_pos - (bunker.get_max_health() as i16/2/divisor);
+        let x_current = x_zero + bunker.get_health() as i16/divisor;
+        let x_max = x_zero + bunker.get_max_health() as i16/divisor;
+
+        canvas.box_(x_zero, y1, x_max, y2, pixels::Color::RGBA(255,0,0,128));
+        canvas.box_(x_zero, y1, x_current, y2, pixels::Color::RGBA(0,255,0,255));
     }
 
 }

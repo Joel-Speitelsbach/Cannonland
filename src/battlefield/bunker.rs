@@ -12,8 +12,8 @@ pub struct Bunker {
     cannon_length: i16,
     charge: u8,
     max_charge: u8,
-    health_points: u8,
-    max_health_points: u8
+    health: u8,
+    max_health: u8
 }
 
 impl Bunker {
@@ -32,8 +32,8 @@ impl Bunker {
             cannon_length: 20,
             charge: 0,
             max_charge: 100,
-            health_points: 100,
-            max_health_points: 100
+            health: 100,
+            max_health: 100
         };
     }
 
@@ -81,12 +81,24 @@ impl Bunker {
         self.charge = 0;
     }
 
+    pub fn get_max_charge(&self) -> u8 {
+        return self.max_charge;
+    }
+
+    pub fn get_health(&self) -> u8 {
+        return self.health;
+    }
+
     pub fn harm(&mut self, harm_amount: u8) {
-        self.health_points = cmp::min(self.health_points-harm_amount, 0);
+        self.health = cmp::min(self.health-harm_amount, 0);
     }
 
     pub fn heal(&mut self, heal_amount: u8) {
-        self.health_points = cmp::max(self.health_points+heal_amount, self.max_health_points);
+        self.health = cmp::max(self.health+heal_amount, self.max_health);
+    }
+
+    pub fn get_max_health(&self) -> u8 {
+        return self.max_health;
     }
 
 }

@@ -1,6 +1,6 @@
 pub mod grid;
-mod shot;
-mod bunker;
+pub mod shot;
+pub mod bunker;
 
 use std::f32;
 use message::{PlayerAction,PlayerID};
