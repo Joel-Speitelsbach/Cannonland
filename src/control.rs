@@ -50,9 +50,6 @@ impl Controller {
     pub fn take_actions(&mut self) -> Vec<PlayerAction> {
         let time = self.timer.ticks() as i32;
         let mut cannon_movement = self.cannon_movement;
-        if cannon_movement == 0 {
-            return vec!();
-        }
         self.cannon_movement = 0;
         if let (true,old_time) = self.right_pressed {
             let time_diff = time - old_time;
@@ -63,6 +60,9 @@ impl Controller {
             let time_diff = time - old_time;
             self.left_pressed = (true,time);
             cannon_movement -= time_diff;
+        }
+        if cannon_movement == 0 {
+            return vec!();
         }
         let angle = cannon_movement as f32 / 300.;
         println!("diff angle: {}", &angle);
