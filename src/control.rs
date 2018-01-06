@@ -90,7 +90,7 @@ impl Controller {
             self.fire_pressed = (true,time);
             self.cannon_load += time_diff;
         }
-        let cannon_percent = self.cannon_load as f32 / 2000.;
+        let cannon_percent = self.cannon_load as f32 / 1000.;
         if cannon_percent > 0.02 || self.fire {
             actions.push(PlayerAction::IncreaseLoad {
                 inc: cannon_percent,
