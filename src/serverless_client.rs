@@ -31,9 +31,6 @@ pub fn run(opts: &[String]) {
         if counter%60 == 0 {
             print!("calc needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
         }
-        if counter%100 == 0 {
-            battlefield.shoot(4);
-        }
 
         // events
         let mut presenter = Presenter::new(&mut presenter_state, &mut battlefield);
