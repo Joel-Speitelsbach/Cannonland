@@ -63,7 +63,7 @@ impl Bunker {
 
     pub fn hit_at(&self, x_pos: i16, y_pos: i16, radius: u8) -> bool {
         return self.y_pos > y_pos - radius as i16
-            && (((self.x_pos-x_pos).pow(2) + (self.y_pos-y_pos).pow(2)) as f32).sqrt() < (self.radius + radius) as f32;
+            && (((self.x_pos-x_pos) as f32).powf(2.) + ((self.y_pos-y_pos) as f32).powf(2.)).sqrt() < (self.radius + radius) as f32;
     }
 
     pub fn get_angle_radians(&self) -> f32 {
@@ -82,7 +82,7 @@ impl Bunker {
         self.charge = cmp::min(self.charge+charge_amount, self.max_charge);
     }
 
-    pub fn reset_charge(&mut self) { 
+    pub fn reset_charge(&mut self) {
         self.charge = 0;
     }
 

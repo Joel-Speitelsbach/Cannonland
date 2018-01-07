@@ -55,13 +55,14 @@ impl Battlefield {
         }
     }
 
-    pub fn shoot(&mut self, bunker_id: u8) {
+    fn shoot(&mut self, bunker_id: u8) {
         let bunker = &mut self.bunkers[bunker_id as usize];
 
         let shoot_pos = bunker.get_shoot_pos_xy();
         let shot = shot::Shot::new(shoot_pos.0 as f32, shoot_pos.1 as f32, bunker.get_angle_radians(), bunker.get_charge());
-        bunker.reset_charge();
         self.shots.push(shot);
+
+        bunker.reset_charge();
     }
 
     fn collide(&mut self) {
