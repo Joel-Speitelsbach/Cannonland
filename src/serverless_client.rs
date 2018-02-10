@@ -29,7 +29,8 @@ pub fn run(opts: &[String]) {
         }
         battlefield.stride();
         if counter%60 == 0 {
-            print!("calc needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
+            print!("calc needed {} msecs", 
+                calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
         }
 
         // events
@@ -49,7 +50,8 @@ pub fn run(opts: &[String]) {
         let present_time = SystemTime::now();
         presenter.present();
         if counter%60 == 0 {
-            print!(", present needed {} msecs", present_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
+            print!(", present needed {} msecs", 
+                present_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
             println!(", calc and present needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
         }
 

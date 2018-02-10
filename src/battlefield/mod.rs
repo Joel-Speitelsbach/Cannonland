@@ -25,7 +25,7 @@ impl Battlefield {
         bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerGrey));
         bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerOrange));
 
-        return Battlefield{ grid: grid::create_grid(), bunkers, shots: Vec::new() };
+        return Battlefield{ grid: grid::create_test_grid(), bunkers, shots: Vec::new() };
     }
 
     pub fn stride(&mut self) {

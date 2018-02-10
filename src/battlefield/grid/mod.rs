@@ -8,7 +8,7 @@ use self::color::Color;
 use self::particle::Particle;
 use super::bunker::Bunker;
 
-pub fn create_grid() -> Grid {
+pub fn create_test_grid() -> Grid {
     let mut grid = Grid::new(800, 500);
 
     grid.set_rect(Color::DIRT, 40, 40, 80, 80);
