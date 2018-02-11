@@ -1,31 +1,36 @@
+extern crate sdl2_sys;
+
 pub mod particle_test;
 mod particle;
-pub mod color;  // make private
+pub mod particle_type;  // make private
 
 use std::cmp;
 
-use self::color::Color;
+use self::particle_type::ParticleType;
 use self::particle::Particle;
 use super::bunker::Bunker;
+use sdl2::image::LoadSurface;
+use sdl2::pixels::Color;
+use sdl2::pixels::PixelFormatEnum;
 
 pub fn create_test_grid() -> Grid {
     let mut grid = Grid::new(800, 500);
 
-    grid.set_rect(Color::DIRT, 40, 40, 80, 80);
-    grid.set_rect(Color::ROCK, 20, 100, 140, 210);
-    grid.set_rect(Color::SNOW, 300, 20, 390, 140);
-    grid.set_rect(Color::WATER, 150, 100, 300, 200);
-    grid.set_rect(Color::ROCK, 350, 140, 400, 240);
-    grid.set_rect(Color::BETON, 350, 400, 600, 450);
+    grid.set_rect(ParticleType::DIRT, 40, 40, 80, 80);
+    grid.set_rect(ParticleType::ROCK, 20, 100, 140, 210);
+    grid.set_rect(ParticleType::SNOW, 300, 20, 390, 140);
+    grid.set_rect(ParticleType::WATER, 150, 100, 300, 200);
+    grid.set_rect(ParticleType::ROCK, 350, 140, 400, 240);
+    grid.set_rect(ParticleType::BETON, 350, 400, 600, 450);
 
-    grid.set_rect(Color::BunkerBlue, 50, 40, 51, 41);
-    grid.set_rect(Color::BunkerRed, 150, 40, 151, 41);
-    grid.set_rect(Color::BunkerGreen, 250, 40, 251, 41);
-    grid.set_rect(Color::BunkerYellow, 350, 40, 351, 41);
-    grid.set_rect(Color::BunkerTeal, 450, 40, 451, 41);
-    grid.set_rect(Color::BunkerPurple, 550, 40, 551, 41);
-    grid.set_rect(Color::BunkerGrey, 650, 40, 651, 41);
-    grid.set_rect(Color::BunkerOrange, 750, 40, 751, 41);
+    grid.set_rect(ParticleType::BunkerBlue, 50, 40, 51, 41);
+    grid.set_rect(ParticleType::BunkerRed, 150, 40, 151, 41);
+    grid.set_rect(ParticleType::BunkerGreen, 250, 40, 251, 41);
+    grid.set_rect(ParticleType::BunkerYellow, 350, 40, 351, 41);
+    grid.set_rect(ParticleType::BunkerTeal, 450, 40, 451, 41);
+    grid.set_rect(ParticleType::BunkerPurple, 550, 40, 551, 41);
+    grid.set_rect(ParticleType::BunkerGrey, 650, 40, 651, 41);
+    grid.set_rect(ParticleType::BunkerOrange, 750, 40, 751, 41);
 
     return grid;
 }
@@ -44,23 +49,69 @@ impl Grid {
         for y in 0..height {
             grid_vec.push(Vec::with_capacity(width));
             for _ in 0..width {
-                grid_vec[y].push(Particle::new(Color::EMPTY));
+                grid_vec[y].push(Particle::new(
+                    ParticleType::EMPTY,
+                    Color::RGB(0,0,0),
+                ));
             }
         }
 
         return Grid{width: width, height: height, grid: grid_vec};
     }
+    
+    pub fn load_from_file(file_name: &String) -> Grid {
+        let surface = ::sdl2::surface::Surface::from_file(file_name)
+            .expect("could not load image");
+        let (width, height) = surface.size();
+        let canvas = surface.into_canvas().unwrap();
+        let pixels = canvas.read_pixels(None, PixelFormatEnum::ABGR8888).unwrap();
+        let (width, height) = (width as usize, height as usize);
+        
+        let pix = |px: usize| {
+            for i in 0..4 {
+                print!("{} ", pixels[i + px*4]);
+            }
+            println!();
+        };
+        for px in 0..6 {
+            pix(px);
+        }
+        
+        let mut grid = Grid::new(width, height);
+        for y in 0..height {
+            for x in 0..width {
+                let pos = (x + y * width) * 4;
+                //let pixel = &pixels[pos..pos+4];
+                let (r,g,b,a) = (
+                    pixels[pos+0],
+                    pixels[pos+1],
+                    pixels[pos+2],
+                    pixels[pos+3],
+                );
+                if a < 100 {
+                    grid.grid[y][x].color = (r,g,b,100);
+                    grid.grid[y][x].particle_type = ParticleType::EMPTY;
+                } else {
+                    grid.grid[y][x].color = (r,g,b,255);
+                    grid.grid[y][x].particle_type = ParticleType::ROCK;
+                }
+            }
+        }
+        grid.set_rect(ParticleType::BunkerBlue, 50, 40, 51, 41);
+        grid.set_rect(ParticleType::BunkerRed, 150, 40, 151, 41);
+        grid 
+    }
 
-    pub fn set_rect(&mut self, color: Color, x_start: usize, y_start: usize, x_end: usize, y_end: usize) -> () {
+    pub fn set_rect(&mut self, particle_type: ParticleType, x_start: usize, y_start: usize, x_end: usize, y_end: usize) -> () {
         for y in y_start..y_end {
             for x in x_start..x_end {
-                self.grid[y][x].color = color;
+                self.grid[y][x].particle_type = particle_type;
             }
         }
     }
 
     pub fn collides_at_position(&mut self, x_pos: usize, y_pos: usize) -> bool {
-        return self.is_inside_grid(x_pos, y_pos) && self.grid[y_pos][x_pos].color != Color::EMPTY;
+        return self.is_inside_grid(x_pos, y_pos) && self.grid[y_pos][x_pos].particle_type != ParticleType::EMPTY;
     }
 
     fn is_inside_grid(&self, x_pos: usize, y_pos: usize) -> bool {
@@ -95,7 +146,7 @@ impl Grid {
             for x in 0..self.width {
                 if self.grid[y][x].can_fall() && self.grid[y+1][x].can_move_into() {
                     self.grid[y+1][x] = self.grid[y][x];
-                    self.grid[y][x].color = Color::BLUR;
+                    self.grid[y][x].particle_type = ParticleType::BLUR;
                 }
             }
         }
@@ -120,15 +171,15 @@ impl Grid {
             for x in x_start..x_end {
                 let x32 = x as i32;
                 if self.grid[y][x].can_fall()
-                && self.grid[y+1][x].color != Color::BLUR
-                && (y == 0 || self.grid[y-1][x].color != Color::BLUR)
-                && self.grid[y][(x32+sign) as usize].color == Color::EMPTY
-                && self.grid[y+1][(x32+sign) as usize].color == Color::EMPTY
-                && self.grid[y+2][(x32+sign) as usize].color == Color::EMPTY {
+                && self.grid[y+1][x].particle_type != ParticleType::BLUR
+                && (y == 0 || self.grid[y-1][x].particle_type != ParticleType::BLUR)
+                && self.grid[y][(x32+sign) as usize].particle_type == ParticleType::EMPTY
+                && self.grid[y+1][(x32+sign) as usize].particle_type == ParticleType::EMPTY
+                && self.grid[y+2][(x32+sign) as usize].particle_type == ParticleType::EMPTY {
                     self.grid[y][(x32+sign) as usize] = self.grid[y][x];
-                    self.grid[y][x].color = Color::BLUR;
-                    self.grid[y+1][(x32+sign) as usize].color = Color::BLUR;
-                    self.grid[y+2][(x32+sign) as usize].color = Color::BLUR;
+                    self.grid[y][x].particle_type = ParticleType::BLUR;
+                    self.grid[y+1][(x32+sign) as usize].particle_type = ParticleType::BLUR;
+                    self.grid[y+2][(x32+sign) as usize].particle_type = ParticleType::BLUR;
                 }
             }
         }
@@ -137,8 +188,8 @@ impl Grid {
     fn clear_blur(&mut self) -> () {
         for y in 0..self.height {
             for x in 0..self.width {
-                if self.grid[y][x].color == Color::BLUR {
-                    self.grid[y][x].color = Color::EMPTY;
+                if self.grid[y][x].particle_type == ParticleType::BLUR {
+                    self.grid[y][x].particle_type = ParticleType::EMPTY;
                 }
             }
         }
@@ -155,18 +206,18 @@ impl Grid {
     }
 
     fn update_bunker_at(&mut self, x_pos: usize, y_pos: usize, bunkers: &mut Vec<Bunker>) -> () {
-        let color = self.grid[y_pos][x_pos].color;
+        let particle_type = self.grid[y_pos][x_pos].particle_type;
         let x_pos_i16 = x_pos as i16;
         let y_pos_i16 = y_pos as i16;
 
         for bunker in bunkers {
-            if bunker.get_color() == color {
+            if bunker.get_color() == particle_type {
                 bunker.x_pos = x_pos_i16;
                 bunker.y_pos = y_pos_i16;
                 return;
             }
         }
-        self.grid[y_pos][x_pos].color = Color::EMPTY;
+        self.grid[y_pos][x_pos].particle_type = ParticleType::EMPTY;
     }
 
 }

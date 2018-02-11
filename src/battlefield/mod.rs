@@ -4,7 +4,8 @@ pub mod bunker;
 
 use std::f32;
 use message::{PlayerAction,PlayerID};
-use self::grid::color::Color;
+use self::grid::particle_type::ParticleType;
+use self::grid::Grid;
 
 pub struct Battlefield {
     pub grid: grid::Grid,
@@ -16,16 +17,16 @@ impl Battlefield {
 
     pub fn new() -> Battlefield {
         let mut bunkers = Vec::with_capacity(8);
-        bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerBlue));
-        bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerRed));
-        bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerGreen));
-        bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerYellow));
-        bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerTeal));
-        bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerPurple));
-        bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerGrey));
-        bunkers.push(bunker::Bunker::new_at_nowhere(Color::BunkerOrange));
+        bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerBlue));
+        bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerRed));
+        bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerGreen));
+        bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerYellow));
+        bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerTeal));
+        bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerPurple));
+        bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerGrey));
+        bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerOrange));
 
-        return Battlefield{ grid: grid::create_test_grid(), bunkers, shots: Vec::new() };
+        return Battlefield{ grid: Grid::load_from_file(&"pics/terra_valley.png".to_owned()), bunkers, shots: Vec::new() };
     }
 
     pub fn stride(&mut self) {

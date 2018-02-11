@@ -1,10 +1,10 @@
 use std::f32;
 use std::cmp;
 
-use super::grid::color::Color;
+use super::grid::particle_type::ParticleType;
 
 pub struct Bunker {
-    color: Color,
+    particle_type: ParticleType,
     pub x_pos: i16,
     pub y_pos: i16,
     radius: u8,
@@ -18,13 +18,13 @@ pub struct Bunker {
 
 impl Bunker {
 
-    pub fn new_at_nowhere(color: Color) -> Bunker {
-        return Bunker::new(color, 4096, 4096);
+    pub fn new_at_nowhere(particle_type: ParticleType) -> Bunker {
+        return Bunker::new(particle_type, 4096, 4096);
     }
 
-    pub fn new(color: Color, x_pos: i16, y_pos: i16) -> Bunker {
+    pub fn new(particle_type: ParticleType, x_pos: i16, y_pos: i16) -> Bunker {
         return Bunker {
-            color,
+            particle_type,
             x_pos: x_pos,
             y_pos: y_pos,
             radius: 10,
@@ -38,11 +38,11 @@ impl Bunker {
     }
 
     pub fn get_rgba(&self) -> (u8, u8, u8, u8) {
-        return self.color.get_rgba();
+        return self.particle_type.get_rgba();
     }
 
-    pub fn get_color(&self) -> Color {
-        return self.color;
+    pub fn get_color(&self) -> ParticleType {
+        return self.particle_type;
     }
 
     pub fn get_shoot_pos_xy(&self) -> (i16, i16) {
