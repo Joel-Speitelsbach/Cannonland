@@ -1,17 +1,17 @@
 use std::time::SystemTime;
 use sdl2;
-use sdl2::event::{Event,WindowEvent};
+use sdl2::event::{Event};
 use sdl2::keyboard::Keycode;
 
 use battlefield;
 use present::{Presenter,PresenterState};
 use control::{Controller};
 
-pub fn run(opts: &[String]) {
+pub fn run(_: &[String]) {
     let sdl_context = sdl2::init().unwrap();
     let mut battlefield = battlefield::Battlefield::new();
 
-    let mut presenter_state = PresenterState::new(&sdl_context);
+    let mut presenter_state = PresenterState::new(&sdl_context, &battlefield);
     let mut controller = Controller::new(&sdl_context);
 
     //init misc
@@ -29,7 +29,7 @@ pub fn run(opts: &[String]) {
         }
         battlefield.stride();
         if counter%60 == 0 {
-            print!("calc needed {} msecs", 
+            print!("calc needed {} msecs",
                 calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
         }
 
@@ -50,7 +50,7 @@ pub fn run(opts: &[String]) {
         let present_time = SystemTime::now();
         presenter.present();
         if counter%60 == 0 {
-            print!(", present needed {} msecs", 
+            print!(", present needed {} msecs",
                 present_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
             println!(", calc and present needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
         }

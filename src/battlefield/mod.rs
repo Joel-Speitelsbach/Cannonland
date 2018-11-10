@@ -26,7 +26,8 @@ impl Battlefield {
         bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerGrey));
         bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerOrange));
 
-        return Battlefield{ grid: Grid::load_from_file(&"pics/terra_valley.png".to_owned()), bunkers, shots: Vec::new() };
+        let grid = Grid::load_from_file(&"pics/terra_valley_small.png".to_owned());
+        return Battlefield{ grid: grid, bunkers, shots: Vec::new() };
     }
 
     pub fn stride(&mut self) {

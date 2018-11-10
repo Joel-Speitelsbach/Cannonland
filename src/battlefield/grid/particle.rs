@@ -42,7 +42,7 @@ impl Particle {
     pub fn empty_if_not_bunker(&mut self) -> () {
         if !self.particle_type.is_bunker() {
             self.particle_type = ParticleType::EMPTY;
-            self.color.3 = 100;
+            self.color = (0,0,0,100);
         }
     }
 

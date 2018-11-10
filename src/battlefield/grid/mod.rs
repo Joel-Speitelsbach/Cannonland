@@ -1,5 +1,3 @@
-extern crate sdl2_sys;
-
 pub mod particle_test;
 mod particle;
 pub mod particle_type;  // make private
@@ -58,7 +56,7 @@ impl Grid {
 
         return Grid{width: width, height: height, grid: grid_vec};
     }
-    
+
     pub fn load_from_file(file_name: &String) -> Grid {
         let surface = ::sdl2::surface::Surface::from_file(file_name)
             .expect("could not load image");
@@ -66,7 +64,7 @@ impl Grid {
         let canvas = surface.into_canvas().unwrap();
         let pixels = canvas.read_pixels(None, PixelFormatEnum::ABGR8888).unwrap();
         let (width, height) = (width as usize, height as usize);
-        
+
         let pix = |px: usize| {
             for i in 0..4 {
                 print!("{} ", pixels[i + px*4]);
@@ -76,7 +74,7 @@ impl Grid {
         for px in 0..6 {
             pix(px);
         }
-        
+
         let mut grid = Grid::new(width, height);
         for y in 0..height {
             for x in 0..width {
@@ -89,7 +87,7 @@ impl Grid {
                     pixels[pos+3],
                 );
                 if a < 100 {
-                    grid.grid[y][x].color = (r,g,b,100);
+                    grid.grid[y][x].color = (0,0,0,100);
                     grid.grid[y][x].particle_type = ParticleType::EMPTY;
                 } else {
                     grid.grid[y][x].color = (r,g,b,255);
@@ -99,7 +97,7 @@ impl Grid {
         }
         grid.set_rect(ParticleType::BunkerBlue, 50, 40, 51, 41);
         grid.set_rect(ParticleType::BunkerRed, 150, 40, 151, 41);
-        grid 
+        grid
     }
 
     pub fn set_rect(&mut self, particle_type: ParticleType, x_start: usize, y_start: usize, x_end: usize, y_end: usize) -> () {
@@ -190,6 +188,7 @@ impl Grid {
             for x in 0..self.width {
                 if self.grid[y][x].particle_type == ParticleType::BLUR {
                     self.grid[y][x].particle_type = ParticleType::EMPTY;
+                    self.grid[y][x].color = (0,0,0,100);
                 }
             }
         }

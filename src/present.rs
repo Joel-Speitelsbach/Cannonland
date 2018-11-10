@@ -5,27 +5,37 @@ use sdl2::video::Window;
 use sdl2::pixels;
 use sdl2::event::{Event,WindowEvent};
 
-use battlefield;
-use battlefield::grid;
+use battlefield::{self,grid,Battlefield};
 
-const GRID_WIDTH :i32 = 800;
-const GRID_HEIGHT:i32 = 500;
+// const GRID_WIDTH :i32 = 800;
+// const GRID_HEIGHT:i32 = 500;
 
 pub struct PresenterState {
     canvas: sdl2::render::Canvas<Window>,
 }
 impl PresenterState {
-    pub fn new(sdl_context: &sdl2::Sdl,) -> PresenterState {
+    pub fn new(sdl_context: &sdl2::Sdl, battlefield: &Battlefield) -> PresenterState {
         let video_subsystem = sdl_context.video().unwrap();
-        let window = video_subsystem.window("Cannonland",
-            GRID_WIDTH as u32,
-            GRID_HEIGHT as u32)
-          .position_centered().resizable()
-          .build()
-          .unwrap();
-        PresenterState {
-            canvas: window.into_canvas().build().unwrap(),
-        }
+        let window =
+            video_subsystem
+            .window("Cannonland",
+                battlefield.grid.width  as u32,
+                battlefield.grid.height as u32)
+            .build()
+            .unwrap();
+        let mut canvas =
+            window
+            .into_canvas()
+            .software()
+            .build()
+            .unwrap();
+        canvas.window_mut().set_size(
+            battlefield.grid.width  as u32 * 3,
+            battlefield.grid.height as u32 * 3);
+        canvas.window_mut().set_position(
+            sdl2::video::WindowPos::Centered,
+            sdl2::video::WindowPos::Centered);
+        PresenterState { canvas }
     }
 }
 
@@ -63,8 +73,8 @@ impl<'st,'g> Presenter<'st,'g> {
 
     fn rescale_canvas(&mut self, x: i32, y: i32) {
         self.state.canvas.set_scale
-            (x as f32 / GRID_WIDTH  as f32,
-             y as f32 / GRID_HEIGHT as f32).unwrap();
+            (x as f32 / self.battlefield.grid.width  as f32,
+             y as f32 / self.battlefield.grid.height as f32).unwrap();
     }
 }
 
