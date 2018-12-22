@@ -98,6 +98,7 @@ impl Bunker {
         self.health = cmp::max(self.health-harm_amount, 0);
     }
 
+    #[allow(dead_code)]
     pub fn heal(&mut self, heal_amount: u8) {
         self.health = cmp::min(self.health+heal_amount, self.max_health);
     }

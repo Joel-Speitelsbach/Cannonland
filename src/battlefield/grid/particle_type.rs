@@ -1,4 +1,5 @@
 
+#[allow(dead_code)]
 #[derive(Copy, Clone)]
 #[derive(PartialEq, Eq)]
 #[derive(Hash)]

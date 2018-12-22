@@ -11,6 +11,7 @@ use sdl2::image::LoadSurface;
 use sdl2::pixels::Color;
 use sdl2::pixels::PixelFormatEnum;
 
+#[allow(dead_code)]
 pub fn create_test_grid() -> Grid {
     let mut grid = Grid::new(800, 500);
 
