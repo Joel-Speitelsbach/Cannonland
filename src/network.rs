@@ -13,12 +13,12 @@ pub type Server = TcpListener;
 pub struct Simple;
 impl Simple {
     pub fn send<D>(mut other: &OtherSide, data: &D) -> Result_<()>
-        where D: Serialize {
+            where D: Serialize {
         bincode::serialize_into(&mut other, &data, Infinite) //todo
     }
 
     pub fn recieve<D>(mut other: &OtherSide) -> Result_<D>
-        where for<'de> D: Deserialize<'de> {
+            where for<'de> D: Deserialize<'de> {
         bincode::deserialize_from(&mut other, bincode::Infinite)
     }
 

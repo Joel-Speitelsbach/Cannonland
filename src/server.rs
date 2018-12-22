@@ -34,7 +34,7 @@ pub fn run(opts: &[String]) {
         // recieve messages from clients
         let mut messages: Vec<(PlayerID,ClientMessage)> = Vec::new();
         for (id, cl) in &clients {
-            if let Ok(msg) = network::Simple::recieve(&cl) {
+            while let Ok(msg) = network::Simple::recieve(&cl) {
                 // println!("client nr.{}: {:?}", &id, &msg);
                 messages.push((*id,msg));
             }
@@ -49,7 +49,7 @@ pub fn run(opts: &[String]) {
         for (id, cl) in &clients {
             if let Err(err) = network::Simple::send(&cl, &msg) {
                 println!("client {} disconnected", &id);
-                println!("debug info {}", err);
+                println!("debug info: {}", err);
                 clients_to_remove.push(id.clone());
             } else {
                 println!("{:?}", &msg);
@@ -61,14 +61,14 @@ pub fn run(opts: &[String]) {
         
         
         // update battlefield
-        for (playerId,clientMessage) in messages {
-            for action in clientMessage.actions {
-                battlefield.execute_action(playerId, &action);
+        for (player_id,client_message) in messages {
+            for action in client_message.actions {
+                battlefield.execute_action(player_id, &action);
             }
         }
         battlefield.stride();
         
         
-        sleep(Duration::from_millis(50));
+        sleep(Duration::from_millis(15));
     }
 }

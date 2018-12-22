@@ -20,11 +20,14 @@ fn run (args &[String]) {
 }
 //////////////////////////////////// */
 
-use std::thread::sleep;
-use std::time::Duration;
-
+use sdl2;
+use sdl2::keyboard::Keycode;
+use sdl2::event::{Event};
 use network;
-use super::message::{ServerMessage,ClientMessage,PlayerID,ServerMessageInit};
+use super::message::{ServerMessage,ClientMessage,ServerMessageInit};
+use present::{Presenter,PresenterState};
+use control::{Controller};
+
 
 pub fn run(opts: &[String]) {
     println!("opts: {:?}", opts);
@@ -38,39 +41,78 @@ pub fn run(opts: &[String]) {
             return;
         },
     };
+    other.set_nonblocking(false).unwrap();
     
     // recieve init message
-    other.set_nonblocking(false);
-    let initMsg: ServerMessageInit = network::Simple::recieve(&other)
+    let init_msg: ServerMessageInit = network::Simple::recieve(&other)
         .expect("failed to recieve init msg");
-    other.set_nonblocking(true);
-    println!("initMsg.player_id: {:?}", initMsg.player_id);
-    let ServerMessageInit {player_id: my_player_id,..} = initMsg;
+    println!("init_msg.player_id: {:?}", init_msg.player_id);
+    let mut battlefield = init_msg.battlefield;
     
-    // init client state
-    let mut counter = 0;
     
-    // main loop
-    loop {
+    // init game
+    let sdl_context = sdl2::init().unwrap();
+    let mut presenter_state = PresenterState::new(&sdl_context, &battlefield);
+    let mut controller = Controller::new(&sdl_context);
+    
+    
+    'mainloop: loop {
         
         // recieve
-        if let Ok(msg) = network::Simple::recieve(&other) {
-            let msg: ServerMessage = msg;
-            println!("server: {:?}", &msg);
+        let msg: ServerMessage = 'recieve: loop {
+            match network::Simple::recieve(&other) {
+                Ok(msg) => {
+                    println!("server: {:?}", &msg);
+                    break msg;
+                }
+                Err(err) => {
+                    println!("coundn't recieve from server: {}", err);
+                    println!("retrying...", );
+                    continue 'recieve;
+                }
+            }
+        };
+        let messages = msg.client_messages;
+        
+        
+        // update battlefield
+        for (player_id,client_message) in messages {
+            for action in client_message.actions {
+                battlefield.execute_action(player_id, &action);
+            }
+        }
+        battlefield.stride();
+        
+        
+        // present battlefield
+        let mut presenter = Presenter::new(&mut presenter_state, &mut battlefield);
+        presenter.present();
+        
+        
+        // events
+        for event in sdl_context.event_pump().unwrap().poll_iter() {
+            presenter.respond_to(&event);
+            controller.use_event(&event);
+            match event {
+                Event::Quit{..} |
+                Event::KeyDown {keycode: Option::Some(Keycode::Escape), ..} =>
+                    break 'mainloop,
+                _ => {}
+            }
         }
         
         // send
-        let msg = ClientMessage {
-            actions: vec!(),
-        };
-        counter += 1;
-        if let Err(err) = network::Simple::send(&other, &msg) {
-            // connection lost
-            println!("server disconnected");
-            println!("debug info: {}", err);
-            break;
+        let actions = controller.take_actions();
+        if actions.len() > 0 {
+            let msg = ClientMessage {
+                actions: actions,
+            };
+            if let Err(err) = network::Simple::send(&other, &msg) {
+                // connection lost
+                println!("server disconnected");
+                println!("debug info: {}", err);
+                break 'mainloop;
+            }
         }
-        
-        sleep(Duration::from_millis(50));
     }
 }
