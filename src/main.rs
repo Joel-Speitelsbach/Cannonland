@@ -13,7 +13,11 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
 
     if args.len() < 2 {
-        panic!("Usage: cargo run <module name> <args>")
+        eprintln!(
+            "Usage:\
+            \n     cargo run <module name> <args>"
+        );
+        ::std::process::exit(0);
     }
 
     match args[1].as_str() {
