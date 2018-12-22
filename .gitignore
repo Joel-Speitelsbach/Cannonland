@@ -1,2 +1,4 @@
 Cargo.lock
 target
+pics/
+nix-shell.sh

@@ -44,7 +44,7 @@ pub fn run(opts: &[String]) {
     let initMsg: ServerMessageInit = network::Simple::recieve(&other)
         .expect("failed to recieve init msg");
     other.set_nonblocking(true);
-    println!("initMsg: {:?}", initMsg);
+    println!("initMsg.player_id: {:?}", initMsg.player_id);
     let ServerMessageInit {player_id: my_player_id,..} = initMsg;
     
     // init client state

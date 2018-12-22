@@ -8,7 +8,7 @@ use self::grid::particle_type::ParticleType;
 use self::grid::Grid;
 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Battlefield {
     pub grid: grid::Grid,
     pub bunkers: Vec<bunker::Bunker>,

@@ -36,7 +36,7 @@ pub fn create_test_grid() -> Grid {
 }
 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Grid {
     pub width: usize,
     pub height: usize,

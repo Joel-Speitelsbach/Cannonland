@@ -4,7 +4,7 @@ use std::cmp;
 use super::grid::particle_type::ParticleType;
 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Bunker {
     particle_type: ParticleType,
     pub x_pos: i16,

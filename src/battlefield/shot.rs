@@ -1,6 +1,6 @@
 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Shot {
     pub x_pos: f32,
     pub y_pos: f32,
