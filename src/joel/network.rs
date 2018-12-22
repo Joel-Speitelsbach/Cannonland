@@ -12,7 +12,7 @@ pub type Server = TcpListener;
 
 pub struct Simple;
 impl Simple {
-    pub fn send<D>(mut other: &OtherSide, data: &D) -> Result_<()> 
+    pub fn send<D>(mut other: &OtherSide, data: &D) -> Result_<()>
         where D: Serialize {
         bincode::serialize_into(&mut other, &data, Infinite) //todo
     }
@@ -42,7 +42,7 @@ impl Simple {
                 stream.set_nodelay(true).unwrap();
                 Some(stream)
             },
-            Err(_)         => None,
+            Err(_) => None,
         }
     }
     pub fn connect_to_server(addr: &str) -> Result<OtherSide, Error> {
@@ -61,7 +61,7 @@ impl Simple {
 // pub trait Network {
     // fn start_server() -> Server;
     // fn connect_to_server(addr: &str) -> OtherSide;
-    // fn send<D>(&OtherSide, data: D) 
+    // fn send<D>(&OtherSide, data: D)
         // where D: Serialize;
     // fn recieve<D>(&OtherSide) -> D
         // where for<'de> D: Deserialize<'de>;

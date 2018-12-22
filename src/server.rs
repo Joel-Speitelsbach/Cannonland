@@ -4,8 +4,9 @@ use std::thread::sleep;
 use std::time::Duration;
 use std::collections::HashMap;
 
-use super::network;
-use super::msg::{ServerMessage,ClientMessage,PlayerID,ServerMessageInit,delay};
+use network;
+use super::message::{ServerMessage,ClientMessage,PlayerID,ServerMessageInit};
+
 
 pub fn run(opts: &[String]) {
     println!("opts: {:?}", opts);
@@ -13,15 +14,17 @@ pub fn run(opts: &[String]) {
     let mut clients: HashMap<PlayerID,network::OtherSide> = HashMap::new();
     let server_state = network::Simple::start_server().unwrap();
     loop {
+        
         // (maybe) add new client
         if let Some(client) = network::Simple::poll_for_client(&server_state) {
             let init_message = ServerMessageInit {
                 player_id: next_player_id,
             };
             network::Simple::send(&client, &init_message).unwrap();
-            clients.insert(next_player_id,client);
+            clients.insert(next_player_id, client);
             next_player_id += 1;
         }
+        
         // recieve messages from clients
         let mut messages: Vec<(PlayerID,ClientMessage)> = Vec::new();
         for (id, cl) in &clients {
@@ -30,6 +33,7 @@ pub fn run(opts: &[String]) {
                 messages.push((*id,msg));
             }
         }
+        
         // resend client messages
         let msg = ServerMessage {
             client_messages: messages,
@@ -48,7 +52,9 @@ pub fn run(opts: &[String]) {
             clients.remove(&id);
         }
         
+        
         println!("end server loop");
-        sleep(delay());
+        
+        sleep(Duration::from_millis(50));
     }
 }

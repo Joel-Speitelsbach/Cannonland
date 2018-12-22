@@ -7,6 +7,8 @@ use message::{PlayerAction,PlayerID};
 use self::grid::particle_type::ParticleType;
 use self::grid::Grid;
 
+
+#[derive(Serialize, Deserialize)]
 pub struct Battlefield {
     pub grid: grid::Grid,
     pub bunkers: Vec<bunker::Bunker>,

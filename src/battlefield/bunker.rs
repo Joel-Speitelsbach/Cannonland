@@ -3,6 +3,8 @@ use std::cmp;
 
 use super::grid::particle_type::ParticleType;
 
+
+#[derive(Serialize, Deserialize)]
 pub struct Bunker {
     particle_type: ParticleType,
     pub x_pos: i16,
@@ -15,6 +17,7 @@ pub struct Bunker {
     health: u8,
     max_health: u8
 }
+
 
 impl Bunker {
 

@@ -31,7 +31,8 @@ impl PresenterState {
             .unwrap();
         canvas.window_mut().set_size(
             battlefield.grid.width  as u32 * 3,
-            battlefield.grid.height as u32 * 3);
+            battlefield.grid.height as u32 * 3,
+        ).unwrap();
         canvas.window_mut().set_position(
             sdl2::video::WindowPos::Centered,
             sdl2::video::WindowPos::Centered);

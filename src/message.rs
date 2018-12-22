@@ -2,16 +2,12 @@
 
 use std::vec::Vec;
 
-pub type PlayerID = u32; //can be changed and maybe this belongs into 'game'
+pub type PlayerID = u32; //can be changed and maybe this belongs into 'battlefield'
 
-// enum ChangeWeapon {
-    // Next,Prev,
-// }
-
-// 'game' uses this to alter its state
+// 'battlefield' uses this to alter its state
 #[derive(Serialize, Deserialize, Debug)]
 pub enum PlayerAction {
-    TurnCannon { diff_angle: f32 }, /*radian, clockwise*/ 
+    TurnCannon { diff_angle: f32 }, /*radian, clockwise*/
     IncreaseLoad { inc: f32 }, /* 'load' ranges from 0. to 1. */
     CangeWeapon (ChangeWeapon),
     Fire,
@@ -19,7 +15,7 @@ pub enum PlayerAction {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ChangeWeapon {
-    Next, 
+    Next,
     Prev,
 }
 
@@ -37,3 +33,7 @@ pub struct ServerMessageInit {
 pub struct ServerMessage {
     pub client_messages: Vec<(PlayerID, ClientMessage)>,
 }
+
+
+// MISC
+// pub fn delay() -> Duration {Duration::from_millis(50)}

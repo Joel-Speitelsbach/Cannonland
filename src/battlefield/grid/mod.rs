@@ -11,6 +11,7 @@ use sdl2::image::LoadSurface;
 use sdl2::pixels::Color;
 use sdl2::pixels::PixelFormatEnum;
 
+
 #[allow(dead_code)]
 pub fn create_test_grid() -> Grid {
     let mut grid = Grid::new(800, 500);
@@ -34,11 +35,14 @@ pub fn create_test_grid() -> Grid {
     return grid;
 }
 
+
+#[derive(Serialize, Deserialize)]
 pub struct Grid {
     pub width: usize,
     pub height: usize,
     pub grid: Vec<Vec<Particle>>
 }
+
 
 impl Grid {
 

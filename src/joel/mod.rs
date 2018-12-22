@@ -40,8 +40,8 @@ pub fn run(opts: &[String]) {
 
 // fn client_() {
     // println!("client");
-    // let msg = Msg { 
-        // int: 3, 
+    // let msg = Msg {
+        // int: 3,
         // string: "Testing".to_owned(),
         // eid: Eid {
             // mat: (1,2,3),
