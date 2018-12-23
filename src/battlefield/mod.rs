@@ -1,6 +1,7 @@
 pub mod grid;
 pub mod shot;
 pub mod bunker;
+pub mod shot_type;
 
 use std::f32;
 use message::{PlayerAction,PlayerID};
@@ -61,7 +62,7 @@ impl Battlefield {
         let bunker = &mut self.bunkers[bunker_id as usize];
 
         let shoot_pos = bunker.get_shoot_pos_xy();
-        let shot = shot::Shot::new(shoot_pos.0 as f32, shoot_pos.1 as f32, bunker.get_angle_radians(), bunker.get_charge());
+        let shot = shot::Shot::new(shot_type::ShotType::CANNON, shoot_pos.0 as f32, shoot_pos.1 as f32, bunker.get_angle_radians(), bunker.get_charge());
         self.shots.push(shot);
 
         bunker.reset_charge();
@@ -74,7 +75,7 @@ impl Battlefield {
 
             if Battlefield::collide_with_bunkers_true_for_hit(&mut self.bunkers, &self.shots[i])
                 || self.grid.collides_at_position(x_pos, y_pos) {
-                self.grid.delete_radius_leave_out_bunkers(x_pos, y_pos, self.shots[i].destruction_radius as usize);
+                self.grid.delete_radius_leave_out_bunkers(x_pos, y_pos, self.shots[i].get_destruction_radius() as usize);
                 self.shots.remove(i);
             }
         }
@@ -96,8 +97,8 @@ impl Battlefield {
     }
 
     fn collide_with_bunker_true_for_hit(bunker: &mut bunker::Bunker, shot: &shot::Shot) -> bool {
-        if bunker.hit_at(shot.x_pos as i16, shot.y_pos as i16, shot.radius) {
-            bunker.harm(shot.harm);
+        if bunker.hit_at(shot.x_pos as i16, shot.y_pos as i16, shot.get_radius()) {
+            bunker.harm(shot.get_harm());
             return true;
         }
         return false;
