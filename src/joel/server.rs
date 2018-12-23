@@ -8,6 +8,12 @@ use std::collections::HashMap;
 use super::network;
 use super::msg::{ServerMessage,ClientMessage,PlayerID,ServerMessageInit,delay};
 
+
+// struct State {
+//     clients :: HashMap<PlayerID, network::OtherSide>,
+//     server_state
+// }
+
 pub fn run(opts: &[String]) {
     println!("opts: {:?}", opts);
     let mut next_player_id = 0;
@@ -20,7 +26,7 @@ pub fn run(opts: &[String]) {
                 player_id: next_player_id,
             };
             network::Simple::send(&client, &init_message).unwrap();
-            clients.insert(next_player_id,client);
+            clients.insert(next_player_id, client);
             next_player_id += 1;
         }
         // recieve messages from clients

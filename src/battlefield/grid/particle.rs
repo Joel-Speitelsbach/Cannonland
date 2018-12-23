@@ -1,13 +1,16 @@
 use super::particle_type::ParticleType;
 use sdl2::pixels::Color;
 
+
 #[derive(Copy, Clone)]
+#[derive(Serialize, Deserialize)]
 pub struct Particle {
     pub particle_type: ParticleType,
     pub color: (u8,u8,u8,u8,),
     //x_speed: i8,
     //y_speed: i8
 }
+
 
 impl Particle {
 

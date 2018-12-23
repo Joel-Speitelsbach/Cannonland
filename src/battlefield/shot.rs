@@ -1,5 +1,7 @@
 use super::shot_type::ShotType;
 
+
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Shot {
     pub shot_type: ShotType,
     pub x_pos: f32,

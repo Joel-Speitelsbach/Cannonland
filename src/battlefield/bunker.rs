@@ -3,6 +3,8 @@ use std::cmp;
 
 use super::grid::particle_type::ParticleType;
 
+
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Bunker {
     particle_type: ParticleType,
     pub x_pos: i16,
@@ -15,6 +17,7 @@ pub struct Bunker {
     health: u8,
     max_health: u8
 }
+
 
 impl Bunker {
 
@@ -98,6 +101,7 @@ impl Bunker {
         self.health = cmp::max(self.health-harm_amount, 0);
     }
 
+    #[allow(dead_code)]
     pub fn heal(&mut self, heal_amount: u8) {
         self.health = cmp::min(self.health+heal_amount, self.max_health);
     }

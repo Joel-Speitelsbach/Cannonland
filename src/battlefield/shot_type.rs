@@ -1,3 +1,5 @@
+
+#[derive(Serialize, Deserialize, Clone)]
 pub enum ShotType {
     CANNON,
     ROCKET,

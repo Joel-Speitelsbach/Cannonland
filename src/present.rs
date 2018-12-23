@@ -31,7 +31,8 @@ impl PresenterState {
             .unwrap();
         canvas.window_mut().set_size(
             battlefield.grid.width  as u32 * 3,
-            battlefield.grid.height as u32 * 3);
+            battlefield.grid.height as u32 * 3,
+        ).unwrap();
         canvas.window_mut().set_position(
             sdl2::video::WindowPos::Centered,
             sdl2::video::WindowPos::Centered);
@@ -39,15 +40,15 @@ impl PresenterState {
     }
 }
 
-pub struct Presenter<'st,'g> {
+pub struct Presenter<'st,'b> {
     state: &'st mut PresenterState,
-    battlefield: &'g mut battlefield::Battlefield,
+    battlefield: &'b mut battlefield::Battlefield,
 }
-impl<'st,'g> Presenter<'st,'g> {
+impl<'st,'b> Presenter<'st,'b> {
     pub fn new(
         presenter_state: &'st mut PresenterState,
-        battlefield: &'g mut battlefield::Battlefield,
-        )-> Presenter<'st,'g>
+        battlefield: &'b mut battlefield::Battlefield,
+    )-> Presenter<'st,'b>
     {
         Presenter{
             state: presenter_state,
@@ -79,7 +80,7 @@ impl<'st,'g> Presenter<'st,'g> {
 }
 
 // draw grid
-impl<'st,'g> Presenter<'st,'g> {
+impl<'st,'b> Presenter<'st,'b> {
     fn draw_grid(&mut self) -> () {
         self.draw_background();
         self.draw_particles();
@@ -114,7 +115,7 @@ impl<'st,'g> Presenter<'st,'g> {
 }
 
 // draw bunkers
-impl<'st,'g> Presenter<'st,'g> {
+impl<'st,'b> Presenter<'st,'b> {
 
     fn draw_bunkers(&mut self) -> () {
         for bunker in &self.battlefield.bunkers {
@@ -169,7 +170,7 @@ impl<'st,'g> Presenter<'st,'g> {
 }
 
 // draw shots
-impl<'st,'g> Presenter<'st,'g> {
+impl<'st,'b> Presenter<'st,'b> {
 
     fn draw_shots(&mut self) -> () {
         for shot in &self.battlefield.shots {

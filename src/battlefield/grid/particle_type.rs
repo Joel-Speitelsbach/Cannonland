@@ -1,7 +1,8 @@
 
+#[allow(dead_code)]
 #[derive(Copy, Clone)]
-#[derive(PartialEq, Eq)]
-#[derive(Hash)]
+#[derive(PartialEq, Eq, Hash)]
+#[derive(Serialize, Deserialize)]
 pub enum ParticleType {
     EMPTY,
     BLUR,
@@ -19,6 +20,7 @@ pub enum ParticleType {
     BunkerGrey,
     BunkerOrange
 }
+
 
 impl ParticleType {
 
