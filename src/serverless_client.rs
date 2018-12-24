@@ -23,7 +23,7 @@ pub fn run(_: &[String]) {
 
         // iterate battlefield
         let calc_time = SystemTime::now();
-        let actions = controller.take_actions();
+        let actions = controller.poll_actions();
         for action in actions {
             battlefield.execute_action(0, &action);
         }

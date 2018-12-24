@@ -111,7 +111,7 @@ impl Controller {
         return None;
     }
 
-    fn take_fire(&mut self) -> Vec<PlayerAction> {
+    fn poll_fire(&mut self) -> Vec<PlayerAction> {
         let mut actions = vec!();
         let time = self.timer.ticks() as i32;
         if let (true,old_time) = self.fire_pressed {
@@ -133,7 +133,7 @@ impl Controller {
         actions
     }
 
-    pub fn take_actions(&mut self) -> Vec<PlayerAction> { // TODO rename to poll
+    pub fn poll_actions(&mut self) -> Vec<PlayerAction> { // TODO rename to poll
         let mut actions = vec!();
         if let Some(action) = self.take_cannon_movement() {
             actions.push(action);
@@ -144,7 +144,7 @@ impl Controller {
         if let Some(action) = self.take_next_weapon() {
             actions.push(action);
         }
-        actions.append(&mut self.take_fire());
+        actions.append(&mut self.poll_fire());
         actions
     }
 }

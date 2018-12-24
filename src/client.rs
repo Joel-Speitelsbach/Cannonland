@@ -85,7 +85,7 @@ pub fn run(opts: &[String]) {
         }
         
         // send
-        let actions = controller.take_actions();
+        let actions = controller.poll_actions();
         let msg = ClientMessage {
             actions: actions,
         };
