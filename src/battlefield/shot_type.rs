@@ -1,3 +1,4 @@
+use super::grid::particle_type::ParticleType;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub enum ShotType {
@@ -16,11 +17,19 @@ impl ShotType {
         }
     }
 
-    pub fn get_destruction_radius(&self) -> f32 { // TODO rename to impact_radius
+    pub fn get_impact_radius(&self) -> f32 {
         match self {
             &ShotType::CANNON => 10f32,
             &ShotType::ROCKET => 25f32,
             &ShotType::SNOW => 20f32
+        }
+    }
+
+    pub fn get_impact_target_type(&self) -> ParticleType {
+        match self {
+            &ShotType::CANNON => ParticleType::EMPTY,
+            &ShotType::ROCKET => ParticleType::EMPTY,
+            &ShotType::SNOW => ParticleType::SNOW
         }
     }
 

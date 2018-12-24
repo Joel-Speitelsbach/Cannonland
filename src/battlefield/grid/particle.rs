@@ -42,11 +42,21 @@ impl Particle {
         return self.particle_type.is_bunker();
     }
 
-    pub fn empty_if_not_bunker(&mut self) -> () {
-        if !self.particle_type.is_bunker() {
-            self.particle_type = ParticleType::EMPTY;
-            self.color = (0,0,0,100);
+    pub fn replace_if_possible(&mut self, replacement: ParticleType) -> () {
+        if self.replacement_possible(replacement) {
+            self.particle_type = replacement;
+            self.color = replacement.get_rgba();
         }
+    }
+
+    fn replacement_possible(&self, replacement: ParticleType) -> bool {
+        if self.particle_type.is_bunker() {
+            return false;
+        }
+        if replacement == ParticleType::EMPTY {
+            return true;
+        }
+        return self.particle_type.can_move_into();
     }
 
 }

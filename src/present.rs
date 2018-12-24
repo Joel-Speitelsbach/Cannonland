@@ -146,7 +146,7 @@ impl<'st,'b> Presenter<'st,'b> {
         let y = bunker.y_pos - 5;
         let x = bunker.x_pos;
 
-        canvas.filled_circle(x, y, (bunker.get_current_weapon().get_destruction_radius()/4.0) as i16, pixels::Color::RGBA(200,200,200,200)).unwrap();
+        canvas.filled_circle(x, y, (bunker.get_current_weapon().get_impact_radius()/4.0) as i16, pixels::Color::RGBA(200,200,200,200)).unwrap();
     }
 
     fn draw_charge(canvas: &mut sdl2::render::Canvas<Window>, bunker: &battlefield::bunker::Bunker) {

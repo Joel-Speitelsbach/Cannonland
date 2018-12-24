@@ -1,5 +1,5 @@
 use super::shot_type::ShotType;
-
+use super::grid::particle_type::ParticleType;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Shot {
@@ -29,8 +29,12 @@ impl Shot {
         return self.shot_type.get_radius();
     }
 
-    pub fn get_destruction_radius(&self) -> f32 {
-        return self.shot_type.get_destruction_radius();
+    pub fn get_impact_radius(&self) -> f32 {
+        return self.shot_type.get_impact_radius();
+    }
+
+    pub fn get_impact_target_type(&self) -> ParticleType {
+        return self.shot_type.get_impact_target_type();
     }
 
     pub fn get_harm(&self) -> u8 {

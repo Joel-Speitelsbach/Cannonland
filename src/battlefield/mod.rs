@@ -83,7 +83,7 @@ impl Battlefield {
 
             if Battlefield::collide_with_bunkers_true_for_hit(&mut self.bunkers, &self.shots[i])
                 || self.grid.collides_at_position(x_pos, y_pos) {
-                self.grid.delete_radius_leave_out_bunkers(x_pos, y_pos, self.shots[i].get_destruction_radius() as usize);
+                self.grid.replace_radius_where_possible(self.shots[i].get_impact_target_type(), x_pos, y_pos, self.shots[i].get_impact_radius() as usize);
                 self.shots.remove(i);
             }
         }
