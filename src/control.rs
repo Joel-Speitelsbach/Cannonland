@@ -4,12 +4,14 @@ use sdl2::event::Event;
 use sdl2::{Sdl,TimerSubsystem};
 use sdl2::keyboard::Keycode;
 
-use message::PlayerAction;
+use message::{PlayerAction, ChangeWeapon};
 
 pub struct Controller {
     left_pressed: (bool, i32), // (whether key is currently pressed
     right_pressed: (bool, i32), //   , timestamp)
     fire_pressed: (bool, i32),
+    up_released: bool,
+    down_released: bool,
     cannon_movement: i32,
     cannon_load: i32,
     fire: bool,
@@ -24,12 +26,15 @@ impl Controller {
             left_pressed: (false,0),
             right_pressed: (false,0),
             fire_pressed: (false,0),
+            up_released: false,
+            down_released: false,
             cannon_movement: 0,
             cannon_load: 0,
             fire: false,
             timer: timer,
         }
     }
+
     pub fn use_event(&mut self, event: &Event) {
         match *event {
             Event::KeyDown { repeat: false, timestamp: time, keycode: k,.. } => match k {
@@ -55,11 +60,18 @@ impl Controller {
                     self.cannon_load += time_diff;
                     self.fire = true;
                 },
+                Some(Keycode::Up) => {
+                    self.up_released = true;
+                },
+                Some(Keycode::Down) => {
+                    self.down_released = true;
+                },
                 _ => (),
             },
             _ => {},
         }
     }
+
     fn take_cannon_movement(&mut self) -> Option<PlayerAction> {
         let time = self.timer.ticks() as i32;
         let mut cannon_movement = self.cannon_movement;
@@ -82,6 +94,23 @@ impl Controller {
             diff_angle: angle,
         })
     }
+
+    fn take_prev_weapon(&mut self) -> Option<PlayerAction> {
+        if self.up_released {
+            self.up_released = false;
+            return Some(PlayerAction::CangeWeapon(ChangeWeapon::Prev));
+        }
+        return None;
+    }
+
+    fn take_next_weapon(&mut self) -> Option<PlayerAction> {
+        if self.down_released {
+            self.down_released = false;
+            return Some(PlayerAction::CangeWeapon(ChangeWeapon::Next));
+        }
+        return None;
+    }
+
     fn take_fire(&mut self) -> Vec<PlayerAction> {
         let mut actions = vec!();
         let time = self.timer.ticks() as i32;
@@ -103,9 +132,16 @@ impl Controller {
         }
         actions
     }
-    pub fn take_actions(&mut self) -> Vec<PlayerAction> {
+
+    pub fn take_actions(&mut self) -> Vec<PlayerAction> { // TODO rename to poll
         let mut actions = vec!();
         if let Some(action) = self.take_cannon_movement() {
+            actions.push(action);
+        }
+        if let Some(action) = self.take_prev_weapon() {
+            actions.push(action);
+        }
+        if let Some(action) = self.take_next_weapon() {
             actions.push(action);
         }
         actions.append(&mut self.take_fire());

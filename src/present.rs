@@ -124,6 +124,7 @@ impl<'st,'b> Presenter<'st,'b> {
 
             Presenter::draw_cannon(&mut self.state.canvas, &bunker, color);
             Presenter::draw_building(&mut self.state.canvas, &bunker, color);
+            Presenter::draw_weapon(&mut self.state.canvas, &bunker);
             Presenter::draw_charge(&mut self.state.canvas, &bunker);
             Presenter::draw_health(&mut self.state.canvas, &bunker);
         }
@@ -139,6 +140,13 @@ impl<'st,'b> Presenter<'st,'b> {
 
     fn draw_building(canvas: &mut sdl2::render::Canvas<Window>, bunker: &battlefield::bunker::Bunker, color: pixels::Color) {
         canvas.filled_pie(bunker.x_pos, bunker.y_pos, bunker.get_radius() as i16, 180, 360, color).unwrap();
+    }
+
+    fn draw_weapon(canvas: &mut sdl2::render::Canvas<Window>, bunker: &battlefield::bunker::Bunker) {
+        let y = bunker.y_pos - 5;
+        let x = bunker.x_pos;
+
+        canvas.filled_circle(x, y, (bunker.get_current_weapon().get_destruction_radius()/4.0) as i16, pixels::Color::RGBA(200,200,200,200)).unwrap();
     }
 
     fn draw_charge(canvas: &mut sdl2::render::Canvas<Window>, bunker: &battlefield::bunker::Bunker) {

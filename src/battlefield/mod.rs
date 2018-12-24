@@ -2,9 +2,10 @@ pub mod grid;
 pub mod shot;
 pub mod bunker;
 pub mod shot_type;
+mod weapon_depot;
 
 use std::f32;
-use message::{PlayerAction,PlayerID};
+use message::{PlayerAction,PlayerID,ChangeWeapon};
 use self::grid::particle_type::ParticleType;
 use self::grid::Grid;
 
@@ -53,10 +54,15 @@ impl Battlefield {
                     (inc_load * 100.) as u8
                 );
             },
+            PlayerAction::CangeWeapon(ChangeWeapon::Next) => {
+                self.bunkers[bunker_id as usize].next_weapon();
+            },
+            PlayerAction::CangeWeapon(ChangeWeapon::Prev) => {
+                self.bunkers[bunker_id as usize].prev_weapon();
+            },
             PlayerAction::Fire => {
                 self.shoot(bunker_id as u8);
             }
-            _ => (),
         }
     }
 
@@ -64,7 +70,7 @@ impl Battlefield {
         let bunker = &mut self.bunkers[bunker_id as usize];
 
         let shoot_pos = bunker.get_shoot_pos_xy();
-        let shot = shot::Shot::new(shot_type::ShotType::CANNON, shoot_pos.0 as f32, shoot_pos.1 as f32, bunker.get_angle_radians(), bunker.get_charge());
+        let shot = shot::Shot::new(bunker.get_current_weapon(), shoot_pos.0 as f32, shoot_pos.1 as f32, bunker.get_angle_radians(), bunker.get_charge());
         self.shots.push(shot);
 
         bunker.reset_charge();

@@ -16,11 +16,11 @@ impl ShotType {
         }
     }
 
-    pub fn get_destruction_radius(&self) -> f32 {
+    pub fn get_destruction_radius(&self) -> f32 { // TODO rename to impact_radius
         match self {
             &ShotType::CANNON => 10f32,
             &ShotType::ROCKET => 25f32,
-            &ShotType::SNOW => 0f32
+            &ShotType::SNOW => 20f32
         }
     }
 
