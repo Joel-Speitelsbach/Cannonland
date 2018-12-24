@@ -8,7 +8,6 @@ use self::particle_type::ParticleType;
 use self::particle::Particle;
 use super::bunker::Bunker;
 use sdl2::image::LoadSurface;
-use sdl2::pixels::Color;
 use sdl2::pixels::PixelFormatEnum;
 
 
@@ -52,10 +51,7 @@ impl Grid {
         for y in 0..height {
             grid_vec.push(Vec::with_capacity(width));
             for _ in 0..width {
-                grid_vec[y].push(Particle::new(
-                    ParticleType::EMPTY,
-                    Color::RGB(0,0,0),
-                ));
+                grid_vec[y].push(Particle::new(ParticleType::EMPTY));
             }
         }
 
@@ -92,7 +88,7 @@ impl Grid {
                     pixels[pos+3],
                 );
                 if a < 100 {
-                    grid.grid[y][x].color = (0,0,0,100);
+                    grid.grid[y][x].color = ParticleType::EMPTY.get_rgba();
                     grid.grid[y][x].particle_type = ParticleType::EMPTY;
                 } else {
                     grid.grid[y][x].color = (r,g,b,255);
@@ -193,7 +189,7 @@ impl Grid {
             for x in 0..self.width {
                 if self.grid[y][x].particle_type == ParticleType::BLUR {
                     self.grid[y][x].particle_type = ParticleType::EMPTY;
-                    self.grid[y][x].color = (0,0,0,100);
+                    self.grid[y][x].color = ParticleType::EMPTY.get_rgba();
                 }
             }
         }

@@ -1,5 +1,4 @@
 use super::particle_type::ParticleType;
-use sdl2::pixels::Color;
 
 
 #[derive(Copy, Clone)]
@@ -14,10 +13,14 @@ pub struct Particle {
 
 impl Particle {
 
-    pub fn new(particle_type: ParticleType, color: Color) -> Particle {
+    pub fn new(particle_type: ParticleType) -> Particle {
+        return Particle::new_with_color(particle_type, particle_type.get_rgba());
+    }
+
+    pub fn new_with_color(particle_type: ParticleType, color: (u8,u8,u8,u8,)) -> Particle {
         return Particle{
             particle_type: particle_type,
-            color: color.rgba(),
+            color: color,
             /*, x_speed: 0, y_speed: 0*/
         };
     }

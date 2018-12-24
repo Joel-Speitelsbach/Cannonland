@@ -89,7 +89,7 @@ impl<'st,'b> Presenter<'st,'b> {
     fn grid(&mut self) -> &mut grid::Grid {&mut self.battlefield.grid}
 
     fn draw_background(&mut self) -> () {
-        self.state.canvas.set_draw_color(pixels::Color::RGBA(96,128,200,255));
+        self.state.canvas.set_draw_color(pixels::Color::RGBA(64,92,128,255));
         self.state.canvas.clear();
     }
 
