@@ -2,7 +2,8 @@ use std::f32;
 use std::cmp;
 
 use super::grid::particle_type::ParticleType;
-
+use super::weapon_depot::WeaponDepot;
+use super::shot_type::ShotType;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Bunker {
@@ -15,7 +16,8 @@ pub struct Bunker {
     charge: u8,
     max_charge: u8,
     health: u8,
-    max_health: u8
+    max_health: u8,
+    weapons: WeaponDepot
 }
 
 
@@ -36,7 +38,8 @@ impl Bunker {
             charge: 0,
             max_charge: 100,
             health: 100,
-            max_health: 100
+            max_health: 100,
+            weapons: WeaponDepot::new([ShotType::CANNON, ShotType::ROCKET, ShotType::SNOW].to_vec())
         };
     }
 
@@ -98,7 +101,7 @@ impl Bunker {
     }
 
     pub fn harm(&mut self, harm_amount: u8) {
-        self.health = cmp::max(self.health-harm_amount, 0);
+        self.health = cmp::max(self.health as i16 - harm_amount as i16, 0) as u8;
     }
 
     #[allow(dead_code)]
@@ -108,6 +111,18 @@ impl Bunker {
 
     pub fn get_max_health(&self) -> u8 {
         return self.max_health;
+    }
+
+    pub fn next_weapon(&mut self) {
+        self.weapons.next();
+    }
+
+    pub fn prev_weapon(&mut self) {
+        self.weapons.prev();
+    }
+
+    pub fn get_current_weapon(&self) -> ShotType {
+        return self.weapons.get_current();
     }
 
 }

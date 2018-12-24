@@ -1,9 +1,11 @@
 pub mod grid;
 pub mod shot;
 pub mod bunker;
+pub mod shot_type;
+mod weapon_depot;
 
 use std::f32;
-use message::{PlayerAction,PlayerID};
+use message::{PlayerAction,PlayerID,ChangeWeapon};
 use self::grid::particle_type::ParticleType;
 use self::grid::Grid;
 
@@ -52,10 +54,15 @@ impl Battlefield {
                     (inc_load * 100.) as u8
                 );
             },
+            PlayerAction::CangeWeapon(ChangeWeapon::Next) => {
+                self.bunkers[bunker_id as usize].next_weapon();
+            },
+            PlayerAction::CangeWeapon(ChangeWeapon::Prev) => {
+                self.bunkers[bunker_id as usize].prev_weapon();
+            },
             PlayerAction::Fire => {
                 self.shoot(bunker_id as u8);
             }
-            _ => (),
         }
     }
 
@@ -63,7 +70,7 @@ impl Battlefield {
         let bunker = &mut self.bunkers[bunker_id as usize];
 
         let shoot_pos = bunker.get_shoot_pos_xy();
-        let shot = shot::Shot::new(shoot_pos.0 as f32, shoot_pos.1 as f32, bunker.get_angle_radians(), bunker.get_charge());
+        let shot = shot::Shot::new(bunker.get_current_weapon(), shoot_pos.0 as f32, shoot_pos.1 as f32, bunker.get_angle_radians(), bunker.get_charge());
         self.shots.push(shot);
 
         bunker.reset_charge();
@@ -76,7 +83,7 @@ impl Battlefield {
 
             if Battlefield::collide_with_bunkers_true_for_hit(&mut self.bunkers, &self.shots[i])
                 || self.grid.collides_at_position(x_pos, y_pos) {
-                self.grid.delete_radius_leave_out_bunkers(x_pos, y_pos, self.shots[i].destruction_radius as usize);
+                self.grid.replace_radius_where_possible(self.shots[i].get_impact_target_type(), x_pos, y_pos, self.shots[i].get_impact_radius() as usize);
                 self.shots.remove(i);
             }
         }
@@ -98,8 +105,8 @@ impl Battlefield {
     }
 
     fn collide_with_bunker_true_for_hit(bunker: &mut bunker::Bunker, shot: &shot::Shot) -> bool {
-        if bunker.hit_at(shot.x_pos as i16, shot.y_pos as i16, shot.radius) {
-            bunker.harm(shot.harm);
+        if bunker.hit_at(shot.x_pos as i16, shot.y_pos as i16, shot.get_radius()) {
+            bunker.harm(shot.get_harm());
             return true;
         }
         return false;

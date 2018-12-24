@@ -121,7 +121,7 @@ impl Grid {
         return x_pos < self.width && y_pos < self.height;
     }
 
-    pub fn delete_radius_leave_out_bunkers(&mut self, x_pos: usize, y_pos: usize, radius: usize) -> () {
+    pub fn replace_radius_where_possible(&mut self, particle_type: ParticleType, x_pos: usize, y_pos: usize, radius: usize) -> () {
         let x_start = cmp::max(0, x_pos-radius);
         let y_start = cmp::max(0, y_pos-radius);
         let x_end = cmp::min(self.width, x_pos+radius);
@@ -131,7 +131,7 @@ impl Grid {
         for y in y_start..y_end {
             for x in x_start..x_end {
                 if (((x_pos-x).pow(2) + (y_pos-y).pow(2)) as f32).sqrt() < radius {
-                    self.grid[y][x].empty_if_not_bunker();
+                    self.grid[y][x].replace_if_possible(particle_type);
                 }
             }
         }

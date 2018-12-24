@@ -46,8 +46,8 @@ impl ParticleType {
 
     pub fn get_rgba(&self) -> (u8, u8, u8, u8) {
         match self {
-            &ParticleType::EMPTY => (0,0,0,0),
-            &ParticleType::BLUR => (0,0,0,0),
+            &ParticleType::EMPTY => (0,0,0,100),
+            &ParticleType::BLUR => (0,0,0,100),
             &ParticleType::DIRT => (128,64,0,255),
             &ParticleType::ROCK => (128,128,128,255),
             &ParticleType::BETON => (194,194,194,255),
