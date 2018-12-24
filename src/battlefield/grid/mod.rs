@@ -118,8 +118,8 @@ impl Grid {
     }
 
     pub fn replace_radius_where_possible(&mut self, particle_type: ParticleType, x_pos: usize, y_pos: usize, radius: usize) -> () {
-        let x_start = cmp::max(0, x_pos-radius);
-        let y_start = cmp::max(0, y_pos-radius);
+        let x_start = cmp::max(0, x_pos as i32 - radius as i32) as usize;
+        let y_start = cmp::max(0, y_pos as i32 - radius as i32) as usize;
         let x_end = cmp::min(self.width, x_pos+radius);
         let y_end = cmp::min(self.height, y_pos+radius);
 
