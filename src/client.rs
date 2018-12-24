@@ -1,25 +1,3 @@
-/*////////// Grundgerüst ///////////////
-fn run (args &[String]) {
-    let battlefield = Bf.new();
-    loop {
-        for serverMessage in serverMessages {
-            for actions in serverMessage {
-                battlefield.alter(action);
-            }
-            battlefield.stride();
-        }
-        let presenter = Presenter::new(&mut battlefield);
-        presenter.present();
-        for event in poll_events() {
-            controller.useEvent(&event);
-            presenter.useEvent(&event);
-        }
-        let actions = controller.takeActions();
-        sendMessageToServer(actions);
-    }
-}
-//////////////////////////////////// */
-
 use sdl2;
 use sdl2::keyboard::Keycode;
 use sdl2::event::{Event};
@@ -33,7 +11,12 @@ pub fn run(opts: &[String]) {
     println!("opts: {:?}", opts);
     
     // connect to server
-    let other = match network::Simple::connect_to_server("127.0.0.1:8080") {
+    let ip_addr = if opts.len() == 0 {
+        "127.0.0.1".to_string()
+    } else {
+        opts[0].clone()
+    };
+    let other = match network::Simple::connect_to_server(ip_addr + ":8080") {
         Ok(ok) => ok,
         Err(err) => {
             println!("failed to connect to server");
@@ -55,30 +38,30 @@ pub fn run(opts: &[String]) {
     let mut presenter_state = PresenterState::new(&sdl_context, &battlefield);
     let mut controller = Controller::new(&sdl_context);
     
-    
     'mainloop: loop {
         
         // recieve
-        let msg: ServerMessage = 'recieve: loop {
-            match network::Simple::recieve(&other) {
-                Ok(msg) => {
-                    println!("server: {:?}", &msg);
-                    break msg;
-                }
-                Err(err) => {
-                    println!("coundn't recieve from server: {}", err);
-                    println!("retrying...", );
-                    continue 'recieve;
-                }
+        let msg: ServerMessage = match network::Simple::recieve(&other) {
+            Ok(msg) => {
+                msg
+            }
+            Err(err) => {
+                // connection lost
+                println!("server disconnected");
+                println!("debug info: {}", err);
+                break 'mainloop
             }
         };
+        // if msg.client_messages.len() > 0 {
+        //     println!("server: {:?}", &msg);
+        // }
         let messages = msg.client_messages;
         
         
         // update battlefield
-        for (player_id,client_message) in messages {
-            for action in client_message.actions {
-                battlefield.execute_action(player_id, &action);
+        for (player_id,client_message) in &messages {
+            for action in &client_message.actions {
+                battlefield.execute_action(*player_id, action);
             }
         }
         battlefield.stride();
@@ -103,16 +86,14 @@ pub fn run(opts: &[String]) {
         
         // send
         let actions = controller.take_actions();
-        if actions.len() > 0 {
-            let msg = ClientMessage {
-                actions: actions,
-            };
-            if let Err(err) = network::Simple::send(&other, &msg) {
-                // connection lost
-                println!("server disconnected");
-                println!("debug info: {}", err);
-                break 'mainloop;
-            }
+        let msg = ClientMessage {
+            actions: actions,
+        };
+        if let Err(err) = network::Simple::send(&other, &msg) {
+            // connection lost
+            println!("server disconnected");
+            println!("debug info: {}", err);
+            break 'mainloop;
         }
     }
 }

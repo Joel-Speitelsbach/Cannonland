@@ -7,6 +7,7 @@ use self::serde::{Serialize, Deserialize};
 extern crate bincode;
 use self::bincode::{Infinite, Result as Result_};
 
+
 pub type OtherSide = TcpStream;
 pub type Server = TcpListener;
 
@@ -25,45 +26,31 @@ impl Simple {
     pub fn start_server() -> Result<Server, Error> {
         match TcpListener::bind("127.0.0.1:8080") {
             Ok(x) => {
-                if let Err(_) = x.set_nonblocking(true) {
-                    panic!("could not set nonblocking mode");
-                }
+                x.set_nonblocking(true).expect("could not set nonblocking mode");
                 Ok(x)
             },
-            Err(err) => Err(err),
+            err => err,
         }
     }
+    
     pub fn poll_for_client(server: &Server) -> Option<OtherSide> {
         match server.accept() {
             Ok((stream,_)) => {
-                if let Err(_) = stream.set_nonblocking(true) {
-                    panic!("could not set nonblocking mode");
-                }
+                stream.set_nonblocking(false).expect("could not set nonblocking mode");
                 stream.set_nodelay(true).unwrap();
                 Some(stream)
             },
             Err(_) => None,
         }
     }
-    pub fn connect_to_server(addr: &str) -> Result<OtherSide, Error> {
-        let connect = TcpStream::connect(addr);
+    
+    pub fn connect_to_server(addr: String) -> Result<OtherSide, Error> {
+        let connect = TcpStream::connect(&addr);
         if let Ok(stream) = connect {
-            if let Err(_) = stream.set_nonblocking(true) {
-                panic!("could not set nonblocking mode");
-            }
+            stream.set_nonblocking(false).expect("could not set nonblocking mode");
             stream.set_nodelay(true).unwrap();
             return Ok(stream);
         }
         connect
     }
 }
-
-// pub trait Network {
-    // fn start_server() -> Server;
-    // fn connect_to_server(addr: &str) -> OtherSide;
-    // fn send<D>(&OtherSide, data: D)
-        // where D: Serialize;
-    // fn recieve<D>(&OtherSide) -> D
-        // where for<'de> D: Deserialize<'de>;
-    // fn poll_for_clients(server: Server) -> OtherSide;
-// }
