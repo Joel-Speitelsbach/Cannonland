@@ -133,7 +133,7 @@ impl Controller {
         actions
     }
 
-    pub fn poll_actions(&mut self) -> Vec<PlayerAction> { // TODO rename to poll
+    pub fn poll_actions(&mut self) -> Vec<PlayerAction> {
         let mut actions = vec!();
         if let Some(action) = self.take_cannon_movement() {
             actions.push(action);
