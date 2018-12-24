@@ -100,8 +100,8 @@ impl Bunker {
         return self.health;
     }
 
-    pub fn harm(&mut self, harm_amount: u8) { // FIXME bug underflow, unit-tests
-        self.health = cmp::max(self.health-harm_amount, 0);
+    pub fn harm(&mut self, harm_amount: u8) {
+        self.health = cmp::max(self.health as i16 - harm_amount as i16, 0) as u8;
     }
 
     #[allow(dead_code)]

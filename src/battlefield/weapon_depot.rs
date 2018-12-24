@@ -15,15 +15,21 @@ impl WeaponDepot {
         }
     }
 
-    pub fn get_current(&self) -> ShotType { // FIXME bug bei under/overflow, unit-tests
-        return self.weapons.get(self.current_index as usize % self.weapons.len()).unwrap().clone();
+    pub fn get_current(&self) -> ShotType {
+        return self.weapons.get(self.current_index as usize).unwrap().clone();
     }
 
     pub fn prev(&mut self) {
+        if self.current_index <= 0 {
+            self.current_index = self.weapons.len() as u8;
+        }
         self.current_index -= 1;
     }
 
     pub fn next(&mut self) {
         self.current_index += 1;
+        if self.current_index >= self.weapons.len() as u8 {
+            self.current_index = 0;
+        }
     }
 }
