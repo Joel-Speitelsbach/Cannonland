@@ -2,13 +2,14 @@ pub mod particle_test;
 mod particle;
 pub mod particle_type;  // make private
 
-use std::cmp;
 
-use self::particle_type::ParticleType;
+use self::particle_type::{ParticleType,Bunker};
 use self::particle::Particle;
-use super::bunker::Bunker;
+use super::bunker;
+use message::PlayerID;
 use sdl2::image::LoadSurface;
 use sdl2::pixels::PixelFormatEnum;
+use std::cmp;
 
 
 #[allow(dead_code)]
@@ -22,14 +23,14 @@ pub fn create_test_grid() -> Grid {
     grid.set_rect(ParticleType::ROCK, 350, 140, 400, 240);
     grid.set_rect(ParticleType::BETON, 350, 400, 600, 450);
 
-    grid.set_rect(ParticleType::BunkerBlue, 50, 40, 51, 41);
-    grid.set_rect(ParticleType::BunkerRed, 150, 40, 151, 41);
-    grid.set_rect(ParticleType::BunkerGreen, 250, 40, 251, 41);
-    grid.set_rect(ParticleType::BunkerYellow, 350, 40, 351, 41);
-    grid.set_rect(ParticleType::BunkerTeal, 450, 40, 451, 41);
-    grid.set_rect(ParticleType::BunkerPurple, 550, 40, 551, 41);
-    grid.set_rect(ParticleType::BunkerGrey, 650, 40, 651, 41);
-    grid.set_rect(ParticleType::BunkerOrange, 750, 40, 751, 41);
+    grid.set_rect(ParticleType::Bunker(Bunker::Blue), 50, 40, 51, 41);
+    grid.set_rect(ParticleType::Bunker(Bunker::Red), 150, 40, 151, 41);
+    grid.set_rect(ParticleType::Bunker(Bunker::Green), 250, 40, 251, 41);
+    grid.set_rect(ParticleType::Bunker(Bunker::Yellow), 350, 40, 351, 41);
+    grid.set_rect(ParticleType::Bunker(Bunker::Teal), 450, 40, 451, 41);
+    grid.set_rect(ParticleType::Bunker(Bunker::Purple), 550, 40, 551, 41);
+    grid.set_rect(ParticleType::Bunker(Bunker::Grey), 650, 40, 651, 41);
+    grid.set_rect(ParticleType::Bunker(Bunker::Orange), 750, 40, 751, 41);
 
     return grid;
 }
@@ -67,11 +68,13 @@ impl Grid {
         let (width, height) = (width as usize, height as usize);
 
         let pix = |px: usize| {
+            print!("  ");
             for i in 0..4 {
                 print!("{} ", pixels[i + px*4]);
             }
             println!();
         };
+        println!("grid::load_from_file()");
         for px in 0..6 {
             pix(px);
         }
@@ -80,7 +83,6 @@ impl Grid {
         for y in 0..height {
             for x in 0..width {
                 let pos = (x + y * width) * 4;
-                //let pixel = &pixels[pos..pos+4];
                 let (r,g,b,a) = (
                     pixels[pos+0],
                     pixels[pos+1],
@@ -96,17 +98,26 @@ impl Grid {
                 }
             }
         }
-        grid.set_rect(ParticleType::BunkerBlue, 50, 40, 51, 41);
-        grid.set_rect(ParticleType::BunkerRed, 150, 40, 151, 41);
         grid
     }
+    
+    pub fn add_bunker(&mut self, bunker_num: PlayerID, pos: (usize,usize)) {
+        let particle_type = particle_type::Bunker::from_num(bunker_num);
+        let (x,y) = pos;
+        self.set_pixel(particle_type, x, y)
+    }
 
-    pub fn set_rect(&mut self, particle_type: ParticleType, x_start: usize, y_start: usize, x_end: usize, y_end: usize) -> () {
+    pub fn set_rect(&mut self, particle_type: ParticleType, x_start: usize, y_start: usize,
+            x_end: usize, y_end: usize) -> () {
         for y in y_start..y_end {
             for x in x_start..x_end {
-                self.grid[y][x].particle_type = particle_type;
+                self.set_pixel(particle_type, x,y);
             }
         }
+    }
+    
+    fn set_pixel(&mut self, particle_type: ParticleType, x: usize, y: usize) {
+        self.grid[y][x].particle_type = particle_type;
     }
 
     pub fn collides_at_position(&mut self, x_pos: usize, y_pos: usize) -> bool {
@@ -195,7 +206,7 @@ impl Grid {
         }
     }
 
-    pub fn update_bunkers(&mut self, bunkers: &mut Vec<Bunker>) -> () {
+    pub fn update_bunkers(&mut self, bunkers: &mut Vec<bunker::Bunker>) -> () {
         for y in 0..self.height {
             for x in 0..self.width {
                 if self.grid[y][x].is_bunker() {
@@ -205,7 +216,8 @@ impl Grid {
         }
     }
 
-    fn update_bunker_at(&mut self, x_pos: usize, y_pos: usize, bunkers: &mut Vec<Bunker>) -> () {
+    fn update_bunker_at(&mut self, x_pos: usize, y_pos: usize,
+            bunkers: &mut Vec<bunker::Bunker>) -> () {
         let particle_type = self.grid[y_pos][x_pos].particle_type;
         let x_pos_i16 = x_pos as i16;
         let y_pos_i16 = y_pos as i16;

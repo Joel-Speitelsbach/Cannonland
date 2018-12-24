@@ -6,10 +6,15 @@ use sdl2::keyboard::Keycode;
 use battlefield;
 use present::{Presenter,PresenterState};
 use control::{Controller};
+use message::PlayerAction;
+
 
 pub fn run(_: &[String]) {
     let sdl_context = sdl2::init().unwrap();
     let mut battlefield = battlefield::Battlefield::new();
+    battlefield.execute_action(0, &PlayerAction::NewBunker);
+    battlefield.execute_action(1, &PlayerAction::NewBunker);
+    battlefield.execute_action(2, &PlayerAction::NewBunker);
 
     let mut presenter_state = PresenterState::new(&sdl_context, &battlefield);
     let mut controller = Controller::new(&sdl_context);

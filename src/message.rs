@@ -14,6 +14,7 @@ pub enum PlayerAction {
     IncreaseLoad { inc: f32 }, /* 'load' ranges from 0. to 1. */
     CangeWeapon (ChangeWeapon),
     Fire,
+    NewBunker,
 }
 
 

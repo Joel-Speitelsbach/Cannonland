@@ -4,15 +4,16 @@ pub mod bunker;
 pub mod shot_type;
 mod weapon_depot;
 
+extern crate rand;
 use std::f32;
 use message::{PlayerAction,PlayerID,ChangeWeapon};
-use self::grid::particle_type::ParticleType;
+use self::grid::particle_type;
 use self::grid::Grid;
 
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Battlefield {
-    pub grid: grid::Grid,
+    pub grid: Grid,
     pub bunkers: Vec<bunker::Bunker>,
     pub shots: Vec<shot::Shot>
 }
@@ -21,14 +22,11 @@ impl Battlefield {
 
     pub fn new() -> Battlefield {
         let mut bunkers = Vec::with_capacity(8);
-        bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerBlue));
-        bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerRed));
-        bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerGreen));
-        bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerYellow));
-        bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerTeal));
-        bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerPurple));
-        bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerGrey));
-        bunkers.push(bunker::Bunker::new_at_nowhere(ParticleType::BunkerOrange));
+        for i in 0..8 {
+            bunkers.push(bunker::Bunker::new_at_nowhere(
+                particle_type::Bunker::from_num(i)
+            ));
+        }
 
         let grid = Grid::load_from_file(&"pics/terra_valley_small.png".to_owned());
         return Battlefield{ grid: grid, bunkers, shots: Vec::new() };
@@ -61,13 +59,24 @@ impl Battlefield {
                 self.bunkers[bunker_id as usize].prev_weapon();
             },
             PlayerAction::Fire => {
-                self.shoot(bunker_id as u8);
-            }
+                self.shoot(bunker_id);
+            },
+            PlayerAction::NewBunker => {
+                self.new_bunker(bunker_id)
+            },
         }
     }
+    
+    fn new_bunker(&mut self, bunker_id: PlayerID) {
+        let x_pos = rand::random::<usize>() % self.grid.width;
+        self.grid.add_bunker(bunker_id, (x_pos,0));
+    }
 
-    fn shoot(&mut self, bunker_id: u8) {
+    fn shoot(&mut self, bunker_id: PlayerID) {
         let bunker = &mut self.bunkers[bunker_id as usize];
+        if !bunker.alive() {
+            return;
+        }
 
         let shoot_pos = bunker.get_shoot_pos_xy();
         let shot = shot::Shot::new(bunker.get_current_weapon(), shoot_pos.0 as f32, shoot_pos.1 as f32, bunker.get_angle_radians(), bunker.get_charge());
@@ -89,14 +98,13 @@ impl Battlefield {
         }
     }
 
-    fn collide_with_bunkers_true_for_hit(bunkers: &mut Vec<bunker::Bunker>, shot: &shot::Shot) -> bool {
+    fn collide_with_bunkers_true_for_hit(bunkers: &mut Vec<bunker::Bunker>,
+            shot: &shot::Shot) -> bool {
         let mut hit = false;
 
         for i in (0..bunkers.len()).rev() {
+            if !bunkers[i].alive() { continue; }
             if Battlefield::collide_with_bunker_true_for_hit(&mut bunkers[i], shot) {
-                if bunkers[i].get_health() <= 0 {
-                    bunkers.remove(i);
-                }
                 hit = true;
             }
         }

@@ -17,7 +17,7 @@ pub struct Bunker {
     max_charge: u8,
     health: u8,
     max_health: u8,
-    weapons: WeaponDepot
+    weapons: WeaponDepot,
 }
 
 
@@ -25,6 +25,10 @@ impl Bunker {
 
     pub fn new_at_nowhere(particle_type: ParticleType) -> Bunker {
         return Bunker::new(particle_type, 4096, 4096);
+    }
+    
+    pub fn alive(&self) -> bool {
+        self.health > 0
     }
 
     pub fn new(particle_type: ParticleType, x_pos: i16, y_pos: i16) -> Bunker {
@@ -39,7 +43,9 @@ impl Bunker {
             max_charge: 100,
             health: 100,
             max_health: 100,
-            weapons: WeaponDepot::new([ShotType::CANNON, ShotType::ROCKET, ShotType::SNOW].to_vec())
+            weapons: WeaponDepot::new(
+                [ShotType::CANNON, ShotType::ROCKET, ShotType::SNOW].to_vec()
+            ),
         };
     }
 

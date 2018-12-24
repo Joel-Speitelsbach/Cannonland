@@ -2,13 +2,13 @@
 
 use std::collections::HashMap;
 use network;
-use super::message::{ServerMessage,ClientMessage,PlayerID,ServerMessageInit};
+use super::message::{ServerMessage,ClientMessage,PlayerID,ServerMessageInit,PlayerAction};
 use battlefield::Battlefield;
+use std::cmp;
 
 
 pub fn run(opts: &[String]) {
     println!("opts: {:?}", opts);
-    let mut next_player_id = 0;
     let mut clients: HashMap<PlayerID,network::OtherSide> = HashMap::new();
     let server_handle = network::Simple::start_server().unwrap();
     
@@ -32,13 +32,19 @@ pub fn run(opts: &[String]) {
             server_handle.set_nonblocking(false).unwrap();
         }
         if let Some(client) = network::Simple::poll_for_client(&server_handle) {
+            let next_player_id = next_player_id(&clients);
             let init_message = ServerMessageInit {
                 player_id: next_player_id,
                 battlefield: battlefield.clone(),
             };
             network::Simple::send(&client, &init_message).unwrap();
+            
             clients.insert(next_player_id, client);
-            next_player_id += 1;
+            messages.push((next_player_id,
+                ClientMessage {
+                    actions: vec!(PlayerAction::NewBunker),
+                }
+            ));
         }
         server_handle.set_nonblocking(true).unwrap();
             
@@ -76,4 +82,14 @@ pub fn run(opts: &[String]) {
         
         // sleep(Duration::from_millis(15));
     }
+}
+
+fn next_player_id<T>(player_map: &HashMap<PlayerID, T>) -> PlayerID {
+    if player_map.is_empty() { return 0 };
+    
+    let mut min = 10000000;
+    for id in player_map.keys() {
+        min = cmp::min(min,*id);
+    }
+    min + 1
 }
