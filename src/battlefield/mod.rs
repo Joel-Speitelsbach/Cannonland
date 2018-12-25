@@ -5,6 +5,7 @@ pub mod shot_type;
 mod weapon_depot;
 
 extern crate rand;
+use self::rand::Rng;
 use std::f32;
 use message::{PlayerAction,PlayerID,ChangeWeapon};
 use self::grid::particle_type;
@@ -15,7 +16,8 @@ use self::grid::Grid;
 pub struct Battlefield {
     pub grid: Grid,
     pub bunkers: Vec<bunker::Bunker>,
-    pub shots: Vec<shot::Shot>
+    pub shots: Vec<shot::Shot>,
+    rand_gen: rand::prng::isaac::IsaacRng,
 }
 
 impl Battlefield {
@@ -29,7 +31,9 @@ impl Battlefield {
         }
 
         let grid = Grid::load_from_file(&"pics/terra_valley_small.png".to_owned());
-        return Battlefield{ grid: grid, bunkers, shots: Vec::new() };
+        Battlefield { grid: grid, bunkers, shots: Vec::new(),
+            rand_gen: rand::FromEntropy::from_entropy(),
+        }
     }
 
     pub fn stride(&mut self) {
@@ -68,7 +72,7 @@ impl Battlefield {
     }
     
     fn new_bunker(&mut self, bunker_id: PlayerID) {
-        let x_pos = rand::random::<usize>() % self.grid.width;
+        let x_pos = self.rand_gen.gen::<usize>() % self.grid.width;
         self.grid.add_bunker(bunker_id, (x_pos,0));
     }
 

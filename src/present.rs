@@ -7,6 +7,7 @@ use sdl2::event::{Event,WindowEvent};
 
 use battlefield::{self,grid,Battlefield};
 
+
 // const GRID_WIDTH :i32 = 800;
 // const GRID_HEIGHT:i32 = 500;
 
