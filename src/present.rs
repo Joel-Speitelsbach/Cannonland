@@ -47,8 +47,8 @@ pub struct Presenter<'st,'b> {
 impl<'st,'b> Presenter<'st,'b> {
     pub fn new(
         presenter_state: &'st mut PresenterState,
-        battlefield: &'b mut battlefield::Battlefield,
-    )-> Presenter<'st,'b>
+        battlefield: &'b battlefield::Battlefield,
+    ) -> Presenter<'st,'b>
     {
         Presenter{
             state: presenter_state,
