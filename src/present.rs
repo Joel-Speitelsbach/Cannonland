@@ -42,7 +42,7 @@ impl PresenterState {
 
 pub struct Presenter<'st,'b> {
     state: &'st mut PresenterState,
-    battlefield: &'b mut battlefield::Battlefield,
+    battlefield: &'b battlefield::Battlefield,
 }
 impl<'st,'b> Presenter<'st,'b> {
     pub fn new(
@@ -86,7 +86,7 @@ impl<'st,'b> Presenter<'st,'b> {
         self.draw_particles();
     }
 
-    fn grid(&mut self) -> &mut grid::Grid {&mut self.battlefield.grid}
+    fn grid(&self) -> &grid::Grid {&self.battlefield.grid}
 
     fn draw_background(&mut self) -> () {
         self.state.canvas.set_draw_color(pixels::Color::RGBA(64,92,128,255));
