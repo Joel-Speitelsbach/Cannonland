@@ -22,15 +22,20 @@ impl Simple {
             where for<'de> D: Deserialize<'de> {
         bincode::deserialize_from(&mut other, bincode::Infinite)
     }
-
-    pub fn start_server() -> Result<Server, Error> {
-        match TcpListener::bind("127.0.0.1:8080") {
+    
+    pub fn start_server_with_addr(addr: String) -> Result<Server, Error> {
+        match TcpListener::bind(&addr) {
             Ok(x) => {
                 x.set_nonblocking(true).expect("could not set nonblocking mode");
                 Ok(x)
             },
             err => err,
         }
+    }
+
+    #[allow(dead_code)]
+    pub fn start_server() -> Result<Server, Error> {
+        Simple::start_server_with_addr("127.0.0.1:8080".to_string())
     }
     
     pub fn poll_for_client(server: &Server) -> Option<OtherSide> {
