@@ -59,18 +59,12 @@ pub fn run(opts: &[String]) {
         let msg = ServerMessage {
             client_messages: messages.clone(),
         };
-        // if messages.len() > 0 {
-        //     println!("{:?}", &msg);
-        // }
         let mut clients_to_remove = vec!();
         for (id, cl) in &clients {
-            // cl.set_nonblocking(true).unwrap();
             if let Err(err) = network::Simple::send(&cl, &msg) {
                 println!("client {} disconnected", &id);
                 println!("debug info: {}", err);
                 clients_to_remove.push(id.clone());
-            } else {
-                // cl.set_nonblocking(false).unwrap();
             }
         }
         for id in clients_to_remove {
@@ -85,8 +79,6 @@ pub fn run(opts: &[String]) {
             }
         }
         battlefield.stride();
-        
-        // sleep(Duration::from_millis(15));
     }
 }
 
@@ -97,5 +89,6 @@ fn next_player_id<T>(player_map: &HashMap<PlayerID, T>) -> PlayerID {
     for id in player_map.keys() {
         min = cmp::min(min,*id);
     }
+    println!("next playerid = {}", min + 1);
     min + 1
 }

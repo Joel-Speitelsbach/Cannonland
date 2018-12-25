@@ -73,6 +73,9 @@ impl Battlefield {
     
     fn new_bunker(&mut self, bunker_id: PlayerID) {
         let x_pos = self.rand_gen.gen::<usize>() % self.grid.width;
+        self.bunkers[bunker_id as usize] = bunker::Bunker::new_at_nowhere(
+            particle_type::Bunker::from_num(bunker_id)
+        );
         self.grid.add_bunker(bunker_id, (x_pos,0));
     }
 
