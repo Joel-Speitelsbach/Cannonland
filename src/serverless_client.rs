@@ -4,7 +4,7 @@ use sdl2::event::{Event};
 use sdl2::keyboard::Keycode;
 
 use battlefield;
-use present::{Presenter,PresenterState};
+use present::{Resources, Presenter,PresenterState};
 use control::{Controller};
 use message::PlayerAction;
 
@@ -24,6 +24,9 @@ pub fn run(_: &[String]) {
     fps_manager.set_framerate(60).unwrap();
     let mut counter: i64 = 0;
 
+    let texture_creator = presenter_state.canvas.texture_creator();
+    let resources = Resources::new(&texture_creator);
+
     'mainloop: loop {
 
         // iterate battlefield
@@ -39,7 +42,7 @@ pub fn run(_: &[String]) {
         }
 
         // events
-        let mut presenter = Presenter::new(&mut presenter_state, &mut battlefield);
+        let mut presenter = Presenter::new(&mut presenter_state, &battlefield, &resources);
         for event in sdl_context.event_pump().unwrap().poll_iter() {
             presenter.respond_to(&event);
             controller.use_event(&event);

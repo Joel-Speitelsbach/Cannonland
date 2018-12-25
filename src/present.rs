@@ -1,18 +1,31 @@
-
 use sdl2;
 use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::video::Window;
 use sdl2::pixels;
 use sdl2::event::{Event,WindowEvent};
+use sdl2::render::Texture;
+use sdl2::image::LoadTexture;
 
 use battlefield::{self,grid,Battlefield};
-
 
 // const GRID_WIDTH :i32 = 800;
 // const GRID_HEIGHT:i32 = 500;
 
+pub struct Resources<'resources> {
+    texture_missile: Texture<'resources>
+}
+impl<'resources> Resources<'resources> {
+    pub fn new (texture_creator: &'resources sdl2::render::TextureCreator<sdl2::video::WindowContext>) -> Resources<'resources> {
+        let texture_missile = texture_creator.load_texture("./pics/missile.png").unwrap();
+
+        return Resources {
+            texture_missile
+        }
+    }
+}
+
 pub struct PresenterState {
-    canvas: sdl2::render::Canvas<Window>,
+    pub canvas: sdl2::render::Canvas<Window>
 }
 impl PresenterState {
     pub fn new(sdl_context: &sdl2::Sdl, battlefield: &Battlefield) -> PresenterState {
@@ -37,23 +50,27 @@ impl PresenterState {
         canvas.window_mut().set_position(
             sdl2::video::WindowPos::Centered,
             sdl2::video::WindowPos::Centered);
+
         PresenterState { canvas }
     }
 }
 
-pub struct Presenter<'st,'b> {
+pub struct Presenter<'st,'b, 'resources> {
     state: &'st mut PresenterState,
     battlefield: &'b battlefield::Battlefield,
+    resources: &'resources Resources<'resources>
 }
-impl<'st,'b> Presenter<'st,'b> {
+impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
     pub fn new(
         presenter_state: &'st mut PresenterState,
         battlefield: &'b battlefield::Battlefield,
-    ) -> Presenter<'st,'b>
+        resources: &'resources Resources
+    ) -> Presenter<'st,'b, 'resources>
     {
         Presenter{
             state: presenter_state,
             battlefield: battlefield,
+            resources: resources
         }
     }
 
@@ -81,7 +98,7 @@ impl<'st,'b> Presenter<'st,'b> {
 }
 
 // draw grid
-impl<'st,'b> Presenter<'st,'b> {
+impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
     fn draw_grid(&mut self) -> () {
         self.draw_background();
         self.draw_particles();
@@ -116,12 +133,12 @@ impl<'st,'b> Presenter<'st,'b> {
 }
 
 // draw bunkers
-impl<'st,'b> Presenter<'st,'b> {
+impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
 
     fn draw_bunkers(&mut self) -> () {
         for bunker in &self.battlefield.bunkers {
             if !bunker.alive() { continue; }
-            
+
             let rgba: (u8,u8,u8,u8) = bunker.get_rgba();
             let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
 
@@ -181,7 +198,7 @@ impl<'st,'b> Presenter<'st,'b> {
 }
 
 // draw shots
-impl<'st,'b> Presenter<'st,'b> {
+impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
 
     fn draw_shots(&mut self) -> () {
         for shot in &self.battlefield.shots {
