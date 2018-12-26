@@ -5,74 +5,69 @@ use sdl2::video::Window;
 use sdl2::pixels;
 use sdl2::rect::{Point,Rect};
 use sdl2::event::{Event,WindowEvent};
+use sdl2::render::Canvas;
 use sdl2::render::Texture;
 use sdl2::image::LoadTexture;
 
 use battlefield::{self,grid,Battlefield,shot_type};
 
-// const GRID_WIDTH :i32 = 800;
-// const GRID_HEIGHT:i32 = 500;
 
-pub struct Resources<'resources> {
-    missile: Texture<'resources>
+pub fn new_window(sdl2_video: &sdl2::VideoSubsystem, size: (u32,u32)) -> Canvas<Window> {
+    let (width, height) = size;
+    let video_subsystem = sdl2_video;
+    let window =
+        video_subsystem
+        .window("Cannonland",
+            width ,
+            height)
+        .build()
+        .unwrap();
+    let mut canvas =
+        window
+        .into_canvas()
+        .software()
+        .build()
+        .unwrap();
+    canvas.window_mut().set_size(
+        width  * 3,
+        height * 3,
+    ).unwrap();
+    canvas.window_mut().set_position(
+        sdl2::video::WindowPos::Centered,
+        sdl2::video::WindowPos::Centered);
+    canvas
 }
-impl<'resources> Resources<'resources> {
-    pub fn new (texture_creator: &'resources sdl2::render::TextureCreator<sdl2::video::WindowContext>) -> Resources<'resources> {
+
+
+pub struct PresenterState<'resources> {
+    canvas: sdl2::render::Canvas<Window>,
+    missile: Texture<'resources>,
+}
+impl<'resources> PresenterState<'resources> {
+    pub fn new (
+        canvas: Canvas<Window>,
+        texture_creator: &'resources sdl2::render::TextureCreator<sdl2::video::WindowContext>,
+    ) -> PresenterState<'resources> {
         let missile = texture_creator.load_texture("./pics/missile.png").unwrap();
 
-        return Resources {
-            missile
-        }
+        PresenterState { canvas, missile }
     }
 }
 
-pub struct PresenterState {
-    pub canvas: sdl2::render::Canvas<Window>
-}
-impl PresenterState {
-    pub fn new(sdl_context: &sdl2::Sdl, battlefield: &Battlefield) -> PresenterState {
-        let video_subsystem = sdl_context.video().unwrap();
-        let window =
-            video_subsystem
-            .window("Cannonland",
-                battlefield.grid.width  as u32,
-                battlefield.grid.height as u32)
-            .build()
-            .unwrap();
-        let mut canvas =
-            window
-            .into_canvas()
-            .software()
-            .build()
-            .unwrap();
-        canvas.window_mut().set_size(
-            battlefield.grid.width  as u32 * 3,
-            battlefield.grid.height as u32 * 3,
-        ).unwrap();
-        canvas.window_mut().set_position(
-            sdl2::video::WindowPos::Centered,
-            sdl2::video::WindowPos::Centered);
-
-        PresenterState { canvas }
-    }
-}
 
 pub struct Presenter<'st,'b, 'resources> {
-    state: &'st mut PresenterState,
-    battlefield: &'b battlefield::Battlefield,
-    resources: &'resources Resources<'resources>
+    state: &'st mut PresenterState<'resources>,
+    battlefield: &'b Battlefield,
 }
 impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
     pub fn new(
-        presenter_state: &'st mut PresenterState,
-        battlefield: &'b battlefield::Battlefield,
-        resources: &'resources Resources
+        presenter_state: &'st mut PresenterState<'resources>,
+        battlefield: &'b Battlefield,
     ) -> Presenter<'st,'b, 'resources>
     {
         Presenter{
             state: presenter_state,
             battlefield: battlefield,
-            resources: resources
         }
     }
 
@@ -175,7 +170,7 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
             shot_type::ShotType::ROCKET  => {
                 let destination = Rect::new((x-3) as i32, (y-5) as i32, 6, 12);
                 let angle = 60.0;
-                self.state.canvas.copy_ex(&self.resources.missile, None, destination, angle, Point::new(3, 6), false, false).unwrap();
+                self.state.canvas.copy_ex(&self.state.missile, None, destination, angle, Point::new(3, 6), false, false).unwrap();
             },
             shot_type::ShotType::SNOW => {
                 self.draw_default_shot(&bunker.get_current_weapon(), x, y);
@@ -225,7 +220,7 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
                 shot_type::ShotType::ROCKET  => {
                     let destination = Rect::new((shot.x_pos-4.0) as i32, (shot.y_pos-8.0) as i32, 8, 16);
                     let angle = shot.get_angle() as f64;
-                    self.state.canvas.copy_ex(&self.resources.missile, None, destination, angle, Point::new(3, 6), false, false).unwrap();
+                    self.state.canvas.copy_ex(&self.state.missile, None, destination, angle, Point::new(3, 6), false, false).unwrap();
                 },
                 shot_type::ShotType::SNOW => {
                     self.draw_default_shot(shot_type, shot.x_pos as i16, shot.y_pos as i16);

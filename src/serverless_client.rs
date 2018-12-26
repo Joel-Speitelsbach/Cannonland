@@ -4,19 +4,26 @@ use sdl2::event::{Event};
 use sdl2::keyboard::Keycode;
 
 use battlefield;
-use present::{Resources, Presenter,PresenterState};
+use present::{self,Presenter,PresenterState};
 use control::{Controller};
 use message::PlayerAction;
 
 
 pub fn run(_: &[String]) {
-    let sdl_context = sdl2::init().unwrap();
+    // init battlefield
     let mut battlefield = battlefield::Battlefield::new();
     battlefield.execute_action(0, &PlayerAction::NewBunker);
     battlefield.execute_action(1, &PlayerAction::NewBunker);
     battlefield.execute_action(2, &PlayerAction::NewBunker);
-
-    let mut presenter_state = PresenterState::new(&sdl_context, &battlefield);
+ 
+    //init presenter
+    let sdl_context = sdl2::init().unwrap();
+    let win_size = (battlefield.grid.width as u32, battlefield.grid.height as u32);
+    let canvas = present::new_window(&sdl_context.video().unwrap(), win_size);
+    let texture_creator = canvas.texture_creator();
+    let mut presenter_state = PresenterState::new(canvas, &texture_creator);
+    
+    //init controller
     let mut controller = Controller::new(&sdl_context);
 
     //init misc
@@ -24,8 +31,6 @@ pub fn run(_: &[String]) {
     fps_manager.set_framerate(60).unwrap();
     let mut counter: i64 = 0;
 
-    let texture_creator = presenter_state.canvas.texture_creator();
-    let resources = Resources::new(&texture_creator);
 
     'mainloop: loop {
 
@@ -42,7 +47,7 @@ pub fn run(_: &[String]) {
         }
 
         // events
-        let mut presenter = Presenter::new(&mut presenter_state, &battlefield, &resources);
+        let mut presenter = Presenter::new(&mut presenter_state, &battlefield);
         for event in sdl_context.event_pump().unwrap().poll_iter() {
             presenter.respond_to(&event);
             controller.use_event(&event);

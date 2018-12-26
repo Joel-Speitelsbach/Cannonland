@@ -3,7 +3,7 @@ use sdl2::keyboard::Keycode;
 use sdl2::event::{Event};
 use network;
 use super::message::{ServerMessage,ClientMessage,ServerMessageInit};
-use present::{Presenter,PresenterState};
+use present::{self,Presenter,PresenterState};
 use control::{Controller};
 
 
@@ -34,8 +34,11 @@ pub fn run(opts: &[String]) {
     
     
     // init game
+    let win_size = (battlefield.grid.width as u32, battlefield.grid.height as u32);
     let sdl_context = sdl2::init().unwrap();
-    let mut presenter_state = PresenterState::new(&sdl_context, &battlefield);
+    let canvas = present::new_window(&sdl_context.video().unwrap(), win_size);
+    let texture_creator = canvas.texture_creator();
+    let mut presenter_state = PresenterState::new(canvas, &texture_creator);
     let mut controller = Controller::new(&sdl_context);
     
     'mainloop: loop {
