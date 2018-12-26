@@ -10,22 +10,27 @@ use message::PlayerAction;
 
 
 pub fn run(_: &[String]) {
-    let sdl_context = sdl2::init().unwrap();
+    // init battlefield
     let mut battlefield = battlefield::Battlefield::new();
     battlefield.execute_action(0, &PlayerAction::NewBunker);
     battlefield.execute_action(1, &PlayerAction::NewBunker);
     battlefield.execute_action(2, &PlayerAction::NewBunker);
-
+ 
+    //init presenter
+    let sdl_context = sdl2::init().unwrap();
     let win_size = (battlefield.grid.width as u32, battlefield.grid.height as u32);
     let canvas = present::new_window(&sdl_context.video().unwrap(), win_size);
     let texture_creator = canvas.texture_creator();
     let mut presenter_state = PresenterState::new(canvas, &texture_creator);
+    
+    //init controller
     let mut controller = Controller::new(&sdl_context);
 
     //init misc
     let mut fps_manager = sdl2::gfx::framerate::FPSManager::new();
     fps_manager.set_framerate(60).unwrap();
     let mut counter: i64 = 0;
+
 
     'mainloop: loop {
 
