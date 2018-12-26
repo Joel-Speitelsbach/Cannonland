@@ -1,3 +1,4 @@
+use battlefield::shot_type::ShotType;
 use sdl2;
 use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::video::Window;
@@ -168,13 +169,16 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
         let x = bunker.x_pos;
 
         match bunker.get_current_weapon() {
+            shot_type::ShotType::CANNON => {
+                self.draw_default_shot(&bunker.get_current_weapon(), x, y);
+            },
             shot_type::ShotType::ROCKET  => {
                 let destination = Rect::new((x-3) as i32, (y-5) as i32, 6, 12);
                 let angle = 60.0;
                 self.state.canvas.copy_ex(&self.resources.missile, None, destination, angle, Point::new(3, 6), false, false).unwrap();
             },
-            _ => {
-                self.state.canvas.filled_circle(x, y, bunker.get_current_weapon().get_radius() as i16, bunker.get_current_weapon().get_rgba()).unwrap();
+            shot_type::ShotType::SNOW => {
+                self.draw_default_shot(&bunker.get_current_weapon(), x, y);
             }
         }
     }
@@ -212,8 +216,26 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
 
     fn draw_shots(&mut self) -> () {
         for shot in &self.battlefield.shots {
-            self.state.canvas.filled_circle(shot.x_pos as i16, shot.y_pos as i16, shot.get_radius() as i16, pixels::Color::RGBA(96,96,96,255)).unwrap();
+            let shot_type = &shot.shot_type;
+
+            match shot_type {
+                shot_type::ShotType::CANNON => {
+                    self.draw_default_shot(shot_type, shot.x_pos as i16, shot.y_pos as i16);
+                },
+                shot_type::ShotType::ROCKET  => {
+                    let destination = Rect::new((shot.x_pos-4.0) as i32, (shot.y_pos-8.0) as i32, 8, 16);
+                    let angle = shot.get_angle() as f64;
+                    self.state.canvas.copy_ex(&self.resources.missile, None, destination, angle, Point::new(3, 6), false, false).unwrap();
+                },
+                shot_type::ShotType::SNOW => {
+                    self.draw_default_shot(shot_type, shot.x_pos as i16, shot.y_pos as i16);
+                }
+            }
         }
+    }
+
+    fn draw_default_shot(&self, shot_type: &ShotType, x_pos: i16, y_pos: i16) {
+        self.state.canvas.filled_circle(x_pos, y_pos, shot_type.get_radius() as i16, shot_type.get_rgba()).unwrap();
     }
 
 }

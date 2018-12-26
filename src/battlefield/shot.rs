@@ -47,4 +47,8 @@ impl Shot {
         self.y_speed += Shot::GRAVITY;
     }
 
+    pub fn get_angle(&self) -> f32 {
+        return self.y_speed.atan2(self.x_speed) * (180.0/std::f32::consts::PI) + 90.0;
+    }
+
 }
