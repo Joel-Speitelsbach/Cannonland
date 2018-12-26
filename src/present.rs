@@ -2,24 +2,25 @@ use sdl2;
 use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::video::Window;
 use sdl2::pixels;
+use sdl2::rect::{Point,Rect};
 use sdl2::event::{Event,WindowEvent};
 use sdl2::render::Texture;
 use sdl2::image::LoadTexture;
 
-use battlefield::{self,grid,Battlefield};
+use battlefield::{self,grid,Battlefield,shot_type};
 
 // const GRID_WIDTH :i32 = 800;
 // const GRID_HEIGHT:i32 = 500;
 
 pub struct Resources<'resources> {
-    texture_missile: Texture<'resources>
+    missile: Texture<'resources>
 }
 impl<'resources> Resources<'resources> {
     pub fn new (texture_creator: &'resources sdl2::render::TextureCreator<sdl2::video::WindowContext>) -> Resources<'resources> {
-        let texture_missile = texture_creator.load_texture("./pics/missile.png").unwrap();
+        let missile = texture_creator.load_texture("./pics/missile.png").unwrap();
 
         return Resources {
-            texture_missile
+            missile
         }
     }
 }
@@ -144,7 +145,7 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
 
             Presenter::draw_cannon(&mut self.state.canvas, &bunker, color);
             Presenter::draw_building(&mut self.state.canvas, &bunker, color);
-            Presenter::draw_weapon(&mut self.state.canvas, &bunker);
+            self.draw_weapon(&bunker);
             Presenter::draw_charge(&mut self.state.canvas, &bunker);
             Presenter::draw_health(&mut self.state.canvas, &bunker);
         }
@@ -162,11 +163,20 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
         canvas.filled_pie(bunker.x_pos, bunker.y_pos, bunker.get_radius() as i16, 180, 360, color).unwrap();
     }
 
-    fn draw_weapon(canvas: &mut sdl2::render::Canvas<Window>, bunker: &battlefield::bunker::Bunker) {
+    fn draw_weapon(&mut self, bunker: &battlefield::bunker::Bunker) {
         let y = bunker.y_pos - 5;
         let x = bunker.x_pos;
 
-        canvas.filled_circle(x, y, (bunker.get_current_weapon().get_impact_radius()/4.0) as i16, pixels::Color::RGBA(200,200,200,200)).unwrap();
+        match bunker.get_current_weapon() {
+            shot_type::ShotType::ROCKET  => {
+                let destination = Rect::new((x-3) as i32, (y-5) as i32, 6, 12);
+                let angle = 60.0;
+                self.state.canvas.copy_ex(&self.resources.missile, None, destination, angle, Point::new(3, 6), false, false).unwrap();
+            },
+            _ => {
+                self.state.canvas.filled_circle(x, y, bunker.get_current_weapon().get_radius() as i16, bunker.get_current_weapon().get_rgba()).unwrap();
+            }
+        }
     }
 
     fn draw_charge(canvas: &mut sdl2::render::Canvas<Window>, bunker: &battlefield::bunker::Bunker) {
@@ -202,7 +212,7 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
 
     fn draw_shots(&mut self) -> () {
         for shot in &self.battlefield.shots {
-            self.state.canvas.filled_circle(shot.x_pos as i16, shot.y_pos as i16, 4, pixels::Color::RGBA(96,96,96,255)).unwrap();
+            self.state.canvas.filled_circle(shot.x_pos as i16, shot.y_pos as i16, shot.get_radius() as i16, pixels::Color::RGBA(96,96,96,255)).unwrap();
         }
     }
 
