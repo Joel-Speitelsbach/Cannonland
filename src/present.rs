@@ -109,23 +109,39 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
     }
 
     fn draw_particles(&mut self) -> () {
-        for y in 0..self.grid().height {
-            for x in 0..self.grid().width {
-                self.draw_particle(x, y);
+        for (y, row) in (&self.grid().grid).into_iter().enumerate() {
+            for (x, particle) in (&row).into_iter().enumerate() {
+                // self.draw_particle(x, y);
+                let (r,g,b,a) = particle.get_rgba();
+                let color = pixels::Color::RGBA(r,g,b,a);
+                let x = x as i16;
+                let y = y as i16;
+                self.state.canvas.pixel(x, y, color).unwrap();
             }
         }
     }
 
-    fn draw_particle(&mut self, x: usize, y: usize) -> () {
-        let rgba: (u8,u8,u8,u8) = self.grid().grid[y][x].get_rgba();
+    // fn draw_particle(&mut self, x: usize, y: usize) -> () {
+    //     let (r,g,b,a): (u8,u8,u8,u8) = self.grid().grid[y][x].get_rgba();
+    //
+    //     if a != 0 {
+    //         let color = pixels::Color::RGBA(r, g, b, a);
+    //         let x = x as i16;
+    //         let y = y as i16;
+    //         self.state.canvas.pixel(x, y, color).unwrap();
+    //     }
+    // }
 
-        if rgba.3 != 0 {
-            let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
-            let x = x as i16;
-            let y = y as i16;
-            self.state.canvas.pixel(x, y, color).unwrap();
-        }
-    }
+    // fn (&mut self, x: usize, y: usize) -> () {
+    //     let (r,g,b,a): (u8,u8,u8,u8) = self.grid().grid[y][x].get_rgba();
+    //
+    //     if rgba.3 != 0 {
+    //         let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
+    //         let x = x as i16;
+    //         let y = y as i16;
+    //         self.state.canvas.pixel(x, y, color).unwrap();
+    //     }
+    // }
 
 }
 

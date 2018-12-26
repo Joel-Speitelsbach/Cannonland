@@ -11,6 +11,7 @@ mod serverless_client;
 mod network;
 mod server;
 mod client;
+mod util;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();

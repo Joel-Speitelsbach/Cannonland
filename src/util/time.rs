@@ -26,6 +26,12 @@ impl Prof {
         }
     }
     
+    pub fn just_label(label: &str) -> Prof {
+        Prof::new(ProfArgs{
+            label: label.to_owned(),
+        })
+    }
+    
     pub fn start(&mut self) {
         self.start_time = SystemTime::now();
     }
@@ -45,6 +51,7 @@ impl Prof {
         self.counter += 1;
     }
     
+    #[allow(dead_code)]
     pub fn profile<F>(&mut self, mut f: F)
             where F: FnMut() {
         self.start();

@@ -1,4 +1,3 @@
-use std::time::SystemTime;
 use sdl2;
 use sdl2::event::{Event};
 use sdl2::keyboard::Keycode;
@@ -7,6 +6,7 @@ use battlefield;
 use present::{self,Presenter,PresenterState};
 use control::{Controller};
 use message::PlayerAction;
+use util;
 
 
 pub fn run(_: &[String]) {
@@ -29,22 +29,17 @@ pub fn run(_: &[String]) {
     //init misc
     let mut fps_manager = sdl2::gfx::framerate::FPSManager::new();
     fps_manager.set_framerate(60).unwrap();
-    let mut counter: i64 = 0;
+    let mut prof_present = util::time::Prof::just_label("present");
 
 
     'mainloop: loop {
 
         // iterate battlefield
-        let calc_time = SystemTime::now();
         let actions = controller.poll_actions();
         for action in actions {
             battlefield.execute_action(0, &action);
         }
         battlefield.stride();
-        if counter%60 == 0 {
-            print!("calc needed {} msecs",
-                calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
-        }
 
         // events
         let mut presenter = Presenter::new(&mut presenter_state, &battlefield);
@@ -60,15 +55,10 @@ pub fn run(_: &[String]) {
         }
 
         // present
-        let present_time = SystemTime::now();
+        prof_present.start();
         presenter.present();
-        if counter%60 == 0 {
-            print!(", present needed {} msecs",
-                present_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
-            println!(", calc and present needed {} msecs", calc_time.elapsed().unwrap().subsec_nanos() / (1000*1000));
-        }
-
-        counter += 1;
-        fps_manager.delay();
+        prof_present.pause();
+        
+        // fps_manager.delay();
     }
 }
