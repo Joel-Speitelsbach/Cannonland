@@ -10,6 +10,8 @@ use std::f32;
 use message::{PlayerAction,PlayerID,ChangeWeapon};
 use self::grid::particle_type;
 use self::grid::Grid;
+use self::shot::Shot;
+use self::bunker::Bunker;
 
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -98,15 +100,15 @@ impl Battlefield {
             let y_pos = self.shots[i].y_pos as usize;
 
             if Battlefield::collide_with_bunkers_true_for_hit(&mut self.bunkers, &self.shots[i])
-                || self.grid.collides_at_position(x_pos, y_pos) {
+            || self.grid.collides_at_position(x_pos, y_pos) {
                 self.grid.replace_radius_where_possible(self.shots[i].get_impact_target_type(), x_pos, y_pos, self.shots[i].get_impact_radius() as usize);
                 self.shots.remove(i);
             }
         }
     }
 
-    fn collide_with_bunkers_true_for_hit(bunkers: &mut Vec<bunker::Bunker>,
-            shot: &shot::Shot) -> bool {
+    fn collide_with_bunkers_true_for_hit(bunkers: &mut Vec<Bunker>,
+            shot: &Shot) -> bool {
         let mut hit = false;
 
         for i in (0..bunkers.len()).rev() {
@@ -119,7 +121,7 @@ impl Battlefield {
         return hit;
     }
 
-    fn collide_with_bunker_true_for_hit(bunker: &mut bunker::Bunker, shot: &shot::Shot) -> bool {
+    fn collide_with_bunker_true_for_hit(bunker: &mut Bunker, shot: &Shot) -> bool {
         if bunker.hit_at(shot.x_pos as i16, shot.y_pos as i16, shot.get_radius()) {
             bunker.harm(shot.get_harm());
             return true;

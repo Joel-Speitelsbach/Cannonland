@@ -1,6 +1,6 @@
 pub mod particle_test;
 mod particle;
-pub mod particle_type;  // make private
+pub mod particle_type;  // TODO: make private
 
 
 use self::particle_type::{ParticleType,Bunker};
@@ -120,7 +120,7 @@ impl Grid {
         self.grid[y][x].particle_type = particle_type;
     }
 
-    pub fn collides_at_position(&mut self, x_pos: usize, y_pos: usize) -> bool {
+    pub fn collides_at_position(&self, x_pos: usize, y_pos: usize) -> bool {
         return self.is_inside_grid(x_pos, y_pos) && self.grid[y_pos][x_pos].particle_type != ParticleType::EMPTY;
     }
 

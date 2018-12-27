@@ -46,7 +46,6 @@ impl Prof {
                 (self.duration / self.counter).subsec_nanos() as f32
                     / (1000.*1000.),
             );
-            // self.nano_secs = 0;
         }
         self.counter += 1;
     }
