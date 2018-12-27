@@ -44,7 +44,7 @@ pub struct PresenterState<'resources> {
     canvas: sdl2::render::Canvas<Window>,
     missile: Texture<'resources>,
     texture_creator: &'resources TextureCreator<WindowContext>,
-    
+
     prof_canvas_present: util::time::Prof,
     prof_canvas_copy: util::time::Prof,
     prof_pixel_data: util::time::Prof,
@@ -88,7 +88,7 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
         self.draw_grid();
         self.draw_bunkers();
         self.draw_shots();
-        
+
         self.state.prof_canvas_present.start();
         self.state.canvas.present();
         self.state.prof_canvas_present.pause();
@@ -133,7 +133,7 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
                 self.battlefield.grid.width,
                 self.battlefield.grid.height,
             );
-            
+
         // create (raw) pixel data
         self.state.prof_pixel_data.start();
         let mut pixel_data = Vec::with_capacity(width*height*4);
@@ -147,7 +147,7 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
             }
         }
         self.state.prof_pixel_data.pause();
-         
+
         // create texture. the "Blend" model makes sure
         // that the background ist not overwritten with black
         let mut texture = self.state.texture_creator.create_texture(
@@ -157,7 +157,7 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
                  height as u32,
             ).unwrap();
         texture.set_blend_mode(BlendMode::Blend);
-        
+
         // copy pixel_data into texture then into canvas
         self.state.prof_canvas_copy.start();
         texture.update(None, &pixel_data, width*4).unwrap();
@@ -198,7 +198,7 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
     }
 
     fn draw_weapon(&mut self, bunker: &battlefield::bunker::Bunker) {
-        let y = bunker.y_pos - 5;
+        let y = bunker.y_pos - 4;
         let x = bunker.x_pos;
 
         match bunker.get_current_weapon() {
@@ -206,9 +206,7 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
                 self.draw_default_shot(&bunker.get_current_weapon(), x, y);
             },
             shot_type::ShotType::ROCKET  => {
-                let destination = Rect::new((x-3) as i32, (y-5) as i32, 6, 12);
-                let angle = 60.0;
-                self.state.canvas.copy_ex(&self.state.missile, None, destination, angle, Point::new(3, 6), false, false).unwrap();
+                Self::draw_texture_shot(&mut self.state.canvas, &self.state.missile, x as i32,y as i32, 6, 12, 60.0);
             },
             shot_type::ShotType::SNOW => {
                 self.draw_default_shot(&bunker.get_current_weapon(), x, y);
@@ -256,9 +254,7 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
                     self.draw_default_shot(shot_type, shot.x_pos as i16, shot.y_pos as i16);
                 },
                 shot_type::ShotType::ROCKET  => {
-                    let destination = Rect::new((shot.x_pos-4.0) as i32, (shot.y_pos-8.0) as i32, 8, 16);
-                    let angle = shot.get_angle() as f64;
-                    self.state.canvas.copy_ex(&self.state.missile, None, destination, angle, Point::new(3, 6), false, false).unwrap();
+                    Self::draw_texture_shot(&mut self.state.canvas, &self.state.missile, shot.x_pos as i32, shot.y_pos as i32, 8, 16, shot.get_angle() as f64);
                 },
                 shot_type::ShotType::SNOW => {
                     self.draw_default_shot(shot_type, shot.x_pos as i16, shot.y_pos as i16);
@@ -269,6 +265,15 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
 
     fn draw_default_shot(&self, shot_type: &ShotType, x_pos: i16, y_pos: i16) {
         self.state.canvas.filled_circle(x_pos, y_pos, shot_type.get_radius() as i16, shot_type.get_rgba()).unwrap();
+    }
+
+    fn draw_texture_shot(canvas: &mut Canvas<Window>, texture: &Texture, x_pos: i32, y_pos: i32, width: u32, height: u32, angle: f64) {
+        let x_offset = width as i32/2;
+        let y_offset = height as i32/2;
+        let destination = Rect::new(x_pos-x_offset, y_pos-y_offset, width, height);
+        let rotation_point = Point::new(x_offset, y_offset);
+
+        canvas.copy_ex(texture, None, destination, angle, rotation_point, false, false).unwrap();
     }
 
 }
