@@ -30,9 +30,11 @@ pub fn run(_: &[String]) {
     let mut fps_manager = sdl2::gfx::framerate::FPSManager::new();
     fps_manager.set_framerate(60).unwrap();
     let mut prof_present = util::time::Prof::just_label("present");
+    let mut prof_alles = util::time::Prof::just_label("alles");
 
 
     'mainloop: loop {
+        prof_alles.start();
 
         // iterate battlefield
         let actions = controller.poll_actions();
@@ -59,6 +61,7 @@ pub fn run(_: &[String]) {
         presenter.present();
         prof_present.pause();
         
-        // fps_manager.delay();
+        prof_alles.pause();
+        fps_manager.delay();
     }
 }

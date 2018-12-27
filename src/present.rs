@@ -30,8 +30,8 @@ pub fn new_window(sdl2_video: &sdl2::VideoSubsystem, size: (u32,u32)) -> Canvas<
         .build()
         .unwrap();
     canvas.window_mut().set_size(
-        width  * 3,
-        height * 3,
+        width  * 2,
+        height * 2,
     ).unwrap();
     canvas.window_mut().set_position(
         sdl2::video::WindowPos::Centered,

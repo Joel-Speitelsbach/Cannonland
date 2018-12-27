@@ -30,7 +30,7 @@ impl Battlefield {
             ));
         }
 
-        let grid = Grid::load_from_file(&"pics/terra_valley_small.png".to_owned());
+        let grid = Grid::load_from_file(&"pics/terra_valley.png".to_owned());
         Battlefield { grid: grid, bunkers, shots: Vec::new(),
             rand_gen: rand::FromEntropy::from_entropy(),
         }
