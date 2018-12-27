@@ -21,7 +21,7 @@ fn main() {
             "Usage:\
             \n     cargo run <module name> <args>"
         );
-        ::std::process::exit(0);
+        std::process::exit(0);
     }
 
     match args[1].as_str() {
