@@ -10,6 +10,8 @@ use std::f32;
 use message::{PlayerAction,PlayerID,ChangeWeapon};
 use self::grid::particle_type;
 use self::grid::Grid;
+use self::shot::Shot;
+use self::bunker::Bunker;
 
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -20,8 +22,9 @@ pub struct Battlefield {
     rand_gen: rand::prng::isaac::IsaacRng,
 }
 
-impl Battlefield {
 
+impl Battlefield {
+    
     pub fn new() -> Battlefield {
         let mut bunkers = Vec::with_capacity(8);
         for i in 0..8 {
@@ -35,6 +38,7 @@ impl Battlefield {
             rand_gen: rand::FromEntropy::from_entropy(),
         }
     }
+    
 
     pub fn stride(&mut self) {
         self.collide();
@@ -43,6 +47,7 @@ impl Battlefield {
         self.grid.update_bunkers(&mut self.bunkers);
         self.stride_shots();
     }
+    
 
     pub fn execute_action(&mut self, bunker_id: PlayerID, action: &PlayerAction) {
         match *action {
@@ -71,6 +76,7 @@ impl Battlefield {
         }
     }
     
+    
     fn new_bunker(&mut self, bunker_id: PlayerID) {
         let x_pos = self.rand_gen.gen::<usize>() % self.grid.width;
         self.bunkers[bunker_id as usize] = bunker::Bunker::new_at_nowhere(
@@ -78,6 +84,7 @@ impl Battlefield {
         );
         self.grid.add_bunker(bunker_id, (x_pos,0));
     }
+    
 
     fn shoot(&mut self, bunker_id: PlayerID) {
         let bunker = &mut self.bunkers[bunker_id as usize];
@@ -91,6 +98,7 @@ impl Battlefield {
 
         bunker.reset_charge();
     }
+    
 
     fn collide(&mut self) {
         for i in (0..self.shots.len()).rev() {
@@ -98,15 +106,16 @@ impl Battlefield {
             let y_pos = self.shots[i].y_pos as usize;
 
             if Battlefield::collide_with_bunkers_true_for_hit(&mut self.bunkers, &self.shots[i])
-                || self.grid.collides_at_position(x_pos, y_pos) {
+            || self.grid.collides_at_position(x_pos, y_pos) {
                 self.grid.replace_radius_where_possible(self.shots[i].get_impact_target_type(), x_pos, y_pos, self.shots[i].get_impact_radius() as usize);
                 self.shots.remove(i);
             }
         }
     }
+    
 
-    fn collide_with_bunkers_true_for_hit(bunkers: &mut Vec<bunker::Bunker>,
-            shot: &shot::Shot) -> bool {
+    fn collide_with_bunkers_true_for_hit(bunkers: &mut Vec<Bunker>,
+            shot: &Shot) -> bool {
         let mut hit = false;
 
         for i in (0..bunkers.len()).rev() {
@@ -118,14 +127,16 @@ impl Battlefield {
 
         return hit;
     }
+    
 
-    fn collide_with_bunker_true_for_hit(bunker: &mut bunker::Bunker, shot: &shot::Shot) -> bool {
+    fn collide_with_bunker_true_for_hit(bunker: &mut Bunker, shot: &Shot) -> bool {
         if bunker.hit_at(shot.x_pos as i16, shot.y_pos as i16, shot.get_radius()) {
             bunker.harm(shot.get_harm());
             return true;
         }
         return false;
     }
+    
 
     fn stride_shots(&mut self) {
         for i in (0..self.shots.len()).rev() {
@@ -135,5 +146,4 @@ impl Battlefield {
             }
         }
     }
-
 }
