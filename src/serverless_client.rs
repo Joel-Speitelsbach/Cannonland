@@ -61,6 +61,7 @@ pub fn run(_: &[String]) {
         presenter.present();
         prof_present.pause();
         
+        // time control
         prof_alles.pause();
         fps_manager.delay();
     }
