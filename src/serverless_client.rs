@@ -48,9 +48,9 @@ pub fn run(_: &[String]) {
             controller.use_event(&event);
             match event {
                 Event::Quit{..} |
-                Event::KeyDown {keycode: Option::Some(Keycode::Escape), ..} =>
+                Event::KeyDown {keycode: Some(Keycode::Escape), ..} =>
                     break 'mainloop,
-                _ => {}
+                _ => {},
             }
         }
 

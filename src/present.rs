@@ -1,15 +1,16 @@
 use battlefield::shot_type::ShotType;
 use sdl2;
 use sdl2::gfx::primitives::DrawRenderer;
-use sdl2::video::Window;
 use sdl2::pixels;
+use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::{Point,Rect};
 use sdl2::event::{Event,WindowEvent};
-use sdl2::render::Canvas;
-use sdl2::render::Texture;
+use sdl2::render::{Canvas,Texture,TextureCreator,BlendMode};
+use sdl2::video::{WindowContext,Window};
 use sdl2::image::LoadTexture;
 
 use battlefield::{self,grid,Battlefield,shot_type};
+use util;
 
 
 pub fn new_window(sdl2_video: &sdl2::VideoSubsystem, size: (u32,u32)) -> Canvas<Window> {
@@ -25,7 +26,7 @@ pub fn new_window(sdl2_video: &sdl2::VideoSubsystem, size: (u32,u32)) -> Canvas<
     let mut canvas =
         window
         .into_canvas()
-        .software()
+        // .software()
         .build()
         .unwrap();
     canvas.window_mut().set_size(
@@ -42,15 +43,27 @@ pub fn new_window(sdl2_video: &sdl2::VideoSubsystem, size: (u32,u32)) -> Canvas<
 pub struct PresenterState<'resources> {
     canvas: sdl2::render::Canvas<Window>,
     missile: Texture<'resources>,
+    texture_creator: &'resources TextureCreator<WindowContext>,
+    
+    prof_canvas_present: util::time::Prof,
+    prof_canvas_copy: util::time::Prof,
+    prof_pixel_data: util::time::Prof,
 }
 impl<'resources> PresenterState<'resources> {
     pub fn new (
         canvas: Canvas<Window>,
-        texture_creator: &'resources sdl2::render::TextureCreator<sdl2::video::WindowContext>,
+        texture_creator: &'resources TextureCreator<WindowContext>,
     ) -> PresenterState<'resources> {
         let missile = texture_creator.load_texture("./pics/missile.png").unwrap();
 
-        PresenterState { canvas, missile }
+        PresenterState {
+            canvas,
+            missile,
+            texture_creator,
+            prof_canvas_present: util::time::Prof::just_label("_canvas_present"),
+            prof_canvas_copy: util::time::Prof::just_label("_canvas_copy"),
+            prof_pixel_data: util::time::Prof::just_label("_pixel_data"),
+        }
     }
 }
 
@@ -75,7 +88,10 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
         self.draw_grid();
         self.draw_bunkers();
         self.draw_shots();
+        
+        self.state.prof_canvas_present.start();
         self.state.canvas.present();
+        self.state.prof_canvas_present.pause();
     }
 
     pub fn respond_to(&mut self, event: &Event) {
@@ -94,6 +110,7 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
     }
 }
 
+
 // draw grid
 impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
     fn draw_grid(&mut self) -> () {
@@ -101,49 +118,54 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
         self.draw_particles();
     }
 
+
     fn grid(&self) -> &grid::Grid {&self.battlefield.grid}
+
 
     fn draw_background(&mut self) -> () {
         self.state.canvas.set_draw_color(pixels::Color::RGBA(64,92,128,255));
         self.state.canvas.clear();
     }
 
+
     fn draw_particles(&mut self) -> () {
-        for (y, row) in (&self.grid().grid).into_iter().enumerate() {
-            for (x, particle) in (&row).into_iter().enumerate() {
-                // self.draw_particle(x, y);
+        let (width,height) = (
+                self.battlefield.grid.width,
+                self.battlefield.grid.height,
+            );
+            
+        // create (raw) pixel data
+        self.state.prof_pixel_data.start();
+        let mut pixel_data = Vec::with_capacity(width*height*4);
+        for (_y, row) in (&self.grid().grid).into_iter().enumerate() {
+            for (_x, particle) in (&row).into_iter().enumerate() {
                 let (r,g,b,a) = particle.get_rgba();
-                let color = pixels::Color::RGBA(r,g,b,a);
-                let x = x as i16;
-                let y = y as i16;
-                self.state.canvas.pixel(x, y, color).unwrap();
+                pixel_data.push(a);
+                pixel_data.push(b);
+                pixel_data.push(g);
+                pixel_data.push(r);
             }
         }
+        self.state.prof_pixel_data.pause();
+         
+        // create texture. the "Blend" model makes sure
+        // that the background ist not overwritten with black
+        let mut texture = self.state.texture_creator.create_texture(
+                 PixelFormatEnum::RGBA8888,
+                 sdl2::render::TextureAccess::Static,
+                 width as u32,
+                 height as u32,
+            ).unwrap();
+        texture.set_blend_mode(BlendMode::Blend);
+        
+        // copy pixel_data into texture then into canvas
+        self.state.prof_canvas_copy.start();
+        texture.update(None, &pixel_data, width*4).unwrap();
+        self.state.canvas.copy(&texture,None,None).unwrap();
+        self.state.prof_canvas_copy.pause();
     }
-
-    // fn draw_particle(&mut self, x: usize, y: usize) -> () {
-    //     let (r,g,b,a): (u8,u8,u8,u8) = self.grid().grid[y][x].get_rgba();
-    //
-    //     if a != 0 {
-    //         let color = pixels::Color::RGBA(r, g, b, a);
-    //         let x = x as i16;
-    //         let y = y as i16;
-    //         self.state.canvas.pixel(x, y, color).unwrap();
-    //     }
-    // }
-
-    // fn (&mut self, x: usize, y: usize) -> () {
-    //     let (r,g,b,a): (u8,u8,u8,u8) = self.grid().grid[y][x].get_rgba();
-    //
-    //     if rgba.3 != 0 {
-    //         let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
-    //         let x = x as i16;
-    //         let y = y as i16;
-    //         self.state.canvas.pixel(x, y, color).unwrap();
-    //     }
-    // }
-
 }
+
 
 // draw bunkers
 impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
