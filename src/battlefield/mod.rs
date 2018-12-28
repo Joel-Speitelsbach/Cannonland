@@ -33,8 +33,11 @@ impl Battlefield {
             ));
         }
 
-        let grid = Grid::load_from_file(&"pics/terra_valley.png".to_owned());
-        Battlefield { grid: grid, bunkers, shots: Vec::new(),
+        let grid = Grid::load_from_file("pics/terra_valley.png");
+        Battlefield {
+            grid,
+            bunkers,
+            shots: Vec::new(),
             rand_gen: rand::FromEntropy::from_entropy(),
         }
     }
@@ -78,11 +81,33 @@ impl Battlefield {
 
 
     fn new_bunker(&mut self, bunker_id: PlayerID) {
-        let x_pos = self.rand_gen.gen::<usize>() % self.grid.width;
-        self.bunkers[bunker_id as usize] = bunker::Bunker::new_at_nowhere(
-            particle_type::Bunker::from_num(bunker_id)
-        );
-        self.grid.add_bunker(bunker_id, (x_pos,0));
+        let width = self.grid.width as i16;
+        let min_dist = width / (self.number_of_bunkers() * 2 + 1);
+        let x_pos = 'search: loop {
+            let x_pos = self.rand_gen.gen_range::<i16>(0, width);
+            'bunker: for bunker in &self.bunkers {
+                if !bunker.player_active { continue };
+                let collide = (bunker.x_pos - x_pos as i16).abs() < min_dist;
+                if collide {
+                    continue 'search;
+                }
+            }
+            break x_pos;
+        };
+
+        self.grid.add_bunker(bunker_id, (x_pos as usize,0));
+        self.grid.update_bunkers(&mut self.bunkers);
+    }
+
+
+    fn number_of_bunkers(&self) -> i16 {
+        let mut counter = 0;
+        for bunker in &self.bunkers {
+            if bunker.player_active {
+                counter += 1;
+            }
+        }
+        counter
     }
 
 
