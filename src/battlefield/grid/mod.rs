@@ -100,7 +100,7 @@ impl Grid {
         }
         grid
     }
-    
+
     pub fn add_bunker(&mut self, bunker_num: PlayerID, pos: (usize,usize)) {
         let particle_type = particle_type::Bunker::from_num(bunker_num);
         let (x,y) = pos;
@@ -115,7 +115,7 @@ impl Grid {
             }
         }
     }
-    
+
     fn set_pixel(&mut self, particle_type: ParticleType, x: usize, y: usize) {
         self.grid[y][x].particle_type = particle_type;
     }
@@ -137,7 +137,7 @@ impl Grid {
         let radius = radius as f32;
         for y in y_start..y_end {
             for x in x_start..x_end {
-                if (((x_pos-x).pow(2) + (y_pos-y).pow(2)) as f32).sqrt() < radius {
+                if (((x_pos as i32 - x as i32).pow(2) + (y_pos as i32 - y as i32).pow(2)) as f32).sqrt() < radius {
                     self.grid[y][x].replace_if_possible(particle_type);
                 }
             }

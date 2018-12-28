@@ -24,7 +24,7 @@ pub struct Battlefield {
 
 
 impl Battlefield {
-    
+
     pub fn new() -> Battlefield {
         let mut bunkers = Vec::with_capacity(8);
         for i in 0..8 {
@@ -38,7 +38,7 @@ impl Battlefield {
             rand_gen: rand::FromEntropy::from_entropy(),
         }
     }
-    
+
 
     pub fn stride(&mut self) {
         self.collide();
@@ -47,7 +47,7 @@ impl Battlefield {
         self.grid.update_bunkers(&mut self.bunkers);
         self.stride_shots();
     }
-    
+
 
     pub fn execute_action(&mut self, bunker_id: PlayerID, action: &PlayerAction) {
         match *action {
@@ -75,8 +75,8 @@ impl Battlefield {
             },
         }
     }
-    
-    
+
+
     fn new_bunker(&mut self, bunker_id: PlayerID) {
         let x_pos = self.rand_gen.gen::<usize>() % self.grid.width;
         self.bunkers[bunker_id as usize] = bunker::Bunker::new_at_nowhere(
@@ -84,7 +84,7 @@ impl Battlefield {
         );
         self.grid.add_bunker(bunker_id, (x_pos,0));
     }
-    
+
 
     fn shoot(&mut self, bunker_id: PlayerID) {
         let bunker = &mut self.bunkers[bunker_id as usize];
@@ -98,7 +98,7 @@ impl Battlefield {
 
         bunker.reset_charge();
     }
-    
+
 
     fn collide(&mut self) {
         for i in (0..self.shots.len()).rev() {
@@ -112,7 +112,7 @@ impl Battlefield {
             }
         }
     }
-    
+
 
     fn collide_with_bunkers_true_for_hit(bunkers: &mut Vec<Bunker>,
             shot: &Shot) -> bool {
@@ -127,7 +127,7 @@ impl Battlefield {
 
         return hit;
     }
-    
+
 
     fn collide_with_bunker_true_for_hit(bunker: &mut Bunker, shot: &Shot) -> bool {
         if bunker.hit_at(shot.x_pos as i16, shot.y_pos as i16, shot.get_radius()) {
@@ -136,7 +136,7 @@ impl Battlefield {
         }
         return false;
     }
-    
+
 
     fn stride_shots(&mut self) {
         for i in (0..self.shots.len()).rev() {
@@ -145,5 +145,40 @@ impl Battlefield {
                 self.shots.remove(i);
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use super::shot_type::ShotType;
+    use super::particle_type::ParticleType;
+
+    #[test]
+    fn collide() {
+        let mut battlefield = Battlefield::new();
+        battlefield.new_bunker(1);
+
+        let bunker_start_health;
+        let bunker_radius;
+        {
+            let bunker = battlefield.bunkers.get_mut(0).unwrap();
+            bunker.x_pos = 100;
+            bunker.y_pos = 100;
+            bunker_start_health = bunker.get_health();
+            bunker_radius = bunker.get_radius();
+        }
+
+        let x_pos_of_nearest_impact_without_harm = 100.0 + bunker_radius as f32 + ShotType::ROCKET.get_impact_radius();
+
+        battlefield.grid.grid.get_mut(100).unwrap().get_mut(x_pos_of_nearest_impact_without_harm as usize).unwrap().particle_type = ParticleType::BETON;
+        battlefield.shots.push(Shot::new(ShotType::ROCKET, x_pos_of_nearest_impact_without_harm, 100.0, 0.0, 0));
+        battlefield.collide();
+        assert_eq!(battlefield.bunkers.get_mut(0).unwrap().get_health(), bunker_start_health);
+
+        battlefield.grid.grid.get_mut(100).unwrap().get_mut(x_pos_of_nearest_impact_without_harm as usize - 1).unwrap().particle_type = ParticleType::BETON;
+        battlefield.shots.push(Shot::new(ShotType::ROCKET, x_pos_of_nearest_impact_without_harm-1.0, 100.0, 0.0, 0));
+        battlefield.collide();
+        assert_eq!(battlefield.bunkers.get_mut(0).unwrap().get_health(), bunker_start_health - ShotType::ROCKET.get_harm());
     }
 }
