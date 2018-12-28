@@ -18,6 +18,7 @@ pub struct Bunker {
     health: u8,
     max_health: u8,
     weapons: WeaponDepot,
+    pub player_active: bool, //TODO: move this information into Player
 }
 
 
@@ -34,8 +35,8 @@ impl Bunker {
     pub fn new(particle_type: ParticleType, x_pos: i16, y_pos: i16) -> Bunker {
         return Bunker {
             particle_type,
-            x_pos: x_pos,
-            y_pos: y_pos,
+            x_pos,
+            y_pos,
             radius: 10,
             angle_radians: f32::consts::PI*1.5,
             cannon_length: 20,
@@ -46,6 +47,7 @@ impl Bunker {
             weapons: WeaponDepot::new(
                 [ShotType::CANNON, ShotType::ROCKET, ShotType::SNOW].to_vec()
             ),
+            player_active: false,
         };
     }
 

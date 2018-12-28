@@ -19,8 +19,8 @@ impl Particle {
 
     pub fn new_with_color(particle_type: ParticleType, color: (u8,u8,u8,u8,)) -> Particle {
         return Particle{
-            particle_type: particle_type,
-            color: color,
+            particle_type,
+            color,
             /*, x_speed: 0, y_speed: 0*/
         };
     }
@@ -41,6 +41,7 @@ impl Particle {
         return self.particle_type.can_move_into();
     }
 
+    #[allow(dead_code)]
     pub fn is_bunker(&self) -> bool {
         return self.particle_type.is_bunker();
     }
