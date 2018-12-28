@@ -27,8 +27,8 @@ impl Bunker {
     pub fn new_at_nowhere(particle_type: ParticleType) -> Bunker {
         return Bunker::new(particle_type, 4096, 4096);
     }
-    
-    pub fn alive(&self) -> bool {
+
+    pub fn is_alive(&self) -> bool {
         self.health > 0
     }
 
@@ -75,11 +75,6 @@ impl Bunker {
         return self.radius;
     }
 
-    pub fn hit_at(&self, x_pos: i16, y_pos: i16, radius: u8) -> bool {
-        return self.y_pos > y_pos - radius as i16
-            && (((self.x_pos-x_pos) as f32).powf(2.) + ((self.y_pos-y_pos) as f32).powf(2.)).sqrt() < (self.radius + radius) as f32;
-    }
-
     pub fn get_angle_radians(&self) -> f32 {
         return self.angle_radians;
     }
@@ -108,7 +103,18 @@ impl Bunker {
         return self.health;
     }
 
-    pub fn harm(&mut self, harm_amount: u8) {
+    pub fn would_harm_in_radius(&self, x_pos: i16, y_pos: i16, radius: u8) -> bool {
+        return self.y_pos > y_pos - radius as i16
+            && (((self.x_pos-x_pos) as f32).powf(2.) + ((self.y_pos-y_pos) as f32).powf(2.)).sqrt() < (self.radius + radius) as f32;
+    }
+
+    pub fn harm_if_in_radius(&mut self, x_pos: i16, y_pos: i16, radius: u8, harm_amount: u8) {
+        if self.would_harm_in_radius(x_pos, y_pos, radius) {
+            self.harm(harm_amount);
+        }
+    }
+
+    fn harm(&mut self, harm_amount: u8) {
         self.health = cmp::max(self.health as i16 - harm_amount as i16, 0) as u8;
     }
 

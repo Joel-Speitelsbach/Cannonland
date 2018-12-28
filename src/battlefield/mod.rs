@@ -113,7 +113,7 @@ impl Battlefield {
 
     fn shoot(&mut self, bunker_id: PlayerID) {
         let bunker = &mut self.bunkers[bunker_id as usize];
-        if !bunker.alive() {
+        if !bunker.is_alive() {
             return;
         }
 
@@ -130,36 +130,34 @@ impl Battlefield {
             let x_pos = self.shots[i].x_pos as usize;
             let y_pos = self.shots[i].y_pos as usize;
 
-            if Battlefield::collide_with_bunkers_true_for_hit(&mut self.bunkers, &self.shots[i])
+            if Battlefield::shot_collides_with_bunkers(&self.bunkers, &self.shots[i])
             || self.grid.collides_at_position(x_pos, y_pos) {
                 self.grid.replace_radius_where_possible(self.shots[i].get_impact_target_type(), x_pos, y_pos, self.shots[i].get_impact_radius() as usize);
+                Battlefield::harm_bunkers(&mut self.bunkers, &self.shots[i]);
                 self.shots.remove(i);
             }
         }
     }
 
-
-    fn collide_with_bunkers_true_for_hit(bunkers: &mut Vec<Bunker>,
-            shot: &Shot) -> bool {
-        let mut hit = false;
-
+    fn shot_collides_with_bunkers(bunkers: &Vec<Bunker>, shot: &Shot) -> bool {
         for i in (0..bunkers.len()).rev() {
-            if !bunkers[i].alive() { continue; }
-            if Battlefield::collide_with_bunker_true_for_hit(&mut bunkers[i], shot) {
-                hit = true;
+            if !bunkers[i].is_alive() {
+                continue;
+            }
+            if bunkers[i].would_harm_in_radius(shot.x_pos as i16, shot.y_pos as i16, shot.get_radius()) {
+                return true;
             }
         }
-
-        return hit;
+        return false;
     }
 
-
-    fn collide_with_bunker_true_for_hit(bunker: &mut Bunker, shot: &Shot) -> bool {
-        if bunker.hit_at(shot.x_pos as i16, shot.y_pos as i16, shot.get_radius()) {
-            bunker.harm(shot.get_harm());
-            return true;
+    fn harm_bunkers(bunkers: &mut Vec<Bunker>, shot: &Shot) {
+        for i in (0..bunkers.len()).rev() {
+            if !bunkers[i].is_alive() {
+                continue;
+            }
+            bunkers[i].harm_if_in_radius(shot.x_pos as i16, shot.y_pos as i16, shot.get_impact_radius() as u8, shot.get_harm());
         }
-        return false;
     }
 
 

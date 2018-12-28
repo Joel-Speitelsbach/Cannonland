@@ -172,7 +172,7 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
 
     fn draw_bunkers(&mut self) -> () {
         for bunker in &self.battlefield.bunkers {
-            if !bunker.alive() { continue; }
+            if !bunker.is_alive() { continue; }
 
             let rgba: (u8,u8,u8,u8) = bunker.get_rgba();
             let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
