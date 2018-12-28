@@ -3,9 +3,9 @@ mod particle;
 pub mod particle_type;  // TODO: make private
 
 
-use self::particle_type::{ParticleType,Bunker};
+use self::particle_type::{ParticleType};
 use self::particle::Particle;
-use super::bunker;
+use super::bunker::{Player,Bunker};
 use message::PlayerID;
 use sdl2::image::LoadSurface;
 use sdl2::pixels::PixelFormatEnum;
@@ -23,14 +23,14 @@ pub fn create_test_grid() -> Grid {
     grid.set_rect(ParticleType::ROCK, 350, 140, 400, 240);
     grid.set_rect(ParticleType::BETON, 350, 400, 600, 450);
 
-    grid.set_rect(ParticleType::Bunker(Bunker::Blue), 50, 40, 51, 41);
-    grid.set_rect(ParticleType::Bunker(Bunker::Red), 150, 40, 151, 41);
-    grid.set_rect(ParticleType::Bunker(Bunker::Green), 250, 40, 251, 41);
-    grid.set_rect(ParticleType::Bunker(Bunker::Yellow), 350, 40, 351, 41);
-    grid.set_rect(ParticleType::Bunker(Bunker::Teal), 450, 40, 451, 41);
-    grid.set_rect(ParticleType::Bunker(Bunker::Purple), 550, 40, 551, 41);
-    grid.set_rect(ParticleType::Bunker(Bunker::Grey), 650, 40, 651, 41);
-    grid.set_rect(ParticleType::Bunker(Bunker::Orange), 750, 40, 751, 41);
+    grid.set_rect(ParticleType::Bunker(particle_type::Bunker::Blue), 50, 40, 51, 41);
+    grid.set_rect(ParticleType::Bunker(particle_type::Bunker::Red), 150, 40, 151, 41);
+    grid.set_rect(ParticleType::Bunker(particle_type::Bunker::Green), 250, 40, 251, 41);
+    grid.set_rect(ParticleType::Bunker(particle_type::Bunker::Yellow), 350, 40, 351, 41);
+    grid.set_rect(ParticleType::Bunker(particle_type::Bunker::Teal), 450, 40, 451, 41);
+    grid.set_rect(ParticleType::Bunker(particle_type::Bunker::Purple), 550, 40, 551, 41);
+    grid.set_rect(ParticleType::Bunker(particle_type::Bunker::Grey), 650, 40, 651, 41);
+    grid.set_rect(ParticleType::Bunker(particle_type::Bunker::Orange), 750, 40, 751, 41);
 
     return grid;
 }
@@ -56,28 +56,16 @@ impl Grid {
             }
         }
 
-        return Grid{width: width, height: height, grid: grid_vec};
+        return Grid{width, height, grid: grid_vec};
     }
 
-    pub fn load_from_file(file_name: &String) -> Grid {
+    pub fn load_from_file(file_name: &str) -> Grid {
         let surface = ::sdl2::surface::Surface::from_file(file_name)
             .expect("could not load image");
         let (width, height) = surface.size();
         let canvas = surface.into_canvas().unwrap();
         let pixels = canvas.read_pixels(None, PixelFormatEnum::ABGR8888).unwrap();
         let (width, height) = (width as usize, height as usize);
-
-        let pix = |px: usize| {
-            print!("  ");
-            for i in 0..4 {
-                print!("{} ", pixels[i + px*4]);
-            }
-            println!();
-        };
-        println!("grid::load_from_file()");
-        for px in 0..6 {
-            pix(px);
-        }
 
         let mut grid = Grid::new(width, height);
         for y in 0..height {
@@ -116,7 +104,7 @@ impl Grid {
         }
     }
     
-    fn set_pixel(&mut self, particle_type: ParticleType, x: usize, y: usize) {
+    pub fn set_pixel(&mut self, particle_type: ParticleType, x: usize, y: usize) {
         self.grid[y][x].particle_type = particle_type;
     }
 
@@ -128,7 +116,7 @@ impl Grid {
         return x_pos < self.width && y_pos < self.height;
     }
 
-    pub fn replace_radius_where_possible(&mut self, particle_type: ParticleType, x_pos: usize, y_pos: usize, radius: usize) -> () {
+    pub fn replace_radius_where_possible(&mut self, particle_type: ParticleType, x_pos: usize, y_pos: usize, radius: usize) {
         let x_start = cmp::max(0, x_pos as i32 - radius as i32) as usize;
         let y_start = cmp::max(0, y_pos as i32 - radius as i32) as usize;
         let x_end = cmp::min(self.width, x_pos+radius);
@@ -144,14 +132,14 @@ impl Grid {
         }
     }
 
-    pub fn stride(&mut self) -> () {
+    pub fn stride(&mut self) {
         self.fall_down();
         self.fall_side(1);
         self.fall_side(-1);
         self.clear_blur();
     }
 
-    fn fall_down(&mut self) -> () {
+    fn fall_down(&mut self) {
         for y in (0..self.height-1).rev() {
             for x in 0..self.width {
                 if self.grid[y][x].can_fall() && self.grid[y+1][x].can_move_into() {
@@ -162,7 +150,7 @@ impl Grid {
         }
     }
 
-    fn fall_side(&mut self, sign: i8) -> () {
+    fn fall_side(&mut self, sign: i8) {
         let sign = sign as i32;
 
         let x_start: usize;
@@ -195,7 +183,7 @@ impl Grid {
         }
     }
 
-    fn clear_blur(&mut self) -> () {
+    fn clear_blur(&mut self) {
         for y in 0..self.height {
             for x in 0..self.width {
                 if self.grid[y][x].particle_type == ParticleType::BLUR {
@@ -206,7 +194,7 @@ impl Grid {
         }
     }
 
-    pub fn update_bunkers(&mut self, bunkers: &mut Vec<bunker::Bunker>) -> () {
+    pub fn update_bunkers(&mut self, bunkers: &mut Vec<Player>) {
         for y in 0..self.height {
             for x in 0..self.width {
                 if self.grid[y][x].is_bunker() {
@@ -216,20 +204,35 @@ impl Grid {
         }
     }
 
-    fn update_bunker_at(&mut self, x_pos: usize, y_pos: usize,
-            bunkers: &mut Vec<bunker::Bunker>) -> () {
+    fn update_bunker_at(
+        &mut self,
+        x_pos: usize,
+        y_pos: usize,
+        bunkers: &mut Vec<Player>)
+        -> ()
+    {
         let particle_type = self.grid[y_pos][x_pos].particle_type;
-        let x_pos_i16 = x_pos as i16;
         let y_pos_i16 = y_pos as i16;
+        let x_pos_i16 = x_pos as i16;
 
-        for bunker in bunkers {
-            if bunker.get_color() == particle_type {
-                bunker.x_pos = x_pos_i16;
-                bunker.y_pos = y_pos_i16;
-                return;
+        for (i,bunker) in bunkers.into_iter().enumerate() {
+            let new_bunker = || Bunker::new(particle_type,x_pos_i16,y_pos_i16);
+
+
+            if particle_type::Bunker::from_num(i as u32) != particle_type {
+                continue;
             }
+
+            match bunker {
+                Player::Alive(bunker) => {
+                    bunker.x_pos = x_pos_i16;
+                    bunker.y_pos = y_pos_i16;
+                },
+                Player::NotAlive => {
+                    *bunker = Player::Alive(new_bunker())
+                },
+            };
         }
-        self.grid[y_pos][x_pos].particle_type = ParticleType::EMPTY;
     }
 
 }

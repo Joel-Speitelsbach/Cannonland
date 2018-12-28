@@ -10,6 +10,7 @@ use sdl2::video::{WindowContext,Window};
 use sdl2::image::LoadTexture;
 
 use battlefield::{self,grid,Battlefield,shot_type};
+use battlefield::bunker::Player;
 use util;
 
 
@@ -172,7 +173,10 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
 
     fn draw_bunkers(&mut self) -> () {
         for bunker in &self.battlefield.bunkers {
-            if !bunker.alive() { continue; }
+            let bunker = match bunker {
+                Player::Alive(b) => b,
+                Player::NotAlive => continue,
+            };
 
             let rgba: (u8,u8,u8,u8) = bunker.get_rgba();
             let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);

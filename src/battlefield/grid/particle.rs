@@ -19,8 +19,8 @@ impl Particle {
 
     pub fn new_with_color(particle_type: ParticleType, color: (u8,u8,u8,u8,)) -> Particle {
         return Particle{
-            particle_type: particle_type,
-            color: color,
+            particle_type,
+            color,
             /*, x_speed: 0, y_speed: 0*/
         };
     }

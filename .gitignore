@@ -1,3 +1,5 @@
 Cargo.lock
 target
 nix-shell.sh
+.idea
+.vscode

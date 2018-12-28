@@ -5,6 +5,14 @@ use super::grid::particle_type::ParticleType;
 use super::weapon_depot::WeaponDepot;
 use super::shot_type::ShotType;
 
+
+#[derive(Serialize, Deserialize, Clone)]
+pub enum Player {
+    Alive (Bunker),
+    NotAlive,
+}
+
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Bunker {
     particle_type: ParticleType,
@@ -23,10 +31,6 @@ pub struct Bunker {
 
 impl Bunker {
 
-    pub fn new_at_nowhere(particle_type: ParticleType) -> Bunker {
-        return Bunker::new(particle_type, 4096, 4096);
-    }
-    
     pub fn alive(&self) -> bool {
         self.health > 0
     }
@@ -53,6 +57,7 @@ impl Bunker {
         return self.particle_type.get_rgba();
     }
 
+    #[allow(dead_code)]
     pub fn get_color(&self) -> ParticleType {
         return self.particle_type;
     }
@@ -107,7 +112,10 @@ impl Bunker {
     }
 
     pub fn harm(&mut self, harm_amount: u8) {
-        self.health = cmp::max(self.health as i16 - harm_amount as i16, 0) as u8;
+        self.health = cmp::max(
+            self.health as i16 - harm_amount as i16,
+            0
+        ) as u8;
     }
 
     #[allow(dead_code)]
