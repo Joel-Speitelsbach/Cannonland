@@ -12,6 +12,7 @@ mod network;
 mod server;
 mod client;
 mod util;
+mod config;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -27,8 +28,8 @@ fn main() {
     match args[1].as_str() {
         "particle_test" => battlefield::grid::particle_test::run(),
         "present" => serverless_client::run(&args[2..]),
-        "client" => client::run(&args[2..]),
-        "server" => server::run(&args[2..]),
+        "client" => client::run(args[2].clone()),
+        "server" => server::run(Some(args[2].clone())),
         x => println!("module name {} does not exist", x),
     }
 }

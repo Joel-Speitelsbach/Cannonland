@@ -5,18 +5,13 @@ use network;
 use super::message::{ServerMessage,ClientMessage,ServerMessageInit};
 use present::{self,Presenter,PresenterState};
 use control::{Controller};
+use config;
 
 
-pub fn run(opts: &[String]) {
-    println!("opts: {:?}", opts);
-    
+pub fn run(server_ip: String) {
+
     // connect to server
-    let ip_addr = if opts.len() == 0 {
-        "127.0.0.1".to_string()
-    } else {
-        opts[0].clone()
-    };
-    let other = match network::Simple::connect_to_server(ip_addr + ":8080") {
+    let other = match network::Simple::connect_to_server(server_ip + ":" + config::PORT) {
         Ok(ok) => ok,
         Err(err) => {
             println!("failed to connect to server");
@@ -25,14 +20,14 @@ pub fn run(opts: &[String]) {
         },
     };
     other.set_nonblocking(false).unwrap();
-    
+
     // recieve init message
     let init_msg: ServerMessageInit = network::Simple::recieve(&other)
         .expect("failed to recieve init msg");
     println!("init_msg.player_id: {:?}", init_msg.player_id);
     let mut battlefield = init_msg.battlefield;
-    
-    
+
+
     // init game
     let win_size = (battlefield.grid.width as u32, battlefield.grid.height as u32);
     let sdl_context = sdl2::init().unwrap();
@@ -40,9 +35,9 @@ pub fn run(opts: &[String]) {
     let texture_creator = canvas.texture_creator();
     let mut presenter_state = PresenterState::new(canvas, &texture_creator);
     let mut controller = Controller::new(&sdl_context);
-    
+
     'mainloop: loop {
-        
+
         // recieve
         let msg: ServerMessage = match network::Simple::recieve(&other) {
             Ok(msg) => {
@@ -59,8 +54,8 @@ pub fn run(opts: &[String]) {
         //     println!("server: {:?}", &msg);
         // }
         let messages = msg.client_messages;
-        
-        
+
+
         // update battlefield
         for (player_id,client_message) in &messages {
             for action in &client_message.actions {
@@ -68,13 +63,13 @@ pub fn run(opts: &[String]) {
             }
         }
         battlefield.stride();
-        
-        
+
+
         // present battlefield
         let mut presenter = Presenter::new(&mut presenter_state, &mut battlefield);
         presenter.present();
-        
-        
+
+
         // events
         for event in sdl_context.event_pump().unwrap().poll_iter() {
             presenter.respond_to(&event);
@@ -86,7 +81,7 @@ pub fn run(opts: &[String]) {
                 _ => {}
             }
         }
-        
+
         // send
         let actions = controller.poll_actions();
         let msg = ClientMessage {

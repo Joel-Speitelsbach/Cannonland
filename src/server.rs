@@ -5,22 +5,17 @@ use network;
 use super::message::{ServerMessage,ClientMessage,PlayerID,ServerMessageInit,PlayerAction};
 use battlefield::Battlefield;
 use std::cmp;
+use config;
 
 
-pub fn run(opts: &[String]) {
-    println!("opts: {:?}", opts);
+pub fn run(server_ip: Option<String>) {
     let mut clients: HashMap<PlayerID,network::OtherSide> = HashMap::new();
-    
-    let ip_addr = if opts.len() == 0 {
-        "127.0.0.1".to_string()
-    } else {
-        opts[0].clone()
-    };
-    let server_handle = network::Simple::start_server_with_addr(ip_addr + ":8080").unwrap();
-    
+
+    let server_handle = network::Simple::start_server_with_addr(server_ip.unwrap_or("127.0.0.1".to_string()) + ":" + config::PORT).unwrap();
+
     // create battlefield
     let mut battlefield = Battlefield::new();
-    
+
     // main loop
     loop {
         // recieve messages from clients
@@ -31,8 +26,8 @@ pub fn run(opts: &[String]) {
                 messages.push((*id,msg));
             }
         }
-        
-        
+
+
         // (maybe) add new client
         if clients.len() == 0 {
             server_handle.set_nonblocking(false).unwrap();
@@ -44,7 +39,7 @@ pub fn run(opts: &[String]) {
                 battlefield: battlefield.clone(),
             };
             network::Simple::send(&client, &init_message).unwrap();
-            
+
             clients.insert(next_player_id, client);
             messages.push((next_player_id,
                 ClientMessage {
@@ -53,8 +48,8 @@ pub fn run(opts: &[String]) {
             ));
         }
         server_handle.set_nonblocking(true).unwrap();
-            
-            
+
+
         // resend client messages
         let msg = ServerMessage {
             client_messages: messages.clone(),
@@ -70,8 +65,8 @@ pub fn run(opts: &[String]) {
         for id in clients_to_remove {
             clients.remove(&id);
         }
-        
-        
+
+
         // update battlefield
         for (player_id,client_message) in &messages {
             for action in &client_message.actions {
@@ -84,7 +79,7 @@ pub fn run(opts: &[String]) {
 
 fn next_player_id<T>(player_map: &HashMap<PlayerID, T>) -> PlayerID {
     if player_map.is_empty() { return 0 };
-    
+
     let mut min = 10000000;
     for id in player_map.keys() {
         min = cmp::min(min,*id);
