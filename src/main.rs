@@ -29,7 +29,7 @@ fn main() {
         "particle_test" => battlefield::grid::particle_test::run(),
         "present" => serverless_client::run(&args[2..]),
         "client" => client::run(args[2].clone()),
-        "server" => server::run(Some(args[2].clone())),
+        "server" => server::run(args[2].clone()),
         x => println!("module name {} does not exist", x),
     }
 }

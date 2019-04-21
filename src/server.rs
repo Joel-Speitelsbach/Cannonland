@@ -8,10 +8,10 @@ use std::cmp;
 use config;
 
 
-pub fn run(server_ip: Option<String>) {
+pub fn run(server_ip: String) {
     let mut clients: HashMap<PlayerID,network::OtherSide> = HashMap::new();
 
-    let server_handle = network::Simple::start_server_with_addr(server_ip.unwrap_or("127.0.0.1".to_string()) + ":" + config::PORT).unwrap();
+    let server_handle = network::Simple::start_server_with_addr(server_ip + ":" + config::PORT).unwrap();
 
     // create battlefield
     let mut battlefield = Battlefield::new();
