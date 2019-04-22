@@ -43,6 +43,7 @@ pub fn new_window(sdl2_video: &sdl2::VideoSubsystem, size: (u32,u32)) -> Canvas<
 pub struct PresenterState<'resources> {
     canvas: sdl2::render::Canvas<Window>,
     missile: Texture<'resources>,
+    grid_texture: Texture<'resources>,
     texture_creator: &'resources TextureCreator<WindowContext>,
 
     prof_canvas_present: util::time::Prof,
@@ -53,13 +54,30 @@ impl<'resources> PresenterState<'resources> {
     pub fn new (
         canvas: Canvas<Window>,
         texture_creator: &'resources TextureCreator<WindowContext>,
+        battlefield: &Battlefield,
     ) -> PresenterState<'resources> {
         let missile = texture_creator.load_texture("./pics/missile.png").unwrap();
+
+        let (width,height) = (
+                battlefield.grid.width,
+                battlefield.grid.height,
+            );
+            
+        // create texture. the "Blend" model makes sure
+        // that the background ist not overwritten with black
+        let mut grid_texture = texture_creator.create_texture(
+                 PixelFormatEnum::RGBA8888,
+                 sdl2::render::TextureAccess::Static,
+                 width as u32,
+                 height as u32,
+            ).unwrap();
+        grid_texture.set_blend_mode(BlendMode::Blend);
 
         PresenterState {
             canvas,
             missile,
             texture_creator,
+            grid_texture,
             prof_canvas_present: util::time::Prof::just_label("_canvas_present"),
             prof_canvas_copy: util::time::Prof::just_label("_canvas_copy"),
             prof_pixel_data: util::time::Prof::just_label("_pixel_data"),
@@ -148,20 +166,10 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
         }
         self.state.prof_pixel_data.pause();
 
-        // create texture. the "Blend" model makes sure
-        // that the background ist not overwritten with black
-        let mut texture = self.state.texture_creator.create_texture(
-                 PixelFormatEnum::RGBA8888,
-                 sdl2::render::TextureAccess::Static,
-                 width as u32,
-                 height as u32,
-            ).unwrap();
-        texture.set_blend_mode(BlendMode::Blend);
-
         // copy pixel_data into texture then into canvas
         self.state.prof_canvas_copy.start();
-        texture.update(None, &pixel_data, width*4).unwrap();
-        self.state.canvas.copy(&texture,None,None).unwrap();
+        self.state.grid_texture.update(None, &pixel_data, width*4).unwrap();
+        self.state.canvas.copy(&self.state.grid_texture,None,None).unwrap();
         self.state.prof_canvas_copy.pause();
     }
 }

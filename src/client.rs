@@ -33,7 +33,7 @@ pub fn run(server_ip: String) {
     let sdl_context = sdl2::init().unwrap();
     let canvas = present::new_window(&sdl_context.video().unwrap(), win_size);
     let texture_creator = canvas.texture_creator();
-    let mut presenter_state = PresenterState::new(canvas, &texture_creator);
+    let mut presenter_state = PresenterState::new(canvas, &texture_creator, &battlefield);
     let mut controller = Controller::new(&sdl_context);
 
     'mainloop: loop {
