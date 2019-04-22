@@ -4,6 +4,7 @@ extern crate sdl2;
 extern crate serde_derive;
 
 mod present;
+mod program;
 mod battlefield;
 mod message;
 mod control;
