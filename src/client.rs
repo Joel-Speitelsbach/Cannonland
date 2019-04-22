@@ -13,15 +13,19 @@ use std::marker::PhantomData;
 type ConnectError = String;
 type StrideError = String;
 
-struct Client {
+pub struct Client {
     server: network::OtherSide,
 }
 
 impl Client {
-    fn connect_to_server(server_ip: String) -> Result<(Client,ServerMessageInit),ConnectError> {
+    pub fn connect_to_server(server_ip: String) -> Result<(Client,ServerMessageInit),ConnectError> {
         Err("not implemented".to_string())
     }
-    fn stride(&self, client_msg: ClientMessage) -> Result<ServerMessage,StrideError> {
+    pub fn stride(&self, client_msg: ClientMessage) -> Result<ServerMessage,StrideError> {
+        /*
+         * 1. recieve from server
+         * 2. send to server
+         */
         Err("not implemented".to_string())
     }
 }

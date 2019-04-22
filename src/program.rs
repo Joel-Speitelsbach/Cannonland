@@ -11,8 +11,9 @@ use client::Client;
 
 pub fn run() {
 
+    // connect to server
     let (client,serverMsgInit) = Client::connect_to_server("localhost".to_string()).unwrap();
-    let battlefield = serverMsgInit.battlefield;
+    let ServerMessageInit{ mut battlefield, player_id } = serverMsgInit;
 
     // init battlefield
     let win_size = (battlefield.grid.width as u32, battlefield.grid.height as u32);
@@ -22,17 +23,22 @@ pub fn run() {
     let mut presenter_state = PresenterState::new(canvas, &texture_creator, &battlefield);
     let mut controller = Controller::new(&sdl_context);
 
+    // temp variables
+    let mut msg_for_server = ClientMessage{ actions: vec!() };
+
     'mainloop: loop {
-        client.stride(client_msg: ClientMessage)
+        // message from server
+        let server_msg = client.stride(msg_for_server).unwrap();
+
 
         // update battlefield
-        for (player_id,client_message) in &messages {
+        for (player_id,client_message) in &server_msg.client_messages {
             for action in &client_message.actions {
                 battlefield.execute_action(*player_id, action);
             }
         }
         battlefield.stride();
-
+ 
 
         // present battlefield
         let mut presenter = Presenter::new(&mut presenter_state, &mut battlefield);
@@ -50,5 +56,12 @@ pub fn run() {
                 _ => {}
             }
         }
+
+
+        // msg for server
+        let actions = controller.poll_actions();
+        msg_for_server = ClientMessage {
+            actions
+        };
     }
 }
