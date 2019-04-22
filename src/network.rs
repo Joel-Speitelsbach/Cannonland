@@ -6,6 +6,7 @@ extern crate serde;
 use self::serde::{Serialize, Deserialize};
 extern crate bincode;
 use self::bincode::{Infinite, Result as Result_};
+use config;
 
 
 pub type OtherSide = TcpStream;
@@ -22,7 +23,7 @@ impl Simple {
             where for<'de> D: Deserialize<'de> {
         bincode::deserialize_from(&mut other, bincode::Infinite)
     }
-    
+
     pub fn start_server_with_addr(addr: String) -> Result<Server, Error> {
         match TcpListener::bind(&addr) {
             Ok(x) => {
@@ -35,9 +36,9 @@ impl Simple {
 
     #[allow(dead_code)]
     pub fn start_server() -> Result<Server, Error> {
-        Simple::start_server_with_addr("127.0.0.1:8080".to_string())
+        Simple::start_server_with_addr("127.0.0.1:".to_string()  + config::PORT)
     }
-    
+
     pub fn poll_for_client(server: &Server) -> Option<OtherSide> {
         match server.accept() {
             Ok((stream,_)) => {
@@ -48,7 +49,7 @@ impl Simple {
             Err(_) => None,
         }
     }
-    
+
     pub fn connect_to_server(addr: String) -> Result<OtherSide, Error> {
         let connect = TcpStream::connect(&addr);
         if let Ok(stream) = connect {
