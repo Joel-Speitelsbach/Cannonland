@@ -44,7 +44,7 @@ pub struct PresenterState<'resources> {
     canvas: sdl2::render::Canvas<Window>,
     missile: Texture<'resources>,
     grid_texture: Texture<'resources>,
-    texture_creator: &'resources TextureCreator<WindowContext>,
+    _texture_creator: &'resources TextureCreator<WindowContext>,
 
     prof_canvas_present: util::time::Prof,
     prof_canvas_copy: util::time::Prof,
@@ -53,10 +53,10 @@ pub struct PresenterState<'resources> {
 impl<'resources> PresenterState<'resources> {
     pub fn new (
         canvas: Canvas<Window>,
-        texture_creator: &'resources TextureCreator<WindowContext>,
+        _texture_creator: &'resources TextureCreator<WindowContext>,
         battlefield: &Battlefield,
     ) -> PresenterState<'resources> {
-        let missile = texture_creator.load_texture("./pics/missile.png").unwrap();
+        let missile = _texture_creator.load_texture("./pics/missile.png").unwrap();
 
         let (width,height) = (
                 battlefield.grid.width,
@@ -65,7 +65,7 @@ impl<'resources> PresenterState<'resources> {
             
         // create texture. the "Blend" model makes sure
         // that the background ist not overwritten with black
-        let mut grid_texture = texture_creator.create_texture(
+        let mut grid_texture = _texture_creator.create_texture(
                  PixelFormatEnum::RGBA8888,
                  sdl2::render::TextureAccess::Static,
                  width as u32,
@@ -76,7 +76,7 @@ impl<'resources> PresenterState<'resources> {
         PresenterState {
             canvas,
             missile,
-            texture_creator,
+            _texture_creator,
             grid_texture,
             prof_canvas_present: util::time::Prof::just_label("_canvas_present"),
             prof_canvas_copy: util::time::Prof::just_label("_canvas_copy"),
