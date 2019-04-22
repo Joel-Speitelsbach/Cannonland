@@ -6,10 +6,13 @@ use present::{self,Presenter,PresenterState};
 use control::{Controller};
 use config;
 use battlefield::Battlefield;
-use client;
+use client::Client;
 
 
 pub fn run() {
+
+    let (client,serverMsgInit) = Client::connect_to_server("localhost".to_string()).unwrap();
+    let battlefield = serverMsgInit.battlefield;
 
     // init battlefield
     let win_size = (battlefield.grid.width as u32, battlefield.grid.height as u32);
@@ -20,7 +23,7 @@ pub fn run() {
     let mut controller = Controller::new(&sdl_context);
 
     'mainloop: loop {
-
+        client.stride(client_msg: ClientMessage)
 
         // update battlefield
         for (player_id,client_message) in &messages {
@@ -47,6 +50,5 @@ pub fn run() {
                 _ => {}
             }
         }
-
     }
 }
