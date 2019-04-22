@@ -6,8 +6,27 @@ use super::message::{ServerMessage,ClientMessage,ServerMessageInit};
 use present::{self,Presenter,PresenterState};
 use control::{Controller};
 use config;
+use battlefield::Battlefield;
+use std::marker::PhantomData;
+ 
 
+type ConnectError = String;
+type StrideError = String;
 
+struct Client {
+    server: network::OtherSide,
+}
+
+impl Client {
+    fn connect_to_server(server_ip: String) -> Result<(Client,ServerMessageInit),ConnectError> {
+        Err("not implemented".to_string())
+    }
+    fn stride(&self, client_msg: ClientMessage) -> Result<ServerMessage,StrideError> {
+        Err("not implemented".to_string())
+    }
+}
+
+ 
 pub fn run(server_ip: String) {
 
     // connect to server
