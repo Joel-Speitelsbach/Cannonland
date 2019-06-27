@@ -31,6 +31,7 @@ fn main() {
         "present" => serverless_client::run(&args[2..]),
         "client" => client::run(args[2].clone()),
         "server" => server::run(args[2].clone()),
+        "program" => program::run(),
         x => println!("module name {} does not exist", x),
     }
 }
