@@ -13,8 +13,10 @@ use battlefield::{self,grid,Battlefield,shot_type};
 use util;
 
 
-pub fn new_window(sdl2_video: &sdl2::VideoSubsystem, size: (u32,u32)) -> Canvas<Window> {
+pub fn new_window(sdl2_video: &sdl2::VideoSubsystem, size: (i32,i32)) -> Canvas<Window> {
     let (width, height) = size;
+    let width = width as u32;
+    let height = height as u32;
     let video_subsystem = sdl2_video;
     let window =
         video_subsystem
@@ -54,14 +56,11 @@ impl<'resources> PresenterState<'resources> {
     pub fn new (
         canvas: Canvas<Window>,
         _texture_creator: &'resources TextureCreator<WindowContext>,
-        battlefield: &Battlefield,
+        size: (i32,i32),
     ) -> PresenterState<'resources> {
         let missile = _texture_creator.load_texture("./pics/missile.png").unwrap();
 
-        let (width,height) = (
-                battlefield.grid.width,
-                battlefield.grid.height,
-            );
+        let (width,height) = size;
             
         // create texture. the "Blend" model makes sure
         // that the background ist not overwritten with black

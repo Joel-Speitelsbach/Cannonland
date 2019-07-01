@@ -169,6 +169,10 @@ impl Battlefield {
             }
         }
     }
+
+    pub fn size(&self) -> (i32,i32) {
+        (self.grid.width as i32, self.grid.height as i32)
+    }
 }
 
 #[cfg(test)]
