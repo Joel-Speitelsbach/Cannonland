@@ -18,9 +18,9 @@ pub fn run(_: &[String]) {
  
     //init presenter
     let sdl_context = sdl2::init().unwrap();
-    let canvas = present::new_window(&sdl_context.video().unwrap(), battlefield.size());
+    let mut canvas = present::new_window(&sdl_context.video().unwrap(), battlefield.size());
     let texture_creator = canvas.texture_creator();
-    let mut presenter_state = PresenterState::new(canvas, &texture_creator, battlefield.size());
+    let mut presenter_state = PresenterState::new(&mut canvas, &texture_creator, battlefield.size());
     
     //init controller
     let mut controller = Controller::new(&sdl_context);

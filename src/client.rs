@@ -1,14 +1,29 @@
-use sdl2;
-use sdl2::keyboard::Keycode;
-use sdl2::event::{Event};
-use network;
-use super::message::{ServerMessage,ClientMessage,ServerMessageInit};
-use present::{self,Presenter,PresenterState};
+use battlefield;
 use control::{Controller};
 use config;
+use network;
+use message::{ServerMessage,ClientMessage,ServerMessageInit};
+use present::{self,Presenter,PresenterState};
+use program;
+use sdl2::keyboard::Keycode;
+use sdl2::event::{Event};
 
- 
-pub fn run(server_ip: String) {
+
+pub fn run_standalone(server_ip: String) {
+    // init window
+    let win_size: (i32,i32) = battlefield::SIZE; 
+    let sdl_context = sdl2::init().unwrap();
+    let canvas = present::new_window(&sdl_context.video().unwrap(), win_size);
+    let mut window = program::Window {
+        sdl_context,
+        canvas,
+    };
+
+    run(server_ip, &mut window);
+}
+
+
+pub fn run(server_ip: String, window: &mut program::Window) {
 
     // connect to server
     let other = match network::Simple::connect_to_server(server_ip + ":" + config::PORT) {
@@ -29,11 +44,9 @@ pub fn run(server_ip: String) {
 
 
     // init game
-    let sdl_context = sdl2::init().unwrap();
-    let canvas = present::new_window(&sdl_context.video().unwrap(), battlefield.size());
-    let texture_creator = canvas.texture_creator();
-    let mut presenter_state = PresenterState::new(canvas, &texture_creator, battlefield.size());
-    let mut controller = Controller::new(&sdl_context);
+    let texture_creator = window.canvas.texture_creator();
+    let mut presenter_state = PresenterState::new(&mut window.canvas, &texture_creator, battlefield.size());
+    let mut controller = Controller::new(&window.sdl_context);
 
     'mainloop: loop {
 
@@ -70,7 +83,7 @@ pub fn run(server_ip: String) {
 
 
         // events
-        for event in sdl_context.event_pump().unwrap().poll_iter() {
+        for event in window.sdl_context.event_pump().unwrap().poll_iter() {
             presenter.respond_to(&event);
             controller.use_event(&event);
             match event {

@@ -13,16 +13,17 @@ use battlefield::{self,grid,Battlefield,shot_type};
 use util;
 
 
+const WIN_SCALE: i32 = 2;
+
+
 pub fn new_window(sdl2_video: &sdl2::VideoSubsystem, size: (i32,i32)) -> Canvas<Window> {
     let (width, height) = size;
-    let width = width as u32;
-    let height = height as u32;
     let video_subsystem = sdl2_video;
     let window =
         video_subsystem
         .window("Cannonland",
-            width ,
-            height)
+            width as u32,
+            height as u32)
         .build()
         .unwrap();
     let mut canvas =
@@ -32,32 +33,36 @@ pub fn new_window(sdl2_video: &sdl2::VideoSubsystem, size: (i32,i32)) -> Canvas<
         .build()
         .unwrap();
     canvas.window_mut().set_size(
-        width  * 2,
-        height * 2,
+        (width  * WIN_SCALE) as u32,
+        (height * WIN_SCALE) as u32,
     ).unwrap();
     canvas.window_mut().set_position(
         sdl2::video::WindowPos::Centered,
         sdl2::video::WindowPos::Centered);
+    canvas.set_scale(
+        WIN_SCALE as f32, 
+        WIN_SCALE as f32
+    ).unwrap();
     canvas
 }
 
 
-pub struct PresenterState<'resources> {
-    canvas: sdl2::render::Canvas<Window>,
-    missile: Texture<'resources>,
-    grid_texture: Texture<'resources>,
-    _texture_creator: &'resources TextureCreator<WindowContext>,
+pub struct PresenterState<'res> {
+    canvas: &'res mut sdl2::render::Canvas<Window>,
+    missile: Texture<'res>,
+    grid_texture: Texture<'res>,
+    _texture_creator: &'res TextureCreator<WindowContext>,
 
     prof_canvas_present: util::time::Prof,
     prof_canvas_copy: util::time::Prof,
     prof_pixel_data: util::time::Prof,
 }
-impl<'resources> PresenterState<'resources> {
+impl<'res> PresenterState<'res> {
     pub fn new (
-        canvas: Canvas<Window>,
-        _texture_creator: &'resources TextureCreator<WindowContext>,
+        canvas: &'res mut Canvas<Window>,
+        _texture_creator: &'res TextureCreator<WindowContext>,
         size: (i32,i32),
-    ) -> PresenterState<'resources> {
+    ) -> PresenterState<'res> {
         let missile = _texture_creator.load_texture("./pics/missile.png").unwrap();
 
         let (width,height) = size;
@@ -85,19 +90,19 @@ impl<'resources> PresenterState<'resources> {
 }
 
 
-pub struct Presenter<'st,'b, 'resources> {
-    state: &'st mut PresenterState<'resources>,
+pub struct Presenter<'st,'b, 'res> {
+    state: &'st mut PresenterState<'res>,
     battlefield: &'b Battlefield,
 }
-impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
+impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
     pub fn new(
-        presenter_state: &'st mut PresenterState<'resources>,
+        state: &'st mut PresenterState<'res>,
         battlefield: &'b Battlefield,
-    ) -> Presenter<'st,'b, 'resources>
+    ) -> Presenter<'st,'b, 'res>
     {
-        Presenter{
-            state: presenter_state,
-            battlefield: battlefield,
+        Presenter {
+            state,
+            battlefield,
         }
     }
 
@@ -113,14 +118,14 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
 
     pub fn respond_to(&mut self, event: &Event) {
         match *event {
-            Event::Window{win_event: WindowEvent::Resized
-                    (width,height),..} =>
-                self.rescale_canvas(width,height,),
+            Event::Window{win_event: WindowEvent::Resized (_,_), ..} => 
+                self.rescale_canvas(),
             _ => (),
         }
     }
 
-    fn rescale_canvas(&mut self, x: i32, y: i32) {
+    fn rescale_canvas(&mut self) {
+        let (x,y) = self.state.canvas.window().size();
         self.state.canvas.set_scale
             (x as f32 / self.battlefield.grid.width  as f32,
              y as f32 / self.battlefield.grid.height as f32).unwrap();
@@ -129,7 +134,7 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
 
 
 // draw grid
-impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
+impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
     fn draw_grid(&mut self) -> () {
         self.draw_background();
         self.draw_particles();
@@ -175,7 +180,7 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
 
 
 // draw bunkers
-impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
+impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
 
     fn draw_bunkers(&mut self) -> () {
         for bunker in &self.battlefield.bunkers {
@@ -250,7 +255,7 @@ impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
 }
 
 // draw shots
-impl<'st,'b, 'resources> Presenter<'st,'b, 'resources> {
+impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
 
     fn draw_shots(&mut self) -> () {
         for shot in &self.battlefield.shots {
