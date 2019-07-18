@@ -53,9 +53,9 @@ pub struct PresenterState<'res> {
     grid_texture: Texture<'res>,
     _texture_creator: &'res TextureCreator<WindowContext>,
 
-    prof_canvas_present: util::time::Prof,
-    prof_canvas_copy: util::time::Prof,
-    prof_pixel_data: util::time::Prof,
+    prof_canvas_present: util::time::variance::Prof,
+    prof_canvas_copy:    util::time::variance::Prof,
+    prof_pixel_data:     util::time::variance::Prof,
 }
 impl<'res> PresenterState<'res> {
     pub fn new (
@@ -82,9 +82,9 @@ impl<'res> PresenterState<'res> {
             missile,
             _texture_creator,
             grid_texture,
-            prof_canvas_present: util::time::Prof::just_label("_canvas_present"),
-            prof_canvas_copy: util::time::Prof::just_label("_canvas_copy"),
-            prof_pixel_data: util::time::Prof::just_label("_pixel_data"),
+            prof_canvas_present: util::time::variance::Prof::just_label("_canvas_present"),
+            prof_canvas_copy:    util::time::variance::Prof::just_label("_canvas_copy"),
+            prof_pixel_data:     util::time::variance::Prof::just_label("_pixel_data"),
         }
     }
 }

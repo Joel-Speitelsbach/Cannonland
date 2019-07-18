@@ -28,8 +28,8 @@ pub fn run(_: &[String]) {
     //init misc
     let mut fps_manager = sdl2::gfx::framerate::FPSManager::new();
     fps_manager.set_framerate(60).unwrap();
-    let mut prof_present = util::time::Prof::just_label("present");
-    let mut prof_alles = util::time::Prof::just_label("alles");
+    let mut prof_present = util::time::variance::Prof::just_label("present");
+    let mut prof_alles   = util::time::variance::Prof::just_label("alles");
 
 
     'mainloop: loop {
