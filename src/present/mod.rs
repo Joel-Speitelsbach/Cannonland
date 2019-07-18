@@ -67,7 +67,7 @@ impl<'res> PresenterState<'res> {
 
         let (width,height) = size;
             
-        // create texture. the "Blend" model makes sure
+        // create texture. the "Blend" mode makes sure
         // that the background ist not overwritten with black
         let mut grid_texture = _texture_creator.create_texture(
                  PixelFormatEnum::RGBA8888,
@@ -173,7 +173,7 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
         // copy pixel_data into texture then into canvas
         self.state.prof_canvas_copy.start();
         self.state.grid_texture.update(None, &pixel_data, width*4).unwrap();
-        self.state.canvas.copy(&self.state.grid_texture,None,None).unwrap();
+        self.state.canvas.copy(&self.state.grid_texture, None, None).unwrap();
         self.state.prof_canvas_copy.pause();
     }
 }
@@ -266,7 +266,13 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
                     self.draw_default_shot(shot_type, shot.x_pos as i16, shot.y_pos as i16);
                 },
                 shot_type::ShotType::ROCKET  => {
-                    Self::draw_texture_shot(&mut self.state.canvas, &self.state.missile, shot.x_pos as i32, shot.y_pos as i32, 8, 16, shot.get_angle() as f64);
+                    Self::draw_texture_shot(
+                        &mut self.state.canvas, 
+                        &self.state.missile, 
+                        shot.x_pos as i32, shot.y_pos as i32, 
+                        8, 16, 
+                        shot.get_angle() as f64
+                    );
                 },
                 shot_type::ShotType::SNOW => {
                     self.draw_default_shot(shot_type, shot.x_pos as i16, shot.y_pos as i16);
@@ -279,7 +285,13 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
         self.state.canvas.filled_circle(x_pos, y_pos, shot_type.get_radius() as i16, shot_type.get_rgba()).unwrap();
     }
 
-    fn draw_texture_shot(canvas: &mut Canvas<Window>, texture: &Texture, x_pos: i32, y_pos: i32, width: u32, height: u32, angle: f64) {
+    fn draw_texture_shot(
+        canvas: &mut Canvas<Window>, 
+        texture: &Texture, 
+        x_pos: i32, y_pos: i32,
+        width: u32, height: u32, 
+        angle: f64
+    ) {
         let x_offset = width as i32/2;
         let y_offset = height as i32/2;
         let destination = Rect::new(x_pos-x_offset, y_pos-y_offset, width, height);
