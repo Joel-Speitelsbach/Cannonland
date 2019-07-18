@@ -26,7 +26,7 @@ pub fn run_standalone(server_ip: String) {
 pub fn run(server_ip: String, window: &mut program::Window) {
 
     // connect to server
-    let other = match network::Simple::connect_to_server(server_ip + ":" + config::PORT) {
+    let other = match network::connect_to_server(server_ip + ":" + config::PORT) {
         Ok(ok) => ok,
         Err(err) => {
             println!("failed to connect to server");
@@ -34,10 +34,9 @@ pub fn run(server_ip: String, window: &mut program::Window) {
             return;
         },
     };
-    other.set_nonblocking(false).unwrap();
 
     // recieve init message
-    let init_msg: ServerMessageInit = network::Simple::recieve(&other)
+    let init_msg: ServerMessageInit = network::recieve(&other)
         .expect("failed to recieve init msg");
     println!("init_msg.player_id: {:?}", init_msg.player_id);
     let mut battlefield = init_msg.battlefield;
@@ -51,7 +50,7 @@ pub fn run(server_ip: String, window: &mut program::Window) {
     'mainloop: loop {
 
         // recieve
-        let msg: ServerMessage = match network::Simple::recieve(&other) {
+        let msg: ServerMessage = match network::recieve(&other) {
             Ok(msg) => {
                 msg
             }
@@ -62,9 +61,6 @@ pub fn run(server_ip: String, window: &mut program::Window) {
                 break 'mainloop
             }
         };
-        // if msg.client_messages.len() > 0 {
-        //     println!("server: {:?}", &msg);
-        // }
         let messages = msg.client_messages;
 
 
@@ -99,7 +95,7 @@ pub fn run(server_ip: String, window: &mut program::Window) {
         let msg = ClientMessage {
             actions: actions,
         };
-        if let Err(err) = network::Simple::send(&other, &msg) {
+        if let Err(err) = network::send(&other, &msg) {
             // connection lost
             println!("server disconnected");
             println!("debug info: {}", err);
