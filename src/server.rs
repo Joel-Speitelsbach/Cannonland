@@ -20,8 +20,7 @@ pub fn run() {
         // recieve messages from clients
         let mut messages: Vec<(PlayerID,ClientMessage)> = Vec::new();
         for (id, cl) in &clients {
-            if let Ok(msg) = network::recieve(&cl) {
-                // println!("client nr.{}: {:?}", &id, &msg);
+            if let Ok(msg) = cl.recieve() {
                 messages.push((*id,msg));
             }
         }
@@ -29,9 +28,9 @@ pub fn run() {
 
         // (maybe) add new client
         let client = if clients.len() == 0 {
-            network::wait_for_client(&server_handle)
+            server_handle.wait_for_client()
         } else {
-            network::poll_for_client(&server_handle)
+            server_handle.poll_for_client()
         };
         if let Some(client) = client {
             let next_player_id = next_player_id(&clients);
@@ -39,7 +38,7 @@ pub fn run() {
                 player_id: next_player_id,
                 battlefield: battlefield.clone(),
             };
-            network::send(&client, &init_message).unwrap();
+            client.send_large(&init_message).unwrap();
 
             clients.insert(next_player_id, client);
             messages.push((next_player_id,
@@ -56,7 +55,7 @@ pub fn run() {
         };
         let mut clients_to_remove = vec!();
         for (id, cl) in &clients {
-            if let Err(err) = network::send(&cl, &msg) {
+            if let Err(err) = cl.send(&msg) {
                 println!("client {} disconnected", &id);
                 println!("debug info: {}", err);
                 clients_to_remove.push(id.clone());
@@ -76,6 +75,7 @@ pub fn run() {
         battlefield.stride();
     }
 }
+
 
 fn next_player_id<T>(player_map: &HashMap<PlayerID, T>) -> PlayerID {
     if player_map.is_empty() { return 0 };

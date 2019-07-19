@@ -1,6 +1,5 @@
 use battlefield;
 use control::{Controller};
-use config;
 use network;
 use message::{ServerMessage,ClientMessage,ServerMessageInit};
 use present::{self,Presenter,PresenterState};
@@ -9,7 +8,7 @@ use sdl2::keyboard::Keycode;
 use sdl2::event::{Event};
 
 
-pub fn run_standalone(server_ip: String) {
+pub fn run_standalone(server_ip: &str) {
     // init window
     let win_size: (i32,i32) = battlefield::SIZE; 
     let sdl_context = sdl2::init().unwrap();
@@ -23,10 +22,10 @@ pub fn run_standalone(server_ip: String) {
 }
 
 
-pub fn run(server_ip: String, window: &mut program::Window) {
+pub fn run(server_ip: &str, window: &mut program::Window) {
 
     // connect to server
-    let other = match network::connect_to_server(server_ip + ":" + config::PORT) {
+    let other = match network::connect_to_server(server_ip) {
         Ok(ok) => ok,
         Err(err) => {
             println!("failed to connect to server");
@@ -36,7 +35,7 @@ pub fn run(server_ip: String, window: &mut program::Window) {
     };
 
     // recieve init message
-    let init_msg: ServerMessageInit = network::recieve(&other)
+    let init_msg: ServerMessageInit = other.recieve()
         .expect("failed to recieve init msg");
     println!("init_msg.player_id: {:?}", init_msg.player_id);
     let mut battlefield = init_msg.battlefield;
@@ -50,7 +49,7 @@ pub fn run(server_ip: String, window: &mut program::Window) {
     'mainloop: loop {
 
         // recieve
-        let msg: ServerMessage = match network::recieve(&other) {
+        let msg: ServerMessage = match other.recieve() {
             Ok(msg) => {
                 msg
             }
@@ -95,7 +94,7 @@ pub fn run(server_ip: String, window: &mut program::Window) {
         let msg = ClientMessage {
             actions: actions,
         };
-        if let Err(err) = network::send(&other, &msg) {
+        if let Err(err) = other.send(&msg) {
             // connection lost
             println!("server disconnected");
             println!("debug info: {}", err);

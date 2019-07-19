@@ -4,7 +4,7 @@ use std::vec::Vec;
 use battlefield::Battlefield;
 
 
-pub type PlayerID = u32; //can be changed and maybe this belongs into 'battlefield'
+pub type PlayerID = i32; //maybe this belongs into 'battlefield'
 
 
 // 'battlefield' uses this to alter its state
@@ -43,6 +43,3 @@ pub struct ServerMessage {
     pub client_messages: Vec<(PlayerID, ClientMessage)>,
 }
 
-
-// MISC
-// pub fn delay() -> Duration {Duration::from_millis(50)}

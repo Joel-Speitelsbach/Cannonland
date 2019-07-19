@@ -56,5 +56,5 @@ pub fn run() {
         sdl_context,
         canvas,
     };
-    client::run("localhost".to_string(), &mut window);
+    client::run("localhost", &mut window);
 }
