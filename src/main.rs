@@ -14,6 +14,7 @@ mod server;
 mod client;
 mod util;
 mod config;
+mod ttf_example;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -32,6 +33,7 @@ fn main() {
         "client" => client::run_standalone(&args[2]),
         "server" => server::run(),
         "program" => program::run(),
+        "ttf" => ttf_example::run(),
         x => println!("module name {} does not exist", x),
     }
 }
