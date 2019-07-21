@@ -50,6 +50,7 @@ pub fn new_window(sdl2_video: &sdl2::VideoSubsystem, size: (i32,i32)) -> Canvas<
 pub struct PresenterState<'res> {
     canvas: &'res mut sdl2::render::Canvas<Window>,
     missile: Texture<'res>,
+    background: Texture<'res>,
     grid_texture: Texture<'res>,
     _texture_creator: &'res TextureCreator<WindowContext>,
 
@@ -64,6 +65,7 @@ impl<'res> PresenterState<'res> {
         size: (i32,i32),
     ) -> PresenterState<'res> {
         let missile = _texture_creator.load_texture("./pics/missile.png").unwrap();
+        let background = _texture_creator.load_texture("./pics/background_clouded.jpg").unwrap();
 
         let (width,height) = size;
             
@@ -80,6 +82,7 @@ impl<'res> PresenterState<'res> {
         PresenterState {
             canvas,
             missile,
+            background,
             _texture_creator,
             grid_texture,
             prof_canvas_present: util::time::variance::Prof::just_label("_canvas_present"),
@@ -145,8 +148,8 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
 
 
     fn draw_background(&mut self) -> () {
-        self.state.canvas.set_draw_color(pixels::Color::RGBA(64,92,128,255));
         self.state.canvas.clear();
+        self.state.canvas.copy(&self.state.background, None, None).unwrap();
     }
 
 
