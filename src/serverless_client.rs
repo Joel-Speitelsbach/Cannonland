@@ -18,10 +18,9 @@ pub fn run(_: &[String]) {
  
     //init presenter
     let sdl_context = sdl2::init().unwrap();
-    let win_size = (battlefield.grid.width as u32, battlefield.grid.height as u32);
-    let canvas = present::new_window(&sdl_context.video().unwrap(), win_size);
+    let mut canvas = present::new_window(&sdl_context.video().unwrap(), battlefield.size());
     let texture_creator = canvas.texture_creator();
-    let mut presenter_state = PresenterState::new(canvas, &texture_creator, &battlefield);
+    let mut presenter_state = PresenterState::new(&mut canvas, &texture_creator, battlefield.size());
     
     //init controller
     let mut controller = Controller::new(&sdl_context);
@@ -29,8 +28,8 @@ pub fn run(_: &[String]) {
     //init misc
     let mut fps_manager = sdl2::gfx::framerate::FPSManager::new();
     fps_manager.set_framerate(60).unwrap();
-    let mut prof_present = util::time::Prof::just_label("present");
-    let mut prof_alles = util::time::Prof::just_label("alles");
+    let mut prof_present = util::time::variance::Prof::just_label("present");
+    let mut prof_alles   = util::time::variance::Prof::just_label("alles");
 
 
     'mainloop: loop {

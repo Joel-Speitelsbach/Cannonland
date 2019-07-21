@@ -1,40 +1,31 @@
-use sdl2;
+use battlefield;
+use control::{Controller};
+use network;
+use message::{ServerMessage,ClientMessage,ServerMessageInit};
+use present::{self,Presenter,PresenterState};
+use program;
 use sdl2::keyboard::Keycode;
 use sdl2::event::{Event};
-use network;
-use super::message::{ServerMessage,ClientMessage,ServerMessageInit};
-use present::{self,Presenter,PresenterState};
-use control::{Controller};
-use config;
-use battlefield::Battlefield;
-use std::marker::PhantomData;
- 
 
-type ConnectError = String;
-type StrideError = String;
 
-pub struct Client {
-    server: network::OtherSide,
+pub fn run_standalone(server_ip: &str) {
+    // init window
+    let win_size: (i32,i32) = battlefield::SIZE; 
+    let sdl_context = sdl2::init().unwrap();
+    let canvas = present::new_window(&sdl_context.video().unwrap(), win_size);
+    let mut window = program::Window {
+        sdl_context,
+        canvas,
+    };
+
+    run(server_ip, &mut window);
 }
 
-impl Client {
-    pub fn connect_to_server(server_ip: String) -> Result<(Client,ServerMessageInit),ConnectError> {
-        Err("not implemented".to_string())
-    }
-    pub fn stride(&self, client_msg: ClientMessage) -> Result<ServerMessage,StrideError> {
-        /*
-         * 1. recieve from server
-         * 2. send to server
-         */
-        Err("not implemented".to_string())
-    }
-}
 
- 
-pub fn run(server_ip: String) {
+pub fn run(server_ip: &str, window: &mut program::Window) {
 
     // connect to server
-    let other = match network::Simple::connect_to_server(server_ip + ":" + config::PORT) {
+    let other = match network::connect_to_server(server_ip) {
         Ok(ok) => ok,
         Err(err) => {
             println!("failed to connect to server");
@@ -42,27 +33,23 @@ pub fn run(server_ip: String) {
             return;
         },
     };
-    other.set_nonblocking(false).unwrap();
 
     // recieve init message
-    let init_msg: ServerMessageInit = network::Simple::recieve(&other)
+    let init_msg: ServerMessageInit = other.recieve()
         .expect("failed to recieve init msg");
     println!("init_msg.player_id: {:?}", init_msg.player_id);
     let mut battlefield = init_msg.battlefield;
 
 
     // init game
-    let win_size = (battlefield.grid.width as u32, battlefield.grid.height as u32);
-    let sdl_context = sdl2::init().unwrap();
-    let canvas = present::new_window(&sdl_context.video().unwrap(), win_size);
-    let texture_creator = canvas.texture_creator();
-    let mut presenter_state = PresenterState::new(canvas, &texture_creator, &battlefield);
-    let mut controller = Controller::new(&sdl_context);
+    let texture_creator = window.canvas.texture_creator();
+    let mut presenter_state = PresenterState::new(&mut window.canvas, &texture_creator, battlefield.size());
+    let mut controller = Controller::new(&window.sdl_context);
 
     'mainloop: loop {
 
         // recieve
-        let msg: ServerMessage = match network::Simple::recieve(&other) {
+        let msg: ServerMessage = match other.recieve() {
             Ok(msg) => {
                 msg
             }
@@ -73,9 +60,6 @@ pub fn run(server_ip: String) {
                 break 'mainloop
             }
         };
-        // if msg.client_messages.len() > 0 {
-        //     println!("server: {:?}", &msg);
-        // }
         let messages = msg.client_messages;
 
 
@@ -94,7 +78,7 @@ pub fn run(server_ip: String) {
 
 
         // events
-        for event in sdl_context.event_pump().unwrap().poll_iter() {
+        for event in window.sdl_context.event_pump().unwrap().poll_iter() {
             presenter.respond_to(&event);
             controller.use_event(&event);
             match event {
@@ -110,7 +94,7 @@ pub fn run(server_ip: String) {
         let msg = ClientMessage {
             actions: actions,
         };
-        if let Err(err) = network::Simple::send(&other, &msg) {
+        if let Err(err) = other.send(&msg) {
             // connection lost
             println!("server disconnected");
             println!("debug info: {}", err);

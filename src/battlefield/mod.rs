@@ -14,6 +14,9 @@ use self::shot::Shot;
 use self::bunker::Bunker;
 
 
+pub const SIZE: (i32,i32) = (800,500);
+
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Battlefield {
     pub grid: Grid,
@@ -34,12 +37,15 @@ impl Battlefield {
         }
 
         let grid = Grid::load_from_file("pics/terra_valley.png");
-        Battlefield {
+        let battlefield = Battlefield {
             grid,
             bunkers,
             shots: Vec::new(),
             rand_gen: rand::FromEntropy::from_entropy(),
-        }
+        };
+        assert_eq!(battlefield.size(),SIZE,
+            "size of battlefield file (first form) is not correct (second form)");
+        battlefield
     }
 
 
@@ -168,6 +174,10 @@ impl Battlefield {
                 self.shots.remove(i);
             }
         }
+    }
+
+    pub fn size(&self) -> (i32,i32) {
+        (self.grid.width as i32, self.grid.height as i32)
     }
 }
 

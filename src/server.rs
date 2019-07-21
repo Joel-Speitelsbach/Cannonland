@@ -5,13 +5,12 @@ use network;
 use super::message::{ServerMessage,ClientMessage,PlayerID,ServerMessageInit,PlayerAction};
 use battlefield::Battlefield;
 use std::cmp;
-use config;
 
 
-pub fn run(server_ip: String) {
+pub fn run() {
     let mut clients: HashMap<PlayerID,network::OtherSide> = HashMap::new();
 
-    let server_handle = network::Simple::start_server_with_addr(server_ip + ":" + config::PORT).unwrap();
+    let server_handle = network::start_server().unwrap();
 
     // create battlefield
     let mut battlefield = Battlefield::new();
@@ -21,24 +20,25 @@ pub fn run(server_ip: String) {
         // recieve messages from clients
         let mut messages: Vec<(PlayerID,ClientMessage)> = Vec::new();
         for (id, cl) in &clients {
-            if let Ok(msg) = network::Simple::recieve(&cl) {
-                // println!("client nr.{}: {:?}", &id, &msg);
+            if let Ok(msg) = cl.recieve() {
                 messages.push((*id,msg));
             }
         }
 
 
         // (maybe) add new client
-        if clients.len() == 0 {
-            server_handle.set_nonblocking(false).unwrap();
-        }
-        if let Some(client) = network::Simple::poll_for_client(&server_handle) {
+        let client = if clients.len() == 0 {
+            server_handle.wait_for_client()
+        } else {
+            server_handle.poll_for_client()
+        };
+        if let Some(client) = client {
             let next_player_id = next_player_id(&clients);
             let init_message = ServerMessageInit {
                 player_id: next_player_id,
                 battlefield: battlefield.clone(),
             };
-            network::Simple::send(&client, &init_message).unwrap();
+            client.send_large(&init_message).unwrap();
 
             clients.insert(next_player_id, client);
             messages.push((next_player_id,
@@ -47,7 +47,6 @@ pub fn run(server_ip: String) {
                 }
             ));
         }
-        server_handle.set_nonblocking(true).unwrap();
 
 
         // resend client messages
@@ -56,7 +55,7 @@ pub fn run(server_ip: String) {
         };
         let mut clients_to_remove = vec!();
         for (id, cl) in &clients {
-            if let Err(err) = network::Simple::send(&cl, &msg) {
+            if let Err(err) = cl.send(&msg) {
                 println!("client {} disconnected", &id);
                 println!("debug info: {}", err);
                 clients_to_remove.push(id.clone());
@@ -76,6 +75,7 @@ pub fn run(server_ip: String) {
         battlefield.stride();
     }
 }
+
 
 fn next_player_id<T>(player_map: &HashMap<PlayerID, T>) -> PlayerID {
     if player_map.is_empty() { return 0 };

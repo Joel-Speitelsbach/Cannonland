@@ -1,4 +1,3 @@
-
 use std::time::{Duration,SystemTime};
 
 
@@ -13,8 +12,6 @@ pub struct Prof {
     args: ProfArgs,
     start_time: SystemTime,
 }
-
-static SKIP_N: u32 = 60;
 
 impl Prof {
     pub fn new(args: ProfArgs) -> Prof {
@@ -48,15 +45,5 @@ impl Prof {
             );
         }
         self.counter += 1;
-    }
-    
-    #[allow(dead_code)]
-    pub fn profile<F>(&mut self, mut f: F)
-            where F: FnMut() {
-        self.start();
-        
-        f();
-        
-        self.pause();
     }
 }

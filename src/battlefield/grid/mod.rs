@@ -47,16 +47,16 @@ pub struct Grid {
 impl Grid {
 
     pub fn new(width: usize, height: usize) -> Grid {
-        let mut grid_vec = Vec::with_capacity(height);
+        let mut grid = Vec::with_capacity(height);
 
         for y in 0..height {
-            grid_vec.push(Vec::with_capacity(width));
+            grid.push(Vec::with_capacity(width));
             for _ in 0..width {
-                grid_vec[y].push(Particle::new(ParticleType::EMPTY));
+                grid[y].push(Particle::new(ParticleType::EMPTY));
             }
         }
 
-        return Grid{width: width, height: height, grid: grid_vec};
+        return Grid{width, height, grid};
     }
 
 

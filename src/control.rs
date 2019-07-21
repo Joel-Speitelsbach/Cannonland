@@ -1,5 +1,12 @@
 // reads input actions
 
+// joel: i don't like the design of this module.
+//       probable reason: 'Controller' is mutable between game iterations.
+//       i fear this style leads to unmanagable code, when the project grows.
+//       let's be careful and think twice if we are about to replicate this
+//       module design in other modules.
+
+
 use sdl2::event::Event;
 use sdl2::{Sdl,TimerSubsystem};
 use sdl2::keyboard::Keycode;
