@@ -21,7 +21,7 @@ pub fn run() {
 
     // create ttf
     let ttf_context = sdl2::ttf::init().unwrap();
-    let font = ttf_context.load_font("pics/LiberationSans-Regular.ttf",60).unwrap();
+    let font = ttf_context.load_font("pics/LiberationSans.ttf",60).unwrap();
     let texture_creator = canvas.texture_creator();
 
     let surface = 
