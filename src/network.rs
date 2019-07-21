@@ -6,7 +6,6 @@ extern crate serde;
 use self::serde::{Serialize, Deserialize};
 extern crate bincode;
 use self::bincode::{Infinite, Result as Result_};
-use config;
 
 
 pub const PORT: &str = "4242";
@@ -66,6 +65,7 @@ impl OtherSide {
         let mut tcp_stream = tcp_stream;
         bincode::deserialize_from(&mut tcp_stream, bincode::Infinite)
     }
+
 
     fn set_nondelay(&self, nodelay: bool) {
         self.tcp_stream.set_nodelay(nodelay).expect("could not set nodelay");

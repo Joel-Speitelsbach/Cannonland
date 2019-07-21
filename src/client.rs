@@ -89,7 +89,7 @@ pub fn run(server_ip: &str, window: &mut program::Window) {
             }
         }
 
-        // send
+        // send msg to server
         let actions = controller.poll_actions();
         let msg = ClientMessage {
             actions: actions,
