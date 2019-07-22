@@ -3,3 +3,4 @@ target
 nix-shell.sh
 .vscode
 .idea
+pics/local
