@@ -2,8 +2,8 @@ use super::shot_type::ShotType;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct WeaponDepot {
-    pub current_index: u8,
-    pub weapons: Vec<ShotType>,
+    current_index: u8,
+    weapons: Vec<ShotType>,
 }
 
 impl WeaponDepot {

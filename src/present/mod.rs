@@ -285,7 +285,11 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
     }
 
     fn draw_default_shot(&self, shot_type: &ShotType, x_pos: i16, y_pos: i16) {
-        self.state.canvas.filled_circle(x_pos, y_pos, shot_type.get_radius() as i16, shot_type.get_rgba()).unwrap();
+        self.state.canvas.filled_circle(
+            x_pos, y_pos, 
+            shot_type.get_radius() as i16, 
+            shot_type.get_rgba()
+        ).unwrap();
     }
 
     fn draw_texture_shot(
