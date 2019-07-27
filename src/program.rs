@@ -56,15 +56,15 @@ pub fn run() {
         let mut host_extra_width: u32= 0;
         let mut join_extra_width: u32 = 0;
         if selected_index == 0 {
-            host_extra_width = 100;
+            host_extra_width = 200;
         } else {
-            join_extra_width = 100;
+            join_extra_width = 200;
         }
 
         canvas.clear();
-        canvas.copy(&game_name_texture, None, Rect::new(200, 50, game_name_texture.query().width, game_name_texture.query().height)).unwrap();
-        canvas.copy(&host_texture, None, Rect::new(300 - host_extra_width as i32/2, 200, host_texture.query().width + host_extra_width, host_texture.query().height)).unwrap();
-        canvas.copy(&join_texture, None, Rect::new(300 - join_extra_width as i32/2, 300, join_texture.query().width + join_extra_width, join_texture.query().height)).unwrap();
+        canvas.copy(&game_name_texture, None, Rect::new(400, 100, game_name_texture.query().width, game_name_texture.query().height)).unwrap();
+        canvas.copy(&host_texture, None, Rect::new(600 - host_extra_width as i32/2, 400, host_texture.query().width + host_extra_width, host_texture.query().height)).unwrap();
+        canvas.copy(&join_texture, None, Rect::new(600 - join_extra_width as i32/2, 600, join_texture.query().width + join_extra_width, join_texture.query().height)).unwrap();
         canvas.present();
 
         for event in sdl_context.event_pump().unwrap().poll_iter() {
@@ -90,7 +90,7 @@ pub fn run() {
 fn create_text<'t> (texture_creator: &'t TextureCreator<WindowContext>, text: &str) -> Texture<'t> {
     // create ttf
     let ttf_context = sdl2::ttf::init().unwrap();
-    let font = ttf_context.load_font("pics/LiberationSans.ttf",60).unwrap();
+    let font = ttf_context.load_font("pics/LiberationSans.ttf",120).unwrap();
 
     let surface =
             font
