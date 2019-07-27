@@ -67,7 +67,7 @@ impl Battlefield {
             PlayerAction::IncreaseLoad { inc: inc_load } => {
                 let bunker = &mut self.bunkers[bunker_id as usize];
                 bunker.increment_charge(
-                    (inc_load * 100.) as u8
+                    (inc_load * 100.) as i32
                 );
             },
             PlayerAction::CangeWeapon(ChangeWeapon::Next) => {
@@ -87,13 +87,13 @@ impl Battlefield {
 
 
     fn new_bunker(&mut self, bunker_id: PlayerID) {
-        let width = self.grid.width as i16;
+        let width = self.grid.width;
         let min_dist = width / (self.number_of_bunkers() * 2 + 1);
         let x_pos = 'search: loop {
-            let x_pos = self.rand_gen.gen_range::<i16>(0, width);
+            let x_pos = self.rand_gen.gen_range::<i32>(0, width);
             'bunker: for bunker in &self.bunkers {
                 if !bunker.player_active { continue };
-                let collide = (bunker.x_pos - x_pos as i16).abs() < min_dist;
+                let collide = (bunker.x_pos - x_pos).abs() < min_dist;
                 if collide {
                     continue 'search;
                 }
@@ -101,12 +101,12 @@ impl Battlefield {
             break x_pos;
         };
 
-        self.grid.add_bunker(bunker_id, (x_pos as usize,0));
+        self.grid.add_bunker(bunker_id, (x_pos,0));
         self.grid.update_bunkers(&mut self.bunkers);
     }
 
 
-    fn number_of_bunkers(&self) -> i16 {
+    fn number_of_bunkers(&self) -> i32 {
         let mut counter = 0;
         for bunker in &self.bunkers {
             if bunker.player_active {
@@ -124,7 +124,13 @@ impl Battlefield {
         }
 
         let shoot_pos = bunker.get_shoot_pos_xy();
-        let shot = shot::Shot::new(bunker.get_current_weapon(), shoot_pos.0 as f32, shoot_pos.1 as f32, bunker.get_angle_radians(), bunker.get_charge());
+        let shot = shot::Shot::new(
+            bunker.get_current_weapon(), 
+            shoot_pos.0 as f32, 
+            shoot_pos.1 as f32, 
+            bunker.get_angle_radians(), 
+            bunker.get_charge()
+        );
         self.shots.push(shot);
 
         bunker.reset_charge();
@@ -133,12 +139,17 @@ impl Battlefield {
 
     fn collide(&mut self) {
         for i in (0..self.shots.len()).rev() {
-            let x_pos = self.shots[i].x_pos as usize;
-            let y_pos = self.shots[i].y_pos as usize;
+            let x_pos = self.shots[i].x_pos as i32;
+            let y_pos = self.shots[i].y_pos as i32;
 
             if Battlefield::shot_collides_with_bunkers(&self.bunkers, &self.shots[i])
-            || self.grid.collides_at_position(x_pos, y_pos) {
-                self.grid.replace_radius_where_possible(self.shots[i].get_impact_target_type(), x_pos, y_pos, self.shots[i].get_impact_radius() as usize);
+               || self.grid.collides_at_position(x_pos, y_pos) 
+            {
+                self.grid.replace_radius_where_possible(
+                    self.shots[i].get_impact_target_type(), 
+                    x_pos, y_pos, 
+                    self.shots[i].get_impact_radius() as i32
+                    );
                 Battlefield::harm_bunkers(&mut self.bunkers, &self.shots[i]);
                 self.shots.remove(i);
             }
@@ -150,11 +161,15 @@ impl Battlefield {
             if !bunkers[i].is_alive() {
                 continue;
             }
-            if bunkers[i].would_harm_in_radius(shot.x_pos as i16, shot.y_pos as i16, shot.get_radius()) {
+            if bunkers[i].would_harm_in_radius(
+                    shot.x_pos as i32,
+                    shot.y_pos as i32,
+                    shot.get_radius())
+            {
                 return true;
             }
         }
-        return false;
+        false
     }
 
     fn harm_bunkers(bunkers: &mut Vec<Bunker>, shot: &Shot) {
@@ -162,7 +177,11 @@ impl Battlefield {
             if !bunkers[i].is_alive() {
                 continue;
             }
-            bunkers[i].harm_if_in_radius(shot.x_pos as i16, shot.y_pos as i16, shot.get_impact_radius() as u8, shot.get_harm());
+            bunkers[i].harm_if_in_radius(
+                shot.x_pos               as i32, 
+                shot.y_pos               as i32, 
+                shot.get_impact_radius() as i32, 
+                shot.get_harm());
         }
     }
 

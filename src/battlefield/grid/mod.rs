@@ -38,19 +38,19 @@ pub fn create_test_grid() -> Grid {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Grid {
-    pub width: usize,
-    pub height: usize,
+    pub width: i32,
+    pub height: i32,
     pub grid: Vec<Vec<Particle>>
 }
 
 
 impl Grid {
 
-    pub fn new(width: usize, height: usize) -> Grid {
-        let mut grid = Vec::with_capacity(height);
+    pub fn new(width: i32, height: i32) -> Grid {
+        let mut grid = Vec::with_capacity(height as usize);
 
-        for y in 0..height {
-            grid.push(Vec::with_capacity(width));
+        for y in 0..height as usize {
+            grid.push(Vec::with_capacity(width as usize));
             for _ in 0..width {
                 grid[y].push(Particle::new(ParticleType::EMPTY));
             }
@@ -61,12 +61,12 @@ impl Grid {
 
 
     pub fn load_from_file(file_name: &str) -> Grid {
-        let surface = ::sdl2::surface::Surface::from_file(file_name)
+        let surface = sdl2::surface::Surface::from_file(file_name)
             .expect("could not load image");
         let (width, height) = surface.size();
+        let (width, height) = (width as i32, height as i32);
         let canvas = surface.into_canvas().unwrap();
         let pixels = canvas.read_pixels(None, PixelFormatEnum::ABGR8888).unwrap();
-        let (width, height) = (width as usize, height as usize);
 
         let pix = |px: usize| {
             print!("  ");
@@ -81,9 +81,9 @@ impl Grid {
         }
 
         let mut grid = Grid::new(width, height);
-        for y in 0..height {
-            for x in 0..width {
-                let pos = (x + y * width) * 4;
+        for y in 0..height as usize {
+            for x in 0..width as usize {
+                let pos = (x + y * width as usize) * 4;
                 let (r,g,b,a) = (
                     pixels[pos+0],
                     pixels[pos+1],
@@ -103,15 +103,15 @@ impl Grid {
     }
 
 
-    pub fn add_bunker(&mut self, bunker_num: PlayerID, pos: (usize,usize)) {
+    pub fn add_bunker(&mut self, bunker_num: PlayerID, pos: (i32,i32)) {
         let particle_type = particle_type::Bunker::from_num(bunker_num);
         let (x,y) = pos;
         self.set_pixel(particle_type, x, y)
     }
 
 
-    pub fn set_rect(&mut self, particle_type: ParticleType, x_start: usize, y_start: usize,
-            x_end: usize, y_end: usize) -> () {
+    pub fn set_rect(&mut self, particle_type: ParticleType, x_start: i32, y_start: i32,
+            x_end: i32, y_end: i32) -> () {
         for y in y_start..y_end {
             for x in x_start..x_end {
                 self.set_pixel(particle_type, x,y);
@@ -120,32 +120,51 @@ impl Grid {
     }
 
 
-    fn set_pixel(&mut self, particle_type: ParticleType, x: usize, y: usize) {
-        self.grid[y][x].particle_type = particle_type;
+    fn set_pixel(&mut self, particle_type: ParticleType, x: i32, y: i32) {
+        self.grid
+            [y as usize]
+            [x as usize].particle_type = particle_type;
     }
 
 
-    pub fn collides_at_position(&self, x_pos: usize, y_pos: usize) -> bool {
-        return self.is_inside_grid(x_pos, y_pos) && self.grid[y_pos][x_pos].particle_type != ParticleType::EMPTY;
+    pub fn collides_at_position(&self, x_pos: i32, y_pos: i32) -> bool {
+            self.is_inside_grid(x_pos, y_pos) 
+        && 
+            self.grid
+                [y_pos as usize]
+                [x_pos as usize].particle_type 
+        != 
+            ParticleType::EMPTY
     }
 
 
-    fn is_inside_grid(&self, x_pos: usize, y_pos: usize) -> bool {
+    fn is_inside_grid(&self, x_pos: i32, y_pos: i32) -> bool {
         return x_pos < self.width && y_pos < self.height;
     }
 
 
-    pub fn replace_radius_where_possible(&mut self, particle_type: ParticleType, x_pos: usize, y_pos: usize, radius: usize) -> () {
-        let x_start = cmp::max(0, x_pos as i32 - radius as i32) as usize;
-        let y_start = cmp::max(0, y_pos as i32 - radius as i32) as usize;
+    pub fn replace_radius_where_possible(&mut self, particle_type: ParticleType, x_pos: i32, y_pos: i32, radius: i32) -> () {
+        let x_start = cmp::max(0, x_pos - radius);
+        let y_start = cmp::max(0, y_pos - radius);
         let x_end = cmp::min(self.width, x_pos+radius);
         let y_end = cmp::min(self.height, y_pos+radius);
 
         let radius = radius as f32;
         for y in y_start..y_end {
             for x in x_start..x_end {
-                if (((x_pos as i32 - x as i32).pow(2) + (y_pos as i32 - y as i32).pow(2)) as f32).sqrt() < radius {
-                    self.grid[y][x].replace_if_possible(particle_type);
+                if 
+                    (( (x_pos - x).pow(2) 
+                       +
+                       (y_pos - y).pow(2))
+                    as f32)
+                    .sqrt() 
+                < 
+                    radius 
+                {
+                    self.grid
+                        [y as usize]
+                        [x as usize]
+                        .replace_if_possible(particle_type);
                 }
             }
         }
@@ -163,6 +182,7 @@ impl Grid {
     fn fall_down(&mut self) -> () {
         for y in (0..self.height-1).rev() {
             for x in 0..self.width {
+                let (x,y) = (x as usize, y as usize);
                 if self.grid[y][x].can_fall() && self.grid[y+1][x].can_move_into() {
                     self.grid[y+1][x] = self.grid[y][x];
                     self.grid[y][x].particle_type = ParticleType::BLUR;
@@ -172,11 +192,9 @@ impl Grid {
     }
 
 
-    fn fall_side(&mut self, sign: i8) -> () {
-        let sign = sign as i32;
-
-        let x_start: usize;
-        let x_end: usize;
+    fn fall_side(&mut self, sign: i32) -> () {
+        let x_start: i32;
+        let x_end: i32;
         if sign == 1 {
             x_start = 0;
             x_end = self.width-1;
@@ -190,6 +208,7 @@ impl Grid {
         for y in 0..self.height-2 {
             for x in x_start..x_end {
                 let x32 = x as i32;
+                let (x,y) = (x as usize, y as usize);
                 if self.grid[y][x].can_fall()
                 && self.grid[y+1][x].particle_type != ParticleType::BLUR
                 && (y == 0 || self.grid[y-1][x].particle_type != ParticleType::BLUR)
@@ -207,8 +226,8 @@ impl Grid {
 
 
     fn clear_blur(&mut self) -> () {
-        for y in 0..self.height {
-            for x in 0..self.width {
+        for y in 0..self.height as usize {
+            for x in 0..self.width as usize {
                 if self.grid[y][x].particle_type == ParticleType::BLUR {
                     self.grid[y][x].particle_type = ParticleType::EMPTY;
                     self.grid[y][x].color = ParticleType::EMPTY.get_rgba();
@@ -229,31 +248,36 @@ impl Grid {
 
     fn update_bunker_at(
         &mut self,
-        x_pos: usize,
-        y_pos: usize,
+        x_pos: i32,
+        y_pos: i32,
         bunkers: &mut Vec<bunker::Bunker>,
     ) -> ()
     {
-        let particle_type = self.grid[y_pos][x_pos].particle_type;
+        let particle_type = 
+            self.grid
+            [y_pos as usize]
+            [x_pos as usize]
+            .particle_type;
 
         if !particle_type.is_bunker() {
             return
         }
 
-        let x_pos_i16 = x_pos as i16;
-        let y_pos_i16 = y_pos as i16;
-
         for bunker in bunkers {
             if bunker.get_color() == particle_type {
-                bunker.x_pos = x_pos_i16;
-                bunker.y_pos = y_pos_i16;
+                bunker.x_pos = x_pos;
+                bunker.y_pos = y_pos;
                 bunker.player_active = true;
                 return;
             }
         }
 
         // remove unknown bunker from grid
-        self.grid[y_pos][x_pos].particle_type = ParticleType::EMPTY;
+        self.grid
+            [y_pos as usize]
+            [x_pos as usize]
+            .particle_type 
+            = ParticleType::EMPTY;
     }
 
 }

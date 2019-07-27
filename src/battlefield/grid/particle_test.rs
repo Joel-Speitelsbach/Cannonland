@@ -27,8 +27,8 @@ pub fn run() {
 }
 
 fn print_grid(grid: &Grid) {
-    for y in 0..grid.height {
-        for x in 0..grid.width {
+    for y in 0..grid.height as usize {
+        for x in 0..grid.width as usize {
             print!("{}", grid.grid[y][x].get_symbol());
         }
         println!();

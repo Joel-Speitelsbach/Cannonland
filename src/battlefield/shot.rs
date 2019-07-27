@@ -14,31 +14,37 @@ impl Shot {
 
     const GRAVITY: f32 = 0.1;
 
-    pub fn new(shot_type: ShotType, x_pos: f32, y_pos: f32, angle_radians: f32, charge: u8) -> Shot {
+    pub fn new(
+        shot_type: ShotType, 
+        x_pos: f32, y_pos: f32, 
+        angle_radians: f32, 
+        charge: i32) 
+        -> Shot 
+    {
         let speed = charge as f32 / 10f32;
-        return Shot{
+        Shot{
             shot_type: shot_type,
             x_pos: x_pos,
             y_pos: y_pos,
             x_speed: speed * angle_radians.cos(),
             y_speed: speed * angle_radians.sin()
-        };
+        }
     }
 
-    pub fn get_radius(&self) -> u8 {
-        return self.shot_type.get_radius();
+    pub fn get_radius(&self) -> i32 {
+        self.shot_type.get_radius()
     }
 
     pub fn get_impact_radius(&self) -> f32 {
-        return self.shot_type.get_impact_radius();
+        self.shot_type.get_impact_radius()
     }
 
     pub fn get_impact_target_type(&self) -> ParticleType {
-        return self.shot_type.get_impact_target_type();
+        self.shot_type.get_impact_target_type()
     }
 
-    pub fn get_harm(&self) -> u8 {
-        return self.shot_type.get_harm();
+    pub fn get_harm(&self) -> i32 {
+        self.shot_type.get_harm()
     }
 
     pub fn stride(&mut self) {
@@ -48,7 +54,7 @@ impl Shot {
     }
 
     pub fn get_angle(&self) -> f32 {
-        return self.y_speed.atan2(self.x_speed) * (180.0/std::f32::consts::PI) + 90.0;
+        self.y_speed.atan2(self.x_speed) * (180.0/std::f32::consts::PI) + 90.0
     }
 
 }

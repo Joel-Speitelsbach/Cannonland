@@ -1,7 +1,7 @@
 use battlefield::shot_type::ShotType;
 use sdl2;
-use sdl2::gfx::primitives::DrawRenderer;
-use sdl2::pixels;
+use sdl2::gfx::primitives::{DrawRenderer,ToColor};
+use sdl2::pixels::{self,Color};
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::{Point,Rect};
 use sdl2::event::{Event,WindowEvent};
@@ -22,27 +22,17 @@ pub fn new_window(sdl2_video: &sdl2::VideoSubsystem, size: (i32,i32)) -> Canvas<
     let window =
         video_subsystem
         .window("Cannonland",
-            width as u32,
-            height as u32)
+            (width  * WIN_SCALE) as u32,
+            (height * WIN_SCALE) as u32)
+        .position_centered()
         .build()
         .unwrap();
-    let mut canvas =
+    let canvas =
         window
         .into_canvas()
         // .software()
         .build()
         .unwrap();
-    canvas.window_mut().set_size(
-        (width  * WIN_SCALE) as u32,
-        (height * WIN_SCALE) as u32,
-    ).unwrap();
-    canvas.window_mut().set_position(
-        sdl2::video::WindowPos::Centered,
-        sdl2::video::WindowPos::Centered);
-    canvas.set_scale(
-        WIN_SCALE as f32, 
-        WIN_SCALE as f32
-    ).unwrap();
     canvas
 }
 
@@ -111,6 +101,7 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
 
     pub fn present(&mut self) -> () {
         self.draw_grid();
+
         self.draw_bunkers();
         self.draw_shots();
 
@@ -161,7 +152,7 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
 
         // create (raw) pixel data
         self.state.prof_pixel_data.start();
-        let mut pixel_data = Vec::with_capacity(width*height*4);
+        let mut pixel_data = Vec::with_capacity((width*height*4) as usize);
         for (_y, row) in (&self.grid().grid).into_iter().enumerate() {
             for (_x, particle) in (&row).into_iter().enumerate() {
                 let (r,g,b,a) = particle.get_rgba();
@@ -175,7 +166,7 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
 
         // copy pixel_data into texture then into canvas
         self.state.prof_canvas_copy.start();
-        self.state.grid_texture.update(None, &pixel_data, width*4).unwrap();
+        self.state.grid_texture.update(None, &pixel_data, (width*4) as usize).unwrap();
         self.state.canvas.copy(&self.state.grid_texture, None, None).unwrap();
         self.state.prof_canvas_copy.pause();
     }
@@ -201,15 +192,28 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
     }
 
     fn draw_cannon(canvas: &mut sdl2::render::Canvas<Window>, bunker: &battlefield::bunker::Bunker, color: pixels::Color) {
-        let cannon_pos: (i16,i16,i16,i16) = bunker.get_cannon_pos_x1y1x2y2();
+        let cannon_pos = bunker.get_cannon_pos_x1y1x2y2();
         canvas.aa_line(
-            cannon_pos.0, cannon_pos.1,
-            cannon_pos.2, cannon_pos.3,
-            color).unwrap();
+            cannon_pos.0 as i16  *  WIN_SCALE as i16, 
+            cannon_pos.1 as i16  *  WIN_SCALE as i16,
+            cannon_pos.2 as i16  *  WIN_SCALE as i16, 
+            cannon_pos.3 as i16  *  WIN_SCALE as i16,
+            color
+        ).unwrap();
     }
 
-    fn draw_building(canvas: &mut sdl2::render::Canvas<Window>, bunker: &battlefield::bunker::Bunker, color: pixels::Color) {
-        canvas.filled_pie(bunker.x_pos, bunker.y_pos, bunker.get_radius() as i16, 180, 360, color).unwrap();
+    fn draw_building(
+        canvas: &mut sdl2::render::Canvas<Window>, 
+        bunker: &battlefield::bunker::Bunker, 
+        color: pixels::Color) 
+    {
+        canvas.filled_pie(
+            bunker.x_pos as i16  *  WIN_SCALE as i16, 
+            bunker.y_pos as i16  *  WIN_SCALE as i16,
+            bunker.get_radius() as i16 * WIN_SCALE as i16, 
+            180, 360, 
+            color
+        ).unwrap();
     }
 
     fn draw_weapon(&mut self, bunker: &battlefield::bunker::Bunker) {
@@ -221,7 +225,13 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
                 self.draw_default_shot(&bunker.get_current_weapon(), x, y);
             },
             shot_type::ShotType::ROCKET  => {
-                Self::draw_texture_shot(&mut self.state.canvas, &self.state.missile, x as i32,y as i32, 6, 12, 60.0);
+                Self::draw_texture_shot(
+                    &mut self.state.canvas, 
+                    &self.state.missile, 
+                    x as i32,y as i32, 
+                    6, 12, 
+                    60.0
+                );
             },
             shot_type::ShotType::SNOW => {
                 self.draw_default_shot(&bunker.get_current_weapon(), x, y);
@@ -234,12 +244,26 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
 
         let y1 = bunker.y_pos + 1;
         let y2 = y1 + 5;
-        let x_zero = bunker.x_pos - (bunker.get_max_charge() as i16/2/divisor);
-        let x_current = x_zero + bunker.get_charge() as i16/divisor;
-        let x_max = x_zero + bunker.get_max_charge() as i16/divisor;
+        let x_zero = bunker.x_pos - (bunker.get_max_charge() /2/divisor);
+        let x_current = x_zero + bunker.get_charge() /divisor;
+        let x_max = x_zero + bunker.get_max_charge() /divisor;
 
-        canvas.box_(x_zero, y1, x_max, y2, pixels::Color::RGBA(128,128,128,128)).unwrap();
-        canvas.box_(x_zero, y1, x_current, y2, pixels::Color::RGBA(0,0,255,255)).unwrap();
+        box_(
+            canvas,
+            x_zero , 
+            y1     , 
+            x_max  , 
+            y2     , 
+            pixels::Color::RGBA(128,128,128,128)
+        );
+        box_(
+            canvas,
+            x_zero    , 
+            y1        , 
+            x_current , 
+            y2        , 
+            pixels::Color::RGBA(0,0,255,255)
+        );
     }
 
     fn draw_health(canvas: &mut sdl2::render::Canvas<Window>, bunker: &battlefield::bunker::Bunker) {
@@ -247,15 +271,16 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
 
         let y1 = bunker.y_pos + 7;
         let y2 = y1 + 5;
-        let x_zero = bunker.x_pos - (bunker.get_max_health() as i16/2/divisor);
-        let x_current = x_zero + bunker.get_health() as i16/divisor;
-        let x_max = x_zero + bunker.get_max_health() as i16/divisor;
+        let x_zero = bunker.x_pos - (bunker.get_max_health() /2/divisor);
+        let x_current = x_zero + bunker.get_health() /divisor;
+        let x_max = x_zero + bunker.get_max_health() /divisor;
 
-        canvas.box_(x_zero, y1, x_max, y2, pixels::Color::RGBA(255,0,0,128)).unwrap();
-        canvas.box_(x_zero, y1, x_current, y2, pixels::Color::RGBA(0,255,0,255)).unwrap();
+        box_(canvas,x_zero, y1, x_max, y2, pixels::Color::RGBA(255,0,0,128));
+        box_(canvas,x_zero, y1, x_current, y2, pixels::Color::RGBA(0,255,0,255));
     }
 
 }
+
 
 // draw shots
 impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
@@ -266,7 +291,7 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
 
             match shot_type {
                 shot_type::ShotType::CANNON => {
-                    self.draw_default_shot(shot_type, shot.x_pos as i16, shot.y_pos as i16);
+                    self.draw_default_shot(shot_type, shot.x_pos as i32, shot.y_pos as i32);
                 },
                 shot_type::ShotType::ROCKET  => {
                     Self::draw_texture_shot(
@@ -278,18 +303,19 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
                     );
                 },
                 shot_type::ShotType::SNOW => {
-                    self.draw_default_shot(shot_type, shot.x_pos as i16, shot.y_pos as i16);
+                    self.draw_default_shot(shot_type, shot.x_pos as i32, shot.y_pos as i32);
                 }
             }
         }
     }
 
-    fn draw_default_shot(&self, shot_type: &ShotType, x_pos: i16, y_pos: i16) {
-        self.state.canvas.filled_circle(
+    fn draw_default_shot(&self, shot_type: &ShotType, x_pos: i32, y_pos: i32) {
+        filled_circle(
+            &self.state.canvas,
             x_pos, y_pos, 
-            shot_type.get_radius() as i16, 
+            shot_type.get_radius(), 
             shot_type.get_rgba()
-        ).unwrap();
+        );
     }
 
     fn draw_texture_shot(
@@ -301,10 +327,38 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
     ) {
         let x_offset = width as i32/2;
         let y_offset = height as i32/2;
-        let destination = Rect::new(x_pos-x_offset, y_pos-y_offset, width, height);
+        let destination = Rect::new(
+            (x_pos-x_offset) * WIN_SCALE, 
+            (y_pos-y_offset) * WIN_SCALE, 
+            width  * WIN_SCALE as u32, 
+            height * WIN_SCALE as u32
+        );
         let rotation_point = Point::new(x_offset, y_offset);
 
         canvas.copy_ex(texture, None, destination, angle, rotation_point, false, false).unwrap();
     }
 
+}
+
+
+// drawing primitives
+
+fn box_(canvas: &Canvas<Window>, x1: i32, y1: i32, x2: i32, y2: i32, color: Color) {
+    canvas.box_(
+        (x1 * WIN_SCALE) as i16,
+        (y1 * WIN_SCALE) as i16,
+        (x2 * WIN_SCALE) as i16,
+        (y2 * WIN_SCALE) as i16,
+        color
+    ).unwrap();
+}
+
+
+fn filled_circle<C: ToColor>(canvas: &Canvas<Window>, x: i32, y: i32, rad: i32, color: C) {
+    canvas.filled_circle(
+        (x   * WIN_SCALE) as i16,
+        (y   * WIN_SCALE) as i16,
+        (rad * WIN_SCALE) as i16,
+        color,
+    ).unwrap();
 }

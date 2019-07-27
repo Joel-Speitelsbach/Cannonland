@@ -8,15 +8,15 @@ use super::shot_type::ShotType;
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Bunker {
     particle_type: ParticleType,
-    pub x_pos: i16,
-    pub y_pos: i16,
-    radius: u8,
+    pub x_pos: i32,
+    pub y_pos: i32,
+    radius: i32,
     angle_radians: f32,
-    cannon_length: i16,
-    charge: u8,
-    max_charge: u8,
-    health: u8,
-    max_health: u8,
+    cannon_length: i32,
+    charge: i32,
+    max_charge: i32,
+    health: i32,
+    max_health: i32,
     weapons: WeaponDepot,
     pub player_active: bool, //TODO: move this information into Player
 }
@@ -32,7 +32,7 @@ impl Bunker {
         self.health > 0
     }
 
-    pub fn new(particle_type: ParticleType, x_pos: i16, y_pos: i16) -> Bunker {
+    pub fn new(particle_type: ParticleType, x_pos: i32, y_pos: i32) -> Bunker {
         return Bunker {
             particle_type,
             x_pos,
@@ -59,19 +59,19 @@ impl Bunker {
         return self.particle_type;
     }
 
-    pub fn get_shoot_pos_xy(&self) -> (i16, i16) {
+    pub fn get_shoot_pos_xy(&self) -> (i32, i32) {
         let sin_cos = self.angle_radians.sin_cos();
         return (
-            self.x_pos + (self.cannon_length as f32 * sin_cos.1) as i16,
-            self.y_pos + (self.cannon_length as f32 * sin_cos.0) as i16);
+            self.x_pos + (self.cannon_length as f32 * sin_cos.1) as i32,
+            self.y_pos + (self.cannon_length as f32 * sin_cos.0) as i32);
     }
 
-    pub fn get_cannon_pos_x1y1x2y2(&self) -> (i16, i16, i16, i16) {
+    pub fn get_cannon_pos_x1y1x2y2(&self) -> (i32, i32, i32, i32) {
         let shot_pos = self.get_shoot_pos_xy();
         return (self.x_pos, self.y_pos, shot_pos.0, shot_pos.1);
     }
 
-    pub fn get_radius(&self) -> u8 {
+    pub fn get_radius(&self) -> i32 {
         return self.radius;
     }
 
@@ -80,14 +80,19 @@ impl Bunker {
     }
 
     pub fn change_angle_radians_trim_overflow(&mut self, angle_change: f32) {
-        self.angle_radians = f32::min(f32::max(self.angle_radians+angle_change, f32::consts::PI), f32::consts::PI*2.0);
+        self.angle_radians = f32::min(
+            f32::max(
+                self.angle_radians+angle_change, 
+                f32::consts::PI), 
+            f32::consts::PI*2.0
+        );
     }
 
-    pub fn get_charge(&self) -> u8 {
+    pub fn get_charge(&self) -> i32 {
         return self.charge;
     }
 
-    pub fn increment_charge(&mut self, charge_amount: u8) {
+    pub fn increment_charge(&mut self, charge_amount: i32) {
         self.charge = cmp::min(self.charge+charge_amount, self.max_charge);
     }
 
@@ -95,30 +100,34 @@ impl Bunker {
         self.charge = 0;
     }
 
-    pub fn get_max_charge(&self) -> u8 {
+    pub fn get_max_charge(&self) -> i32 {
         return self.max_charge;
     }
 
-    pub fn get_health(&self) -> u8 {
+    pub fn get_health(&self) -> i32 {
         return self.health;
+    } 
+
+    pub fn would_harm_in_radius(&self, x_pos: i32, y_pos: i32, radius: i32) -> bool {
+            self.y_pos > y_pos - radius as i32
+        && 
+              (   ((self.x_pos-x_pos) as f32).powf(2.) 
+                + ((self.y_pos-y_pos) as f32).powf(2.))
+              .sqrt()
+            < (self.radius + radius) as f32
     }
 
-    pub fn would_harm_in_radius(&self, x_pos: i16, y_pos: i16, radius: u8) -> bool {
-        return self.y_pos > y_pos - radius as i16
-            && (((self.x_pos-x_pos) as f32).powf(2.) + ((self.y_pos-y_pos) as f32).powf(2.)).sqrt() < (self.radius + radius) as f32;
-    }
-
-    pub fn harm_if_in_radius(&mut self, x_pos: i16, y_pos: i16, radius: u8, harm_amount: u8) {
+    pub fn harm_if_in_radius(&mut self, x_pos: i32, y_pos: i32, radius: i32, harm_amount: i32) {
         if self.would_harm_in_radius(x_pos, y_pos, radius) {
             self.harm(harm_amount);
         }
     }
 
-    fn harm(&mut self, harm_amount: u8) {
-        self.health = cmp::max(self.health as i16 - harm_amount as i16, 0) as u8;
+    fn harm(&mut self, harm_amount: i32) {
+        self.health = cmp::max(self.health as i32 - harm_amount as i32, 0) as i32;
     }
 
-    pub fn get_max_health(&self) -> u8 {
+    pub fn get_max_health(&self) -> i32 {
         return self.max_health;
     }
 

@@ -19,7 +19,7 @@ impl ShotType {
         }
     }
 
-    pub fn get_radius(&self) -> u8 {
+    pub fn get_radius(&self) -> i32 {
         match self {
             ShotType::CANNON => 3,
             ShotType::ROCKET => 4,
@@ -43,7 +43,7 @@ impl ShotType {
         }
     }
 
-    pub fn get_harm(&self) -> u8 {
+    pub fn get_harm(&self) -> i32 {
         match self {
             ShotType::CANNON => 10,
             ShotType::ROCKET => 20,
