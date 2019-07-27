@@ -13,7 +13,7 @@ use battlefield::{self,grid,Battlefield,shot_type};
 use util;
 
 
-const WIN_SCALE: i32 = 2;
+const GRID_SCALE: i32 = 2;
 
 
 pub fn new_window(sdl2_video: &sdl2::VideoSubsystem, size: (i32,i32)) -> Canvas<Window> {
@@ -22,8 +22,8 @@ pub fn new_window(sdl2_video: &sdl2::VideoSubsystem, size: (i32,i32)) -> Canvas<
     let window =
         video_subsystem
         .window("Cannonland",
-            (width  * WIN_SCALE) as u32,
-            (height * WIN_SCALE) as u32)
+            (width  * GRID_SCALE) as u32,
+            (height * GRID_SCALE) as u32)
         .position_centered()
         .build()
         .unwrap();
@@ -194,10 +194,10 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
     fn draw_cannon(canvas: &mut sdl2::render::Canvas<Window>, bunker: &battlefield::bunker::Bunker, color: pixels::Color) {
         let cannon_pos = bunker.get_cannon_pos_x1y1x2y2();
         canvas.aa_line(
-            cannon_pos.0 as i16  *  WIN_SCALE as i16, 
-            cannon_pos.1 as i16  *  WIN_SCALE as i16,
-            cannon_pos.2 as i16  *  WIN_SCALE as i16, 
-            cannon_pos.3 as i16  *  WIN_SCALE as i16,
+            cannon_pos.0 as i16  *  GRID_SCALE as i16, 
+            cannon_pos.1 as i16  *  GRID_SCALE as i16,
+            cannon_pos.2 as i16  *  GRID_SCALE as i16, 
+            cannon_pos.3 as i16  *  GRID_SCALE as i16,
             color
         ).unwrap();
     }
@@ -208,9 +208,9 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
         color: pixels::Color) 
     {
         canvas.filled_pie(
-            bunker.x_pos as i16  *  WIN_SCALE as i16, 
-            bunker.y_pos as i16  *  WIN_SCALE as i16,
-            bunker.get_radius() as i16 * WIN_SCALE as i16, 
+            bunker.x_pos as i16  *  GRID_SCALE as i16, 
+            bunker.y_pos as i16  *  GRID_SCALE as i16,
+            bunker.get_radius() as i16 * GRID_SCALE as i16, 
             180, 360, 
             color
         ).unwrap();
@@ -250,18 +250,14 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
 
         box_(
             canvas,
-            x_zero , 
-            y1     , 
-            x_max  , 
-            y2     , 
+            x_zero, y1, 
+            x_max, y2, 
             pixels::Color::RGBA(128,128,128,128)
         );
         box_(
             canvas,
-            x_zero    , 
-            y1        , 
-            x_current , 
-            y2        , 
+            x_zero, y1, 
+            x_current, y2, 
             pixels::Color::RGBA(0,0,255,255)
         );
     }
@@ -328,10 +324,10 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
         let x_offset = width as i32/2;
         let y_offset = height as i32/2;
         let destination = Rect::new(
-            (x_pos-x_offset) * WIN_SCALE, 
-            (y_pos-y_offset) * WIN_SCALE, 
-            width  * WIN_SCALE as u32, 
-            height * WIN_SCALE as u32
+            (x_pos-x_offset) * GRID_SCALE, 
+            (y_pos-y_offset) * GRID_SCALE, 
+            width  * GRID_SCALE as u32, 
+            height * GRID_SCALE as u32
         );
         let rotation_point = Point::new(x_offset, y_offset);
 
@@ -341,24 +337,34 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
 }
 
 
-// drawing primitives
+// drawing primitives with GRID_SCALE
 
-fn box_(canvas: &Canvas<Window>, x1: i32, y1: i32, x2: i32, y2: i32, color: Color) {
+fn box_(
+    canvas: &Canvas<Window>, 
+    x1: i32, y1: i32, 
+    x2: i32, y2: i32, 
+    color: Color) 
+{
     canvas.box_(
-        (x1 * WIN_SCALE) as i16,
-        (y1 * WIN_SCALE) as i16,
-        (x2 * WIN_SCALE) as i16,
-        (y2 * WIN_SCALE) as i16,
+        (x1 * GRID_SCALE) as i16,
+        (y1 * GRID_SCALE) as i16,
+        (x2 * GRID_SCALE) as i16,
+        (y2 * GRID_SCALE) as i16,
         color
     ).unwrap();
 }
 
 
-fn filled_circle<C: ToColor>(canvas: &Canvas<Window>, x: i32, y: i32, rad: i32, color: C) {
+fn filled_circle<C: ToColor>(
+    canvas: &Canvas<Window>, 
+    x: i32, y: i32, 
+    rad: i32, 
+    color: C) 
+{
     canvas.filled_circle(
-        (x   * WIN_SCALE) as i16,
-        (y   * WIN_SCALE) as i16,
-        (rad * WIN_SCALE) as i16,
+        (x   * GRID_SCALE) as i16,
+        (y   * GRID_SCALE) as i16,
+        (rad * GRID_SCALE) as i16,
         color,
     ).unwrap();
 }
