@@ -229,12 +229,12 @@ mod tests {
 
         battlefield.grid.grid.get_mut(100).unwrap().get_mut(x_pos_of_nearest_impact_without_harm as usize).unwrap().particle_type = ParticleType::BETON;
         battlefield.shots.push(Shot::new(ShotType::ROCKET, x_pos_of_nearest_impact_without_harm, 100.0, 0.0, 0));
-        battlefield.collide();
+        battlefield.collide(&Sound::stub());
         assert_eq!(battlefield.bunkers.get_mut(0).unwrap().get_health(), bunker_start_health);
 
         battlefield.grid.grid.get_mut(100).unwrap().get_mut(x_pos_of_nearest_impact_without_harm as usize - 1).unwrap().particle_type = ParticleType::BETON;
         battlefield.shots.push(Shot::new(ShotType::ROCKET, x_pos_of_nearest_impact_without_harm-1.0, 100.0, 0.0, 0));
-        battlefield.collide();
+        battlefield.collide(&Sound::stub());
         assert_eq!(battlefield.bunkers.get_mut(0).unwrap().get_health(), bunker_start_health - ShotType::ROCKET.get_harm());
     }
 }
