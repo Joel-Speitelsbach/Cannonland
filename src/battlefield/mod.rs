@@ -12,6 +12,7 @@ use self::grid::particle_type;
 use self::grid::Grid;
 use self::shot::Shot;
 use self::bunker::Bunker;
+use sound::Sound;
 
 
 pub const SIZE: (i32,i32) = (800,500);
@@ -49,8 +50,8 @@ impl Battlefield {
     }
 
 
-    pub fn stride(&mut self) {
-        self.collide();
+    pub fn stride(&mut self, sound: &Sound) {
+        self.collide(&sound);
 
         self.grid.stride();
         self.grid.update_bunkers(&mut self.bunkers);
@@ -58,7 +59,7 @@ impl Battlefield {
     }
 
 
-    pub fn execute_action(&mut self, bunker_id: PlayerID, action: &PlayerAction) {
+    pub fn execute_action(&mut self, bunker_id: PlayerID, action: &PlayerAction, sound: &Sound) {
         match *action {
             PlayerAction::TurnCannon { diff_angle: angle } => {
                 let bunker = &mut self.bunkers[bunker_id as usize];
@@ -77,7 +78,7 @@ impl Battlefield {
                 self.bunkers[bunker_id as usize].prev_weapon();
             },
             PlayerAction::Fire => {
-                self.shoot(bunker_id);
+                self.shoot(bunker_id, sound);
             },
             PlayerAction::NewBunker => {
                 self.new_bunker(bunker_id)
@@ -117,7 +118,7 @@ impl Battlefield {
     }
 
 
-    fn shoot(&mut self, bunker_id: PlayerID) {
+    fn shoot(&mut self, bunker_id: PlayerID, sound: &Sound) {
         let bunker = &mut self.bunkers[bunker_id as usize];
         if !bunker.is_alive() {
             return;
@@ -133,11 +134,12 @@ impl Battlefield {
         );
         self.shots.push(shot);
 
+        sound.play("whoosh.wav");
         bunker.reset_charge();
     }
 
 
-    fn collide(&mut self) {
+    fn collide(&mut self, sound: &Sound) {
         for i in (0..self.shots.len()).rev() {
             let x_pos = self.shots[i].x_pos as i32;
             let y_pos = self.shots[i].y_pos as i32;
@@ -152,6 +154,8 @@ impl Battlefield {
                     );
                 Battlefield::harm_bunkers(&mut self.bunkers, &self.shots[i]);
                 self.shots.remove(i);
+
+                sound.play("explode.wav");
             }
         }
     }

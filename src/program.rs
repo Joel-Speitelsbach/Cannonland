@@ -9,11 +9,13 @@ use sdl2::keyboard::Keycode;
 use sdl2::event::Event;
 use sdl2::render::Canvas;
 use sdl2::rect::Rect;
+use sound::Sound;
 
 
 pub struct Window {
     pub sdl_context: sdl2::Sdl,
     pub canvas: Canvas<sdl2::video::Window>,
+    pub sound: Sound,
 }
 
 
@@ -83,6 +85,7 @@ pub fn run() {
     let mut window = Window {
         sdl_context,
         canvas,
+        sound: Sound::init(),
     };
     client::run("localhost", &mut window);
 }

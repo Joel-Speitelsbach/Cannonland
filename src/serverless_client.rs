@@ -7,14 +7,17 @@ use present::{self,Presenter,PresenterState};
 use control::{Controller};
 use message::PlayerAction;
 use util;
+use sound::Sound;
 
 
 pub fn run(_: &[String]) {
+    let sound = Sound::init();
+
     // init battlefield
     let mut battlefield = battlefield::Battlefield::new();
-    battlefield.execute_action(0, &PlayerAction::NewBunker);
-    battlefield.execute_action(1, &PlayerAction::NewBunker);
-    battlefield.execute_action(2, &PlayerAction::NewBunker);
+    battlefield.execute_action(0, &PlayerAction::NewBunker, &sound);
+    battlefield.execute_action(1, &PlayerAction::NewBunker, &sound);
+    battlefield.execute_action(2, &PlayerAction::NewBunker, &sound);
  
     //init presenter
     let sdl_context = sdl2::init().unwrap();
@@ -38,9 +41,9 @@ pub fn run(_: &[String]) {
         // iterate battlefield
         let actions = controller.poll_actions();
         for action in actions {
-            battlefield.execute_action(0, &action);
+            battlefield.execute_action(0, &action, &sound);
         }
-        battlefield.stride();
+        battlefield.stride(&sound);
 
         // events
         let mut presenter = Presenter::new(&mut presenter_state, &battlefield);

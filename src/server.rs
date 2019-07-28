@@ -5,6 +5,7 @@ use network;
 use super::message::{ServerMessage,ClientMessage,PlayerID,ServerMessageInit,PlayerAction};
 use battlefield::Battlefield;
 use std::cmp;
+use sound::Sound;
 
 
 pub fn run() {
@@ -69,10 +70,10 @@ pub fn run() {
         // update battlefield
         for (player_id,client_message) in &messages {
             for action in &client_message.actions {
-                battlefield.execute_action(*player_id, &action);
+                battlefield.execute_action(*player_id, &action, &Sound::stub());
             }
         }
-        battlefield.stride();
+        battlefield.stride(&Sound::stub());
     }
 }
 

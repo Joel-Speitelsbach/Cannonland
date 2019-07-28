@@ -14,6 +14,8 @@ mod server;
 mod client;
 mod util;
 mod config;
+mod sound;
+
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -32,6 +34,7 @@ fn main() {
         "client" => client::run_standalone(&args[2]),
         "server" => server::run(),
         "program" => program::run(),
+        "sound" => sound::test(),
         x => println!("module name {} does not exist", x),
     }
 }

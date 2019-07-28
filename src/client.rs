@@ -6,6 +6,7 @@ use present::{self,Presenter,PresenterState};
 use program;
 use sdl2::keyboard::Keycode;
 use sdl2::event::{Event};
+use sound::Sound;
 
 
 pub fn run_standalone(server_ip: &str) {
@@ -13,9 +14,11 @@ pub fn run_standalone(server_ip: &str) {
     let win_size: (i32,i32) = battlefield::SIZE; 
     let sdl_context = sdl2::init().unwrap();
     let canvas = present::new_window(&sdl_context.video().unwrap(), win_size);
+    let sound = Sound::init();
     let mut window = program::Window {
         sdl_context,
         canvas,
+        sound,
     };
 
     run(server_ip, &mut window);
@@ -66,10 +69,10 @@ pub fn run(server_ip: &str, window: &mut program::Window) {
         // update battlefield
         for (player_id,client_message) in &messages {
             for action in &client_message.actions {
-                battlefield.execute_action(*player_id, action);
+                battlefield.execute_action(*player_id, action, &window.sound);
             }
         }
-        battlefield.stride();
+        battlefield.stride(&window.sound);
 
 
         // present battlefield
