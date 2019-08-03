@@ -130,16 +130,17 @@ impl Grid {
     pub fn collides_at_position(&self, x_pos: i32, y_pos: i32) -> bool {
             self.is_inside_grid(x_pos, y_pos) 
         && 
-            self.grid
-                [y_pos as usize]
-                [x_pos as usize].particle_type 
-        != 
-            ParticleType::EMPTY
+                self.grid
+                    [y_pos as usize]
+                    [x_pos as usize].particle_type 
+            != 
+                ParticleType::EMPTY
     }
 
 
     fn is_inside_grid(&self, x_pos: i32, y_pos: i32) -> bool {
-        return x_pos < self.width && y_pos < self.height;
+           (x_pos as u32)  <  self.width  as u32 
+        && (y_pos as u32)  <  self.height as u32
     }
 
 
