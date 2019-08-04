@@ -5,7 +5,7 @@ use std::io::Error;
 extern crate serde;
 use self::serde::{Serialize, Deserialize};
 extern crate bincode;
-use self::bincode::{Infinite, Result as Result_};
+use self::bincode::Result as Result_;
 
 
 pub const PORT: &str = "4242";
@@ -46,7 +46,7 @@ impl OtherSide {
             where D: Serialize {
         let OtherSide{ref tcp_stream} = self;
         let mut tcp_stream = tcp_stream;
-        bincode::serialize_into(&mut tcp_stream, &data, Infinite)
+        bincode::serialize_into(&mut tcp_stream, &data)
     }
 
 
@@ -63,7 +63,7 @@ impl OtherSide {
             where for<'de> D: Deserialize<'de> {
         let OtherSide{ref tcp_stream} = self;
         let mut tcp_stream = tcp_stream;
-        bincode::deserialize_from(&mut tcp_stream, bincode::Infinite)
+        bincode::deserialize_from(&mut tcp_stream)
     }
 
 

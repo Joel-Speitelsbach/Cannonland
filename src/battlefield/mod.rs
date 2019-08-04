@@ -5,6 +5,7 @@ pub mod shot_type;
 mod weapon_depot;
 
 extern crate rand;
+extern crate rand_isaac;
 use self::rand::Rng;
 use std::f32;
 use message::{PlayerAction,PlayerID,ChangeWeapon};
@@ -23,7 +24,7 @@ pub struct Battlefield {
     pub grid: Grid,
     pub bunkers: Vec<bunker::Bunker>,
     pub shots: Vec<shot::Shot>,
-    rand_gen: rand::prng::isaac::IsaacRng,
+    rand_gen: rand_isaac::IsaacRng,
 }
 
 
@@ -42,7 +43,7 @@ impl Battlefield {
             grid,
             bunkers,
             shots: Vec::new(),
-            rand_gen: rand::FromEntropy::from_entropy(),
+            rand_gen: rand::SeedableRng::from_entropy(),
         };
         assert_eq!(battlefield.size(),SIZE,
             "size of battlefield file (first form) is not correct (second form)");
@@ -91,7 +92,7 @@ impl Battlefield {
         let width = self.grid.width;
         let min_dist = width / (self.number_of_bunkers() * 2 + 1);
         let x_pos = 'search: loop {
-            let x_pos = self.rand_gen.gen_range::<i32>(0, width);
+            let x_pos = self.rand_gen.gen_range(0, width);
             'bunker: for bunker in &self.bunkers {
                 if !bunker.player_active { continue };
                 let collide = (bunker.x_pos - x_pos).abs() < min_dist;
