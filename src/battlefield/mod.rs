@@ -133,9 +133,9 @@ impl Battlefield {
             bunker.get_angle_radians(), 
             bunker.get_charge()
         );
+        sound.play(&shot.shot_type.get_shoot_sound());
         self.shots.push(shot);
 
-        sound.play("whoosh.wav");
         bunker.reset_charge();
     }
 
@@ -154,9 +154,9 @@ impl Battlefield {
                     self.shots[i].get_impact_radius() as i32
                     );
                 Battlefield::harm_bunkers(&mut self.bunkers, &self.shots[i]);
+                sound.play(&self.shots[i].shot_type.get_impact_sound());
+                
                 self.shots.remove(i);
-
-                sound.play("explode.wav");
             }
         }
     }

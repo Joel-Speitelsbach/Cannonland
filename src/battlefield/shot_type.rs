@@ -51,4 +51,20 @@ impl ShotType {
         }
     }
 
+    pub fn get_shoot_sound(&self) -> String {
+        match self {
+            ShotType::CANNON => "crunch.wav",
+            ShotType::ROCKET => "whoosh.wav",
+            ShotType::SNOW => "schnief.wav",
+        }.to_string()
+    }
+
+    pub fn get_impact_sound(&self) -> String {
+        match self {
+            ShotType::CANNON => "putbomb.wav",
+            ShotType::ROCKET => "explode.wav",
+            ShotType::SNOW => "typewriter.wav",
+        }.to_string()
+    }
+
 }

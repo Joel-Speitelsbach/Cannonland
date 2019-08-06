@@ -68,17 +68,17 @@ impl Grid {
         let canvas = surface.into_canvas().unwrap();
         let pixels = canvas.read_pixels(None, PixelFormatEnum::ABGR8888).unwrap();
 
-        let pix = |px: usize| {
-            print!("  ");
-            for i in 0..4 {
-                print!("{} ", pixels[i + px*4]);
-            }
-            println!();
-        };
-        println!("grid::load_from_file()");
-        for px in 0..6 {
-            pix(px);
-        }
+        // let pix = |px: usize| {
+        //     print!("  ");
+        //     for i in 0..4 {
+        //         print!("{} ", pixels[i + px*4]);
+        //     }
+        //     println!();
+        // };
+        // println!("grid::load_from_file()");
+        // for px in 0..6 {
+        //     pix(px);
+        // }
 
         let mut grid = Grid::new(width, height);
         for y in 0..height as usize {
