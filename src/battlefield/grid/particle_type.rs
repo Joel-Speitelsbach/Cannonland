@@ -1,5 +1,5 @@
 
-use message::PlayerID;
+use crate::message::PlayerID;
 
 
 #[allow(dead_code)]

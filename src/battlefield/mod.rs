@@ -8,12 +8,12 @@ extern crate rand;
 extern crate rand_isaac;
 use self::rand::Rng;
 use std::f32;
-use message::{PlayerAction,PlayerID,ChangeWeapon};
+use crate::message::{PlayerAction,PlayerID,ChangeWeapon};
 use self::grid::particle_type;
 use self::grid::Grid;
 use self::shot::Shot;
 use self::bunker::Bunker;
-use sound::Sound;
+use crate::sound::Sound;
 
 
 pub const SIZE: (i32,i32) = (800,500);

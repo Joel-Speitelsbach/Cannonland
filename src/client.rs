@@ -1,12 +1,12 @@
-use battlefield;
-use control::Controller;
-use network;
-use message::{ServerMessage,ClientMessage,ServerMessageInit};
-use present::{self,Presenter,PresenterState};
-use program;
+use crate::battlefield;
+use crate::control::Controller;
+use crate::network;
+use crate::message::{ServerMessage,ClientMessage,ServerMessageInit};
+use crate::present::{self,Presenter,PresenterState};
+use crate::program;
 use sdl2::keyboard::Keycode;
 use sdl2::event::Event;
-use sound::Sound;
+use crate::sound::Sound;
 
 
 pub fn run_standalone(server_ip: &str) {

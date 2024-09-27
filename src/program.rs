@@ -1,15 +1,15 @@
 use sdl2::video::WindowContext;
 use sdl2::render::Texture;
 use sdl2::render::TextureCreator;
-use battlefield;
-use client;
-use present;
+use crate::battlefield;
+use crate::client;
+use crate::present;
 use sdl2;
 use sdl2::keyboard::Keycode;
 use sdl2::event::Event;
 use sdl2::render::Canvas;
 use sdl2::rect::Rect;
-use sound::Sound;
+use crate::sound::Sound;
 
 
 pub struct Window {

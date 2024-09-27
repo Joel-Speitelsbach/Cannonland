@@ -1,4 +1,4 @@
-use battlefield::shot_type::ShotType;
+use crate::battlefield::shot_type::ShotType;
 use sdl2;
 use sdl2::gfx::primitives::{DrawRenderer,ToColor};
 use sdl2::pixels::{self,Color};
@@ -9,8 +9,8 @@ use sdl2::render::{Canvas,Texture,TextureCreator,BlendMode};
 use sdl2::video::{WindowContext,Window};
 use sdl2::image::LoadTexture;
 
-use battlefield::{self,grid,Battlefield,shot_type};
-use util;
+use crate::battlefield::{self,grid,Battlefield,shot_type};
+use crate::util;
 
 
 const GRID_SCALE: i32 = 2;

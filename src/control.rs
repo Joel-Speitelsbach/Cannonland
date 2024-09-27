@@ -11,7 +11,7 @@ use sdl2::event::Event;
 use sdl2::{Sdl,TimerSubsystem};
 use sdl2::keyboard::Keycode;
 
-use message::{PlayerAction, ChangeWeapon};
+use crate::message::{PlayerAction, ChangeWeapon};
 
 pub struct Controller {
     left_pressed: (bool, i32), // (whether key is currently pressed

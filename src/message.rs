@@ -1,7 +1,7 @@
 // module info: data types for sending messages between server and client
 
 use std::vec::Vec;
-use battlefield::Battlefield;
+use crate::battlefield::Battlefield;
 
 
 pub type PlayerID = i32; //maybe this belongs into 'battlefield'

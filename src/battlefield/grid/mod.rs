@@ -6,7 +6,7 @@ pub mod particle_type;  // TODO: make private
 use self::particle_type::{ParticleType,Bunker};
 use self::particle::Particle;
 use super::bunker;
-use message::PlayerID;
+use crate::message::PlayerID;
 use sdl2::image::LoadSurface;
 use sdl2::pixels::PixelFormatEnum;
 use std::cmp;
