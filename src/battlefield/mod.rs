@@ -93,7 +93,7 @@ impl Battlefield {
         let min_dist = width / (self.number_of_bunkers() * 2 + 1);
         let x_pos = 'search: loop {
             let x_pos = self.rand_gen.gen_range(0, width);
-            'bunker: for bunker in &self.bunkers {
+            for bunker in &self.bunkers {
                 if !bunker.player_active { continue };
                 let collide = (bunker.x_pos - x_pos).abs() < min_dist;
                 if collide {

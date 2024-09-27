@@ -1,11 +1,11 @@
 use battlefield;
-use control::{Controller};
+use control::Controller;
 use network;
 use message::{ServerMessage,ClientMessage,ServerMessageInit};
 use present::{self,Presenter,PresenterState};
 use program;
 use sdl2::keyboard::Keycode;
-use sdl2::event::{Event};
+use sdl2::event::Event;
 use sound::Sound;
 
 

@@ -18,6 +18,8 @@ pub struct Window {
     pub sound: Sound,
 }
 
+#[allow(non_upper_case_globals)]
+const n_menu_entries: i32 = 3;
 
 pub fn run() {
 
@@ -31,9 +33,10 @@ pub fn run() {
     fps_manager.set_framerate(20).unwrap();
 
     let texture_creator = canvas.texture_creator();
-    let game_name_texture = create_text(&texture_creator, "CannonLand");
+    let game_name_texture = create_text(&texture_creator, "Cannonland");
     let host_texture = create_text(&texture_creator, "Host");
     let join_texture = create_text(&texture_creator, "Join");
+    let single_texture = create_text(&texture_creator, "Singleplayer");
 
     let mut selected_index : u8 = 0;
 
@@ -57,23 +60,29 @@ pub fn run() {
 
         let mut host_extra_width: u32= 0;
         let mut join_extra_width: u32 = 0;
+        let mut single_extra_width: u32 = 0;
         if selected_index == 0 {
             host_extra_width = 200;
-        } else {
+        } else if selected_index == 1 {
             join_extra_width = 200;
+        } else {
+            single_extra_width = 200;
         }
 
         canvas.clear();
-        canvas.copy(&game_name_texture, None, Rect::new(400, 100, game_name_texture.query().width, game_name_texture.query().height)).unwrap();
-        canvas.copy(&host_texture, None, Rect::new(600 - host_extra_width as i32/2, 400, host_texture.query().width + host_extra_width, host_texture.query().height)).unwrap();
-        canvas.copy(&join_texture, None, Rect::new(600 - join_extra_width as i32/2, 600, join_texture.query().width + join_extra_width, join_texture.query().height)).unwrap();
+        canvas.copy(&game_name_texture, None, Rect::new(400, 0, game_name_texture.query().width, game_name_texture.query().height)).unwrap();
+        canvas.copy(&host_texture, None, Rect::new(600 - host_extra_width as i32/2, 250, host_texture.query().width + host_extra_width, host_texture.query().height)).unwrap();
+        canvas.copy(&join_texture, None, Rect::new(600 - join_extra_width as i32/2, 450, join_texture.query().width + join_extra_width, join_texture.query().height)).unwrap();
+        canvas.copy(&single_texture, None, Rect::new(600 - single_extra_width as i32/2, 650, join_texture.query().width + single_extra_width, join_texture.query().height)).unwrap();
         canvas.present();
 
         for event in sdl_context.event_pump().unwrap().poll_iter() {
             match event {
                 Event::KeyDown { keycode: Some(Keycode::Right),.. } => break 'mainloop,
-                Event::KeyUp { keycode: Some(Keycode::Up),.. } => selected_index = (selected_index+3)%2,
-                Event::KeyUp { keycode: Some(Keycode::Down),.. } => selected_index = (selected_index+1)%2,
+                Event::KeyDown { keycode: Some(Keycode::Return),.. } => break 'mainloop,
+                Event::KeyUp { keycode: Some(Keycode::Up),.. } => selected_index = (selected_index+2)%3,
+                Event::KeyUp { keycode: Some(Keycode::Down),.. } => selected_index = (selected_index+1)%3,
+                Event::KeyDown { keycode: Some(Keycode::Escape), ..} => break 'mainloop,
                 Event::Quit{..} => break 'mainloop,
                 _ => {},
             }
