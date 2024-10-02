@@ -1,10 +1,16 @@
+use std::thread;
+use std::time::Duration;
+
 use sdl2::video::WindowContext;
 use sdl2::render::Texture;
 use sdl2::render::TextureCreator;
 use crate::battlefield;
 use crate::client;
 use crate::present;
+use crate::serverless_client;
+use crate::server;
 use sdl2;
+use sdl2::pixels::Color;
 use sdl2::keyboard::Keycode;
 use sdl2::event::Event;
 use sdl2::render::Canvas;
@@ -18,21 +24,24 @@ pub struct Window {
     pub sound: Sound,
 }
 
-#[allow(non_upper_case_globals)]
-const n_menu_entries: i32 = 3;
-
 pub fn run() {
 
     // init window
     let win_size: (i32,i32) = battlefield::SIZE;
     let sdl_context = sdl2::init().unwrap();
-    let mut canvas = present::new_window(&sdl_context.video().unwrap(), win_size);
+    let canvas = present::new_window(&sdl_context.video().unwrap(), win_size);
+    let mut window = Window {
+        sdl_context,
+        canvas,
+        sound: Sound::init(),
+    };
+
 
     // create fps manager
     let mut fps_manager = sdl2::gfx::framerate::FPSManager::new();
     fps_manager.set_framerate(20).unwrap();
 
-    let texture_creator = canvas.texture_creator();
+    let texture_creator = window.canvas.texture_creator();
     let game_name_texture = create_text(&texture_creator, "Cannonland");
     let host_texture = create_text(&texture_creator, "Host");
     let join_texture = create_text(&texture_creator, "Join");
@@ -44,18 +53,11 @@ pub fn run() {
         /*
 
         //// UNTERMENÜS
-        if mauszeiger_click() {
-            client::run();
-        }
         if button_für_server()
             && server_nicht_gestartet
         {
             als_hintergrundprozess(server::run);
         }
-
-        zeichne_hauptmenü();
-        screen.blit_surface();
-
         */
 
         let mut host_extra_width: u32= 0;
@@ -69,35 +71,45 @@ pub fn run() {
             single_extra_width = 200;
         }
 
-        canvas.clear();
-        canvas.copy(&game_name_texture, None, Rect::new(400, 0, game_name_texture.query().width, game_name_texture.query().height)).unwrap();
-        canvas.copy(&host_texture, None, Rect::new(600 - host_extra_width as i32/2, 250, host_texture.query().width + host_extra_width, host_texture.query().height)).unwrap();
-        canvas.copy(&join_texture, None, Rect::new(600 - join_extra_width as i32/2, 450, join_texture.query().width + join_extra_width, join_texture.query().height)).unwrap();
-        canvas.copy(&single_texture, None, Rect::new(600 - single_extra_width as i32/2, 650, join_texture.query().width + single_extra_width, join_texture.query().height)).unwrap();
-        canvas.present();
+        window.canvas.set_draw_color(Color::RGB(0, 0, 0));
+        window.canvas.clear();
+        window.canvas.copy(&game_name_texture, None, Rect::new(400, 0, game_name_texture.query().width, game_name_texture.query().height)).unwrap();
+        window.canvas.copy(&host_texture, None, Rect::new(600 - host_extra_width as i32/2, 250, host_texture.query().width + host_extra_width, host_texture.query().height)).unwrap();
+        window.canvas.copy(&join_texture, None, Rect::new(600 - join_extra_width as i32/2, 450, join_texture.query().width + join_extra_width, join_texture.query().height)).unwrap();
+        window.canvas.copy(&single_texture, None, Rect::new(400 - single_extra_width as i32/2, 650, single_texture.query().width + single_extra_width, join_texture.query().height)).unwrap();
+        window.canvas.present();
 
-        for event in sdl_context.event_pump().unwrap().poll_iter() {
+        loop {
+            let event = match window.sdl_context.event_pump().unwrap().poll_event() {
+                Some(event) => event,
+                None => {
+                    break;
+                },
+            };
             match event {
-                Event::KeyDown { keycode: Some(Keycode::Right),.. } => break 'mainloop,
-                Event::KeyDown { keycode: Some(Keycode::Return),.. } => break 'mainloop,
+                Event::KeyDown { keycode: Some(Keycode::Right | Keycode::Return),.. } => {
+                    if selected_index == 0 {
+                        thread::spawn(|| server::run());
+                        thread::sleep(Duration::from_millis(500));
+                        client::run("localhost", &mut window);
+                        return;
+                    } else if selected_index == 1 {
+                        client::run("localhost", &mut window);
+                    } else if selected_index == 2 {
+                        serverless_client::run(&mut window);
+                    }
+                },
                 Event::KeyUp { keycode: Some(Keycode::Up),.. } => selected_index = (selected_index+2)%3,
                 Event::KeyUp { keycode: Some(Keycode::Down),.. } => selected_index = (selected_index+1)%3,
-                Event::KeyDown { keycode: Some(Keycode::Escape), ..} => break 'mainloop,
-                Event::Quit{..} => break 'mainloop,
+                Event::Quit{..} | Event::KeyDown { keycode: Some(Keycode::Escape), ..} => break 'mainloop,
                 _ => {},
             }
         }
 
         fps_manager.delay();
     }
-
-    let mut window = Window {
-        sdl_context,
-        canvas,
-        sound: Sound::init(),
-    };
-    client::run("localhost", &mut window);
 }
+
 
 fn create_text<'t> (texture_creator: &'t TextureCreator<WindowContext>, text: &str) -> Texture<'t> {
     // create ttf
@@ -109,7 +121,7 @@ fn create_text<'t> (texture_creator: &'t TextureCreator<WindowContext>, text: &s
             .render(&text)
             .blended(sdl2::pixels::Color::RGB(200,200,200))
             .unwrap();
-    let mut  texture = texture_creator.create_texture_from_surface(surface).unwrap();
+    let mut texture = texture_creator.create_texture_from_surface(surface).unwrap();
     texture.set_blend_mode(sdl2::render::BlendMode::Blend);
     return texture;
 }

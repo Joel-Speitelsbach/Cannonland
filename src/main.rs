@@ -30,7 +30,7 @@ fn main() {
 
     match args[1].as_str() {
         "particle_test" => battlefield::grid::particle_test::run(),
-        "present" => serverless_client::run(&args[2..]),
+        "present" => serverless_client::run_standalone(),
         "client" => client::run_standalone(&args[2]),
         "server" => server::run(),
         "program" => program::run(),
