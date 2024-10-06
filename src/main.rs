@@ -40,7 +40,7 @@ fn main() {
             "program" => program::run(),
             "sound" => sound::test(),
             x => {
-                println!("module name {} does not exist", x);
+                println!("module name {x} does not exist");
                 eprintln!(
                     "Usage:\
                     \n     cargo run [module name] [args] 

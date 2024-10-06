@@ -108,7 +108,7 @@ impl Grid {
     }
 
 
-    fn set_pixel(&mut self, particle_type: ParticleType, x: i32, y: i32) {
+    pub fn set_pixel(&mut self, particle_type: ParticleType, x: i32, y: i32) {
         self.grid
             [y as usize]
             [x as usize].particle_type = particle_type;

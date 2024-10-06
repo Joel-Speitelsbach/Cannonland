@@ -2,6 +2,7 @@ use std::f32;
 use std::cmp;
 
 use super::grid::particle_type::ParticleType;
+use super::grid::Grid;
 use super::weapon_depot::WeaponDepot;
 use super::shot_type::ShotType;
 
@@ -59,7 +60,15 @@ impl Bunker {
         return self.particle_type;
     }
 
-    pub fn get_shoot_pos_xy(&self) -> (i32, i32) {
+    pub fn get_shoot_pos(&self) -> (i32, i32) {
+        let sin_cos = self.angle_radians.sin_cos();
+        let cannon_length = std::cmp::max(25, self.cannon_length);
+        return (
+            self.x_pos + (cannon_length as f32 * sin_cos.1) as i32,
+            self.y_pos + (cannon_length as f32 * sin_cos.0) as i32);
+    }
+
+    pub fn get_cannon_end_pos(&self) -> (i32, i32) {
         let sin_cos = self.angle_radians.sin_cos();
         return (
             self.x_pos + (self.cannon_length as f32 * sin_cos.1) as i32,
@@ -67,8 +76,8 @@ impl Bunker {
     }
 
     pub fn get_cannon_pos_x1y1x2y2(&self) -> (i32, i32, i32, i32) {
-        let shot_pos = self.get_shoot_pos_xy();
-        return (self.x_pos, self.y_pos, shot_pos.0, shot_pos.1);
+        let cannon_end = self.get_cannon_end_pos();
+        return (self.x_pos, self.y_pos, cannon_end.0, cannon_end.1);
     }
 
     pub fn get_radius(&self) -> i32 {
@@ -117,9 +126,14 @@ impl Bunker {
             < (self.radius + radius) as f32
     }
 
-    pub fn harm_if_in_radius(&mut self, x_pos: i32, y_pos: i32, radius: i32, harm_amount: i32) {
+    pub fn harm_if_in_radius(&mut self, x_pos: i32, y_pos: i32, radius: i32, harm_amount: i32, 
+        grid: &mut Grid) 
+    {
         if self.would_harm_in_radius(x_pos, y_pos, radius) {
             self.harm(harm_amount);
+            if !self.is_alive() {
+                grid.set_pixel(ParticleType::EMPTY, self.x_pos, self.y_pos);
+            }
         }
     }
 

@@ -104,6 +104,8 @@ impl Battlefield {
         };
 
         self.grid.add_bunker(bunker_id, (x_pos,0));
+        self.bunkers[bunker_id as usize] = Bunker::new_at_nowhere(
+            particle_type::Bunker::from_num(bunker_id));
         self.grid.update_bunkers(&mut self.bunkers);
     }
 
@@ -125,7 +127,7 @@ impl Battlefield {
             return;
         }
 
-        let shoot_pos = bunker.get_shoot_pos_xy();
+        let shoot_pos = bunker.get_shoot_pos();
         let shot = shot::Shot::new(
             bunker.get_current_weapon(), 
             shoot_pos.0 as f32, 
@@ -153,7 +155,7 @@ impl Battlefield {
                     x_pos, y_pos, 
                     self.shots[i].get_impact_radius() as i32
                     );
-                Battlefield::harm_bunkers(&mut self.bunkers, &self.shots[i]);
+                Battlefield::harm_bunkers(&mut self.bunkers, &self.shots[i], &mut self.grid);
                 sound.play(&self.shots[i].shot_type.get_impact_sound());
                 
                 self.shots.remove(i);
@@ -177,7 +179,7 @@ impl Battlefield {
         false
     }
 
-    fn harm_bunkers(bunkers: &mut Vec<Bunker>, shot: &Shot) {
+    fn harm_bunkers(bunkers: &mut Vec<Bunker>, shot: &Shot, grid: &mut Grid) {
         for i in (0..bunkers.len()).rev() {
             if !bunkers[i].is_alive() {
                 continue;
@@ -186,7 +188,9 @@ impl Battlefield {
                 shot.x_pos               as i32, 
                 shot.y_pos               as i32, 
                 shot.get_impact_radius() as i32, 
-                shot.get_harm());
+                shot.get_harm(),
+                grid,
+            );
         }
     }
 

@@ -178,10 +178,12 @@ impl<'st,'b, 'res> Presenter<'st,'b, 'res> {
 
     fn draw_bunkers(&mut self) -> () {
         for bunker in &self.battlefield.bunkers {
-            if !bunker.is_alive() { continue; }
-
             let rgba: (u8,u8,u8,u8) = bunker.get_rgba();
-            let color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
+            let mut color = pixels::Color::RGBA(rgba.0, rgba.1, rgba.2, rgba.3);
+            
+            if !bunker.is_alive() { 
+                continue;
+            }
 
             Presenter::draw_cannon(&mut self.state.canvas, &bunker, color);
             Presenter::draw_building(&mut self.state.canvas, &bunker, color);

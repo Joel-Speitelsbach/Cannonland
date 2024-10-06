@@ -43,11 +43,12 @@ pub fn run() {
 
     let texture_creator = window.canvas.texture_creator();
     let game_name_texture = create_text(&texture_creator, "Cannonland");
-    let host_texture = create_text(&texture_creator, "Host");
+    let mut host_texture = create_text(&texture_creator, "Host");
     let join_texture = create_text(&texture_creator, "Join");
     let single_texture = create_text(&texture_creator, "Singleplayer");
 
     let mut selected_index : u8 = 0;
+    let mut server_started = false;
 
     'mainloop: loop {
         /*
@@ -79,6 +80,7 @@ pub fn run() {
         window.canvas.copy(&single_texture, None, Rect::new(400 - single_extra_width as i32/2, 650, single_texture.query().width + single_extra_width, join_texture.query().height)).unwrap();
         window.canvas.present();
 
+        // event loop
         loop {
             let event = match window.sdl_context.event_pump().unwrap().poll_event() {
                 Some(event) => event,
@@ -89,12 +91,15 @@ pub fn run() {
             match event {
                 Event::KeyDown { keycode: Some(Keycode::Right | Keycode::Return),.. } => {
                     if selected_index == 0 {
-                        thread::spawn(|| server::run());
-                        thread::sleep(Duration::from_millis(500));
+                        if !server_started {
+                            thread::spawn(|| server::run());
+                            host_texture = create_text(&texture_creator, "Host (started)");
+                            server_started = true;
+                            thread::sleep(Duration::from_millis(500));
+                        }
                         client::run("localhost", &mut window);
-                        return;
                     } else if selected_index == 1 {
-                        client::run("localhost", &mut window);
+                        run_client_menu(&mut window);
                     } else if selected_index == 2 {
                         serverless_client::run(&mut window);
                     }
@@ -103,6 +108,52 @@ pub fn run() {
                 Event::KeyUp { keycode: Some(Keycode::Down),.. } => selected_index = (selected_index+1)%3,
                 Event::Quit{..} | Event::KeyDown { keycode: Some(Keycode::Escape), ..} => break 'mainloop,
                 _ => {},
+            }
+        }
+
+        fps_manager.delay();
+    }
+}
+
+
+fn run_client_menu(window: &mut Window) {
+    let mut fps_manager = sdl2::gfx::framerate::FPSManager::new();
+    fps_manager.set_framerate(20).unwrap();
+
+    let texture_creator = window.canvas.texture_creator();
+    let mut server_address = "localhost".to_string();
+    'mainloop: loop {
+        let address_line = "server: ".to_string() + &server_address;
+        let address_texture = create_text(&texture_creator, &address_line);
+        window.canvas.set_draw_color(Color::RGB(0, 0, 0));
+        window.canvas.clear();
+        window.canvas.copy(&address_texture, None, Rect::new(200, 300, address_texture.query().width, address_texture.query().height)).unwrap();
+        window.canvas.present();
+        
+        // event loop
+        loop {
+            let event = match window.sdl_context.event_pump().unwrap().poll_event() {
+                Some(event) => event,
+                None => {
+                    break;
+                },
+            };
+            match event {
+                Event::TextInput { text, ..} => {
+                    // println!("text: {text}");
+                    server_address.push_str(&text);
+                },
+                Event::KeyDown { keycode: Some(Keycode::Backspace), ..} => {
+                    let mut chars = server_address.chars();
+                    chars.next_back();
+                    server_address = chars.as_str().to_string();
+                },
+                Event::KeyDown { keycode: Some(Keycode::Return), ..} => {
+                    client::run(&server_address, window);
+                }
+                Event::KeyDown { keycode: Some(Keycode::Escape), ..} => break 'mainloop,
+                Event::Quit {..} => std::process::exit(0),
+                _ => {}
             }
         }
 
