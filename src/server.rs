@@ -4,7 +4,6 @@ use std::collections::HashMap;
 use crate::network;
 use super::message::{ServerMessage,ClientMessage,PlayerID,ServerMessageInit,PlayerAction};
 use crate::battlefield::Battlefield;
-use std::cmp;
 use crate::sound::Sound;
 
 
@@ -34,7 +33,7 @@ pub fn run() {
             server_handle.poll_for_client()
         };
         if let Some(client) = client {
-            let next_player_id = next_player_id(&clients);
+            let next_player_id = next_player_id(&clients).unwrap();
             let init_message = ServerMessageInit {
                 player_id: next_player_id,
                 battlefield: battlefield.clone(),
@@ -78,13 +77,11 @@ pub fn run() {
 }
 
 
-fn next_player_id<T>(player_map: &HashMap<PlayerID, T>) -> PlayerID {
-    if player_map.is_empty() { return 0 };
-
-    let mut min = 10000000;
-    for id in player_map.keys() {
-        min = cmp::min(min,*id);
+fn next_player_id<T>(player_map: &HashMap<PlayerID, T>) -> Option<PlayerID> {
+    for id in 0..8 {
+        if !player_map.contains_key(&id){
+            return Some(id)
+        }
     }
-    println!("next playerid = {}", min + 1);
-    min + 1
+    None
 }
