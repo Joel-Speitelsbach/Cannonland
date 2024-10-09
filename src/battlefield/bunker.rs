@@ -19,7 +19,6 @@ pub struct Bunker {
     health: i32,
     max_health: i32,
     weapons: WeaponDepot,
-    pub player_active: bool, //TODO: move this information into Player
 }
 
 
@@ -48,7 +47,6 @@ impl Bunker {
             weapons: WeaponDepot::new(
                 [ShotType::CANNON, ShotType::ROCKET, ShotType::SNOW].to_vec()
             ),
-            player_active: false,
         };
     }
 

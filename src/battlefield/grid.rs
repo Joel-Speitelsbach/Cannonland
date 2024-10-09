@@ -10,6 +10,7 @@ use crate::message::PlayerID;
 use sdl2::image::LoadSurface;
 use sdl2::pixels::PixelFormatEnum;
 use std::cmp;
+use std::collections::HashMap;
 
 
 #[allow(dead_code)]
@@ -217,7 +218,7 @@ impl Grid {
     }
 
 
-    fn clear_blur(&mut self) -> () {
+    fn clear_blur(&mut self) {
         for y in 0..self.height as usize {
             for x in 0..self.width as usize {
                 if self.grid[y][x].particle_type == ParticleType::BLUR {
@@ -229,10 +230,7 @@ impl Grid {
     }
 
 
-    pub fn update_bunkers(&mut self, bunkers: &mut Vec<bunker::Bunker>) -> () {
-        for bunker in bunkers.as_mut_slice() {
-            bunker.player_active = false;
-        }
+    pub fn update_bunkers(&mut self, bunkers: &mut HashMap<PlayerID,bunker::Bunker>) {
         for y in 0..self.height {
             for x in 0..self.width {
                 self.update_bunker_at(x, y, bunkers);
@@ -245,8 +243,8 @@ impl Grid {
         &mut self,
         x_pos: i32,
         y_pos: i32,
-        bunkers: &mut Vec<bunker::Bunker>,
-    ) -> ()
+        bunkers: &mut HashMap<PlayerID,bunker::Bunker>,
+    )
     {
         let particle_type = 
             self.grid
@@ -258,11 +256,10 @@ impl Grid {
             return
         }
 
-        for bunker in bunkers {
+        for (_,bunker) in bunkers {
             if bunker.get_color() == particle_type {
                 bunker.x_pos = x_pos;
                 bunker.y_pos = y_pos;
-                bunker.player_active = true;
                 return;
             }
         }

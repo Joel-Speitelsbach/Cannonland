@@ -7,6 +7,7 @@ mod weapon_depot;
 extern crate rand;
 extern crate rand_isaac;
 use self::rand::Rng;
+use std::collections::HashMap;
 use std::f32;
 use crate::message::{PlayerAction,PlayerID,ChangeWeapon};
 use self::grid::particle_type;
@@ -22,7 +23,7 @@ pub const SIZE: (i32,i32) = (800,500);
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Battlefield {
     pub grid: Grid,
-    pub bunkers: Vec<bunker::Bunker>,
+    pub bunkers: HashMap<PlayerID,bunker::Bunker>,
     pub shots: Vec<shot::Shot>,
     rand_gen: rand_isaac::IsaacRng,
 }
@@ -31,17 +32,10 @@ pub struct Battlefield {
 impl Battlefield {
 
     pub fn new() -> Battlefield {
-        let mut bunkers = Vec::with_capacity(8);
-        for i in 0..8 {
-            bunkers.push(bunker::Bunker::new_at_nowhere(
-                particle_type::Bunker::from_num(i)
-            ));
-        }
-
         let grid = Grid::load_from_file("pics/terra_valley.png");
         let battlefield = Battlefield {
             grid,
-            bunkers,
+            bunkers: HashMap::new(),
             shots: Vec::new(),
             rand_gen: rand::SeedableRng::from_entropy(),
         };
@@ -63,20 +57,20 @@ impl Battlefield {
     pub fn execute_action(&mut self, bunker_id: PlayerID, action: &PlayerAction, sound: &Sound) {
         match *action {
             PlayerAction::TurnCannon { diff_angle: angle } => {
-                let bunker = &mut self.bunkers[bunker_id as usize];
+                let bunker = &mut self.bunkers.get_mut(&bunker_id).unwrap();
                 bunker.change_angle_radians_trim_overflow(angle);
             },
             PlayerAction::IncreaseLoad { inc: inc_load } => {
-                let bunker = &mut self.bunkers[bunker_id as usize];
+                let bunker = &mut self.bunkers.get_mut(&bunker_id).unwrap();
                 bunker.increment_charge(
                     (inc_load * 100.) as i32
                 );
             },
             PlayerAction::CangeWeapon(ChangeWeapon::Next) => {
-                self.bunkers[bunker_id as usize].next_weapon();
+                self.bunkers.get_mut(&bunker_id).unwrap().next_weapon();
             },
             PlayerAction::CangeWeapon(ChangeWeapon::Prev) => {
-                self.bunkers[bunker_id as usize].prev_weapon();
+                self.bunkers.get_mut(&bunker_id).unwrap().prev_weapon();
             },
             PlayerAction::Fire => {
                 self.shoot(bunker_id, sound);
@@ -92,8 +86,7 @@ impl Battlefield {
 
 
     fn delete_bunker(&mut self, bunker_id: PlayerID) {
-        let bunker = &self.bunkers[bunker_id as usize];
-        self.grid.set_pixel(particle_type::ParticleType::EMPTY, bunker.x_pos, bunker.y_pos);
+        self.bunkers.remove(&bunker_id);
     }
 
 
@@ -102,8 +95,7 @@ impl Battlefield {
         let min_dist = width / (self.number_of_bunkers() * 2 + 1);
         let x_pos = 'search: loop {
             let x_pos = self.rand_gen.gen_range(0, width);
-            for bunker in &self.bunkers {
-                if !bunker.player_active { continue };
+            for (_,bunker) in &self.bunkers {
                 let collide = (bunker.x_pos - x_pos).abs() < min_dist;
                 if collide {
                     continue 'search;
@@ -113,25 +105,19 @@ impl Battlefield {
         };
 
         self.grid.add_bunker(bunker_id, (x_pos,0));
-        self.bunkers[bunker_id as usize] = Bunker::new_at_nowhere(
-            particle_type::Bunker::from_num(bunker_id));
+        self.bunkers.insert(bunker_id, Bunker::new_at_nowhere(
+            particle_type::Bunker::from_num(bunker_id)));
         self.grid.update_bunkers(&mut self.bunkers);
     }
 
 
     fn number_of_bunkers(&self) -> i32 {
-        let mut counter = 0;
-        for bunker in &self.bunkers {
-            if bunker.player_active {
-                counter += 1;
-            }
-        }
-        counter
+        self.bunkers.len() as i32
     }
 
 
     fn shoot(&mut self, bunker_id: PlayerID, sound: &Sound) {
-        let bunker = &mut self.bunkers[bunker_id as usize];
+        let bunker = self.bunkers.get_mut(&bunker_id).unwrap();
         if !bunker.is_alive() {
             return;
         }
@@ -172,12 +158,12 @@ impl Battlefield {
         }
     }
 
-    fn shot_collides_with_bunkers(bunkers: &Vec<Bunker>, shot: &Shot) -> bool {
-        for i in (0..bunkers.len()).rev() {
-            if !bunkers[i].is_alive() {
+    fn shot_collides_with_bunkers(bunkers: &HashMap<PlayerID,Bunker>, shot: &Shot) -> bool {
+        for i in (0..bunkers.len() as i32).rev() {
+            if !bunkers[&i].is_alive() {
                 continue;
             }
-            if bunkers[i].would_harm_in_radius(
+            if bunkers[&i].would_harm_in_radius(
                     shot.x_pos as i32,
                     shot.y_pos as i32,
                     shot.get_radius())
@@ -188,12 +174,12 @@ impl Battlefield {
         false
     }
 
-    fn harm_bunkers(bunkers: &mut Vec<Bunker>, shot: &Shot, grid: &mut Grid) {
-        for i in (0..bunkers.len()).rev() {
-            if !bunkers[i].is_alive() {
+    fn harm_bunkers(bunkers: &mut HashMap<PlayerID,Bunker>, shot: &Shot, grid: &mut Grid) {
+        for i in (0..bunkers.len() as i32).rev() {
+            if !bunkers[&i].is_alive() {
                 continue;
             }
-            bunkers[i].harm_if_in_radius(
+            bunkers.get_mut(&i).unwrap().harm_if_in_radius(
                 shot.x_pos               as i32, 
                 shot.y_pos               as i32, 
                 shot.get_impact_radius() as i32, 
@@ -232,7 +218,7 @@ mod tests {
         let bunker_start_health;
         let bunker_radius;
         {
-            let bunker = battlefield.bunkers.get_mut(0).unwrap();
+            let bunker = battlefield.bunkers.get_mut(&0).unwrap();
             bunker.x_pos = 100;
             bunker.y_pos = 100;
             bunker_start_health = bunker.get_health();
@@ -244,11 +230,11 @@ mod tests {
         battlefield.grid.grid.get_mut(100).unwrap().get_mut(x_pos_of_nearest_impact_without_harm as usize).unwrap().particle_type = ParticleType::BETON;
         battlefield.shots.push(Shot::new(ShotType::ROCKET, x_pos_of_nearest_impact_without_harm, 100.0, 0.0, 0));
         battlefield.collide(&Sound::stub());
-        assert_eq!(battlefield.bunkers.get_mut(0).unwrap().get_health(), bunker_start_health);
+        assert_eq!(battlefield.bunkers.get_mut(&0).unwrap().get_health(), bunker_start_health);
 
         battlefield.grid.grid.get_mut(100).unwrap().get_mut(x_pos_of_nearest_impact_without_harm as usize - 1).unwrap().particle_type = ParticleType::BETON;
         battlefield.shots.push(Shot::new(ShotType::ROCKET, x_pos_of_nearest_impact_without_harm-1.0, 100.0, 0.0, 0));
         battlefield.collide(&Sound::stub());
-        assert_eq!(battlefield.bunkers.get_mut(0).unwrap().get_health(), bunker_start_health - ShotType::ROCKET.get_harm());
+        assert_eq!(battlefield.bunkers.get_mut(&0).unwrap().get_health(), bunker_start_health - ShotType::ROCKET.get_harm());
     }
 }
