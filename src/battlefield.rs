@@ -84,7 +84,16 @@ impl Battlefield {
             PlayerAction::NewBunker => {
                 self.new_bunker(bunker_id)
             },
+            PlayerAction::DeleteBunker => {
+                self.delete_bunker(bunker_id)
+            },
         }
+    }
+
+
+    fn delete_bunker(&mut self, bunker_id: PlayerID) {
+        let bunker = &self.bunkers[bunker_id as usize];
+        self.grid.set_pixel(particle_type::ParticleType::EMPTY, bunker.x_pos, bunker.y_pos);
     }
 
 

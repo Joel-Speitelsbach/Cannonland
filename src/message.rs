@@ -15,6 +15,7 @@ pub enum PlayerAction {
     CangeWeapon (ChangeWeapon),
     Fire,
     NewBunker,
+    DeleteBunker,
 }
 
 

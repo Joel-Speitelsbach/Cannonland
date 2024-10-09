@@ -230,6 +230,9 @@ impl Grid {
 
 
     pub fn update_bunkers(&mut self, bunkers: &mut Vec<bunker::Bunker>) -> () {
+        for bunker in bunkers.as_mut_slice() {
+            bunker.player_active = false;
+        }
         for y in 0..self.height {
             for x in 0..self.width {
                 self.update_bunker_at(x, y, bunkers);

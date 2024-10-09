@@ -9,6 +9,7 @@ use crate::sound::Sound;
 
 pub fn run() {
     let mut clients: HashMap<PlayerID,network::OtherSide> = HashMap::new();
+    let mut clients_to_remove = vec!();
 
     let server_handle = network::start_server().unwrap();
 
@@ -50,10 +51,13 @@ pub fn run() {
 
 
         // resend client messages
+        for cl in clients_to_remove {
+            messages.push((cl,ClientMessage{actions: vec!(PlayerAction::DeleteBunker)}));
+        }
         let msg = ServerMessage {
             client_messages: messages.clone(),
         };
-        let mut clients_to_remove = vec!();
+        clients_to_remove = vec!();
         for (id, cl) in &clients {
             if let Err(err) = cl.send(&msg) {
                 println!("client {} disconnected", &id);
@@ -61,7 +65,7 @@ pub fn run() {
                 clients_to_remove.push(id.clone());
             }
         }
-        for id in clients_to_remove {
+        for id in &clients_to_remove {
             clients.remove(&id);
         }
 
