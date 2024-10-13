@@ -13,6 +13,9 @@ pub fn run() {
 
     let server_handle = network::start_server().unwrap();
 
+    let mut fps_manager = sdl2::gfx::framerate::FPSManager::new();
+    let _ = fps_manager.set_framerate(60);
+
     // create battlefield
     let mut battlefield = Battlefield::new();
 
@@ -68,6 +71,10 @@ pub fn run() {
         for id in &clients_to_remove {
             clients.remove(&id);
         }
+
+
+        // limit frame rate
+        fps_manager.delay();
 
 
         // update battlefield
