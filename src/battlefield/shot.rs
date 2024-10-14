@@ -1,7 +1,7 @@
 use super::shot_type::ShotType;
 use super::grid::particle_type::ParticleType;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct Shot {
     pub shot_type: ShotType,
     pub x_pos: f32,
@@ -55,6 +55,19 @@ impl Shot {
 
     pub fn get_angle(&self) -> f32 {
         self.y_speed.atan2(self.x_speed) * (180.0/std::f32::consts::PI) + 90.0
+    }
+    
+    pub fn collides_with_shot(&self, shots: &[Shot]) -> bool {
+        for shot in shots {
+            if shot == self { continue }
+            let dx = self.x_pos - shot.x_pos;
+            let dy = self.y_pos - shot.y_pos;
+            let d_q = dx * dx + dy * dy;
+            if d_q < 10. * 10. {
+                return true;
+            }
+        }
+        false
     }
 
 }

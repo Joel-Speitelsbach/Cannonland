@@ -1,7 +1,7 @@
 use super::grid::particle_type::ParticleType;
 
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum ShotType {
     CANNON,
     ROCKET,

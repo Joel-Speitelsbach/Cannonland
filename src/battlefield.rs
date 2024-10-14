@@ -135,26 +135,38 @@ impl Battlefield {
 
         bunker.reset_charge();
     }
-
+ 
 
     fn collide(&mut self, sound: &Sound) {
+        let mut shots_to_remove = vec!();
         for i in (0..self.shots.len()).rev() {
-            let x_pos = self.shots[i].x_pos as i32;
-            let y_pos = self.shots[i].y_pos as i32;
+            let shot = &self.shots[i];
+            let x_pos = shot.x_pos as i32;
+            let y_pos = shot.y_pos as i32;
 
-            if Battlefield::shot_collides_with_bunkers(&self.bunkers, &self.shots[i])
-               || self.grid.collides_at_position(x_pos, y_pos) 
-            {
-                self.grid.replace_radius_where_possible(
-                    self.shots[i].get_impact_target_type(), 
-                    x_pos, y_pos, 
-                    self.shots[i].get_impact_radius() as i32
-                    );
-                Battlefield::harm_bunkers(&mut self.bunkers, &self.shots[i], &mut self.grid);
-                sound.play(&self.shots[i].shot_type.get_impact_sound());
-                
-                self.shots.remove(i);
+            let mut shot_collides = false;
+
+            if Battlefield::shot_collides_with_bunkers(&self.bunkers, &shot) {
+                shot_collides = true;
+                Battlefield::harm_bunkers(&mut self.bunkers, &shot, &mut self.grid);
+            } else if self.grid.collides_at_position(x_pos, y_pos) {
+                shot_collides = true;
+            } else if shot.collides_with_shot(&self.shots) {
+                shot_collides = true;
             }
+
+            if shot_collides {
+                sound.play(&shot.shot_type.get_impact_sound());
+                self.grid.replace_radius_where_possible(
+                    shot.get_impact_target_type(), 
+                    x_pos, y_pos, 
+                    shot.get_impact_radius() as i32
+                );
+                shots_to_remove.push(i);
+            }
+        }
+        for i in shots_to_remove {
+            self.shots.remove(i);
         }
     }
 
@@ -203,6 +215,7 @@ impl Battlefield {
         (self.grid.width as i32, self.grid.height as i32)
     }
 }
+
 
 #[cfg(test)]
 mod tests {
