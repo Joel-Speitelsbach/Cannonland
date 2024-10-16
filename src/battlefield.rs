@@ -166,7 +166,7 @@ impl Battlefield {
             }
         }
         for i in shots_to_remove {
-            self.shots.remove(i);
+            self.shots.swap_remove(i);
         }
     }
 
